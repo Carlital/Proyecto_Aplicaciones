@@ -1,0 +1,626 @@
+<odoo>
+  <template id="perfil_docente_template" name="Perfil Docente">
+    <t t-call="website.layout">
+      <t t-set="title">Perfil de <t t-esc="empleado.name"/></t>
+      <div class="perfil-container container">
+        <!-- LADO IZQUIERDO -->
+        <div class="perfil-lado-izquierdo">
+          <div class="card-perfil text-center shadow-lg">
+            <t t-if="empleado.image_1920">
+              <div class="foto-container">
+                <img t-att-src="'data:image/png;base64,%s' % empleado.image_1920.decode('utf-8')"
+                     alt="Foto del docente"
+                     class="foto-perfil"/>
+                <div class="foto-overlay"></div>
+              </div>
+            </t>
+            <t t-else="">
+              <div class="foto-container foto-placeholder">
+                <i class="fa fa-user foto-icon"></i>
+                <div class="foto-overlay"></div>
+              </div>
+            </t>
+            <div class="nombre-container">
+              <h3 class="nombre-docente"><t t-esc="empleado.name"/></h3>
+              <h5 class="cargo-docente"><t t-esc="empleado.job_title or 'Docente'"/></h5>
+            </div>
+
+            <div class="informacion-personal">
+              <ul class="list-group-perfil text-start">
+                <li class="info-item">
+                  <i class="fa fa-id-card info-icon"></i>
+                  <span><strong>Cédula:</strong> <t t-esc="empleado.identification_id or 'No registrado'"/></span>
+                </li>
+                <li class="info-item">
+                  <i class="fa fa-venus-mars info-icon"></i>
+                  <span><strong>Género:</strong> <t t-esc="empleado.gender or 'No especificado'"/></span>
+                </li>
+                <li class="info-item">
+                  <i class="fa fa-graduation-cap info-icon"></i>
+                  <span><strong>Modalidad:</strong> <t t-esc="empleado.x_modalidad or 'No especificado'"/></span>
+                </li>
+                <li class="info-item">
+                  <i class="fa fa-clock-o info-icon"></i>
+                  <span><strong>Dedicación:</strong> <t t-esc="empleado.x_tiempo_dedicacion or 'No especificado'"/></span>
+                </li>
+                <li class="info-item">
+                  <i class="fa fa-university info-icon"></i>
+                  <span><strong>Facultad:</strong> <t t-esc="empleado.x_facultad.name or 'No asignada'"/></span>
+                </li>
+                <li class="info-item">
+                  <i class="fa fa-book info-icon"></i>
+                  <span><strong>Carrera:</strong> <t t-esc="empleado.x_carrera.name or 'No asignada'"/></span>
+                </li>
+                <li t-if="empleado.x_oficina" class="info-item">
+                  <i class="fa fa-map-marker info-icon"></i>
+                  <span><strong>Oficina:</strong> <t t-esc="empleado.x_oficina"/></span>
+                </li>
+                <li class="info-item">
+                  <i class="fa fa-envelope info-icon"></i>
+                  <span><strong>Email institucional:</strong> 
+                    <t t-if="empleado.work_email">
+                      <a t-att-href="'mailto:' + empleado.work_email" class="email-link">
+                        <t t-esc="empleado.work_email"/>
+                      </a>
+                    </t>
+                    <t t-else="">No registrado</t>
+                  </span>
+                </li>
+                <li t-if="empleado.x_email_personal" class="info-item">
+                  <i class="fa fa-envelope-o info-icon"></i>
+                  <span><strong>Email personal:</strong> 
+                    <a t-att-href="'mailto:' + empleado.x_email_personal" class="email-link">
+                      <t t-esc="empleado.x_email_personal"/>
+                    </a>
+                  </span>
+                </li>
+                <li t-if="empleado.x_orcid" class="info-item">
+                  <i class="fa fa-external-link info-icon"></i>
+                  <span><strong>ORCID:</strong> 
+                    <a t-att-href="'https://orcid.org/' + empleado.x_orcid" target="_blank" class="orcid-link">
+                      <t t-esc="empleado.x_orcid"/>
+                    </a>
+                  </span>
+                </li>
+                <li t-if="empleado.x_observacion" class="info-item observacion-item">
+                  <i class="fa fa-info-circle info-icon"></i>
+                  <span><strong>Observación:</strong> <t t-esc="empleado.x_observacion"/></span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Métricas Académicas -->
+            <div class="metricas-academicas mt-4">
+              <h6 class="metricas-titulo">
+                <i class="fa fa-chart-bar me-2"></i>Métricas Académicas
+              </h6>
+              <div class="metricas-grid">
+                <div class="metrica-card" data-aos="fade-up" data-aos-delay="100">
+                  <i class="fa fa-calendar metrica-icon"></i>
+                  <div class="metrica-numero"><t t-esc="empleado.x_anos_experiencia or 0"/></div>
+                  <div class="metrica-label">Años Experiencia</div>
+                </div>
+                <div class="metrica-card" data-aos="fade-up" data-aos-delay="200">
+                  <i class="fa fa-file-text metrica-icon"></i>
+                  <div class="metrica-numero"><t t-esc="empleado.x_total_publicaciones or 0"/></div>
+                  <div class="metrica-label">Publicaciones</div>
+                </div>
+                <div class="metrica-card" data-aos="fade-up" data-aos-delay="300">
+                  <i class="fa fa-lightbulb-o metrica-icon"></i>
+                  <div class="metrica-numero"><t t-esc="empleado.x_total_proyectos or 0"/></div>
+                  <div class="metrica-label">Proyectos</div>
+                </div>
+                <div class="metrica-card" data-aos="fade-up" data-aos-delay="400">
+                  <i class="fa fa-star metrica-icon"></i>
+                  <div class="metrica-numero">
+                    <t t-esc="int((empleado.x_total_publicaciones or 0) + (empleado.x_total_proyectos or 0))"/>
+                  </div>
+                  <div class="metrica-label">Total Logros</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LADO DERECHO -->
+        <div class="perfil-lado-derecho">
+          <div class="tabs-container">
+            <ul class="nav nav-tabs custom-tabs" role="tablist">
+              <li class="nav-item">
+                <a class="nav-link active" data-bs-toggle="tab" href="#presentacion">
+                  <i class="fa fa-user-circle me-2"></i>Presentación
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#docencia">
+                  <i class="fa fa-chalkboard-teacher me-2"></i>Docencia
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#proyectos">
+                  <i class="fa fa-lightbulb-o me-2"></i>Proyectos
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#publicaciones">
+                  <i class="fa fa-file-text me-2"></i>Publicaciones
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#idiomas">
+                  <i class="fa fa-globe me-2"></i>Idiomas
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="tab-content-container">
+            <div class="tab-content border-0 p-0">
+              <div class="tab-pane fade show active" id="presentacion">
+                <div class="tab-header">
+                  <h5><i class="fa fa-user-circle me-2"></i>Presentación Profesional</h5>
+                </div>
+                <div class="contenido-tab">
+                  <t t-if="empleado.x_presentacion">
+                    <div class="content-card">
+                      <div class="presentation-wrapper">
+                        <div class="quote-mark">"</div>
+                        <div class="text-content">
+                          <p class="text-justify" t-raw="empleado.x_presentacion.replace('\n', '&amp;lt;br/&amp;gt;')"/>
+                        </div>
+                        <div class="presentation-footer">
+                          <div class="author-signature">
+                            <i class="fa fa-user-graduate me-2"></i>
+                            <span t-esc="empleado.name"/>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </t>
+                  <t t-else="">
+                    <div class="no-info-card">
+                      <div class="empty-state">
+                        <i class="fa fa-user-circle"></i>
+                        <h6>Presentación no disponible</h6>
+                        <p class="no-info">El docente aún no ha proporcionado información de presentación.</p>
+                      </div>
+                    </div>
+                  </t>
+                </div>
+              </div>
+              
+              <div class="tab-pane fade" id="docencia">
+                <div class="tab-header">
+                  <h5><i class="fa fa-chalkboard-teacher me-2"></i>Experiencia Docente</h5>
+                </div>
+                <div class="contenido-tab">
+                  <t t-if="empleado.x_docencia_periodo">
+                    <div class="content-card">
+                      <!-- Contenedor principal vertical con todas las secciones -->
+                      <div class="docencia-wrapper-vertical-completa">
+                        
+                        <!-- SECCIÓN 1: Información General -->
+                        <div class="seccion-docencia-vertical mb-4">
+                          <div class="seccion-encabezado-docencia-perfil">
+                            <div class="icono-seccion-docencia-perfil">
+                              <i class="fa fa-graduation-cap"></i>
+                            </div>
+                            <div class="titulo-seccion-docencia-perfil">
+                              <h6>Información General</h6>
+                              <p class="text-muted">Datos básicos de la actividad docente</p>
+                            </div>
+                          </div>
+                          
+                          <div class="contenedor-info-docencia-vertical-fie mt-3">
+                            <!-- Item Modalidad -->
+                            <div class="item-info-docencia-vertical-fie">
+                              <div class="icono-info-docencia-fie">
+                                <i class="fa fa-clock-o text-primary"></i>
+                              </div>
+                              <div class="texto-info-docencia-fie">
+                                <span class="etiqueta-info-docencia-fie">Modalidad:</span>
+                                <span class="valor-info-docencia-fie"><t t-esc="empleado.x_modalidad or 'No especificado'"/></span>
+                              </div>
+                            </div>
+                            
+                            <!-- Item Dedicación -->
+                            <div class="item-info-docencia-vertical-fie">
+                              <div class="icono-info-docencia-fie">
+                                <i class="fa fa-calendar text-success"></i>
+                              </div>
+                              <div class="texto-info-docencia-fie">
+                                <span class="etiqueta-info-docencia-fie">Dedicación:</span>
+                                <span class="valor-info-docencia-fie"><t t-esc="empleado.x_tiempo_dedicacion or 'No especificado'"/></span>
+                              </div>
+                            </div>
+                            
+                            <!-- Item Facultad -->
+                            <div class="item-info-docencia-vertical-fie">
+                              <div class="icono-info-docencia-fie">
+                                <i class="fa fa-university text-info"></i>
+                              </div>
+                              <div class="texto-info-docencia-fie">
+                                <span class="etiqueta-info-docencia-fie">Facultad:</span>
+                                <span class="valor-info-docencia-fie"><t t-esc="empleado.x_facultad.name or 'No asignada'"/></span>
+                              </div>
+                            </div>
+                            
+                            <!-- Item Carrera -->
+                            <div class="item-info-docencia-vertical-fie">
+                              <div class="icono-info-docencia-fie">
+                                <i class="fa fa-book text-warning"></i>
+                              </div>
+                              <div class="texto-info-docencia-fie">
+                                <span class="etiqueta-info-docencia-fie">Carrera:</span>
+                                <span class="valor-info-docencia-fie"><t t-esc="empleado.x_carrera.name or 'No asignada'"/></span>
+                              </div>
+                            </div>
+                            
+                            <!-- Item Oficina (si existe) -->
+                            <t t-if="empleado.x_oficina">
+                              <div class="item-info-docencia-vertical-fie">
+                                <div class="icono-info-docencia-fie">
+                                  <i class="fa fa-map-marker text-danger"></i>
+                                </div>
+                                <div class="texto-info-docencia-fie">
+                                  <span class="etiqueta-info-docencia-fie">Oficina:</span>
+                                  <span class="valor-info-docencia-fie"><t t-esc="empleado.x_oficina"/></span>
+                                </div>
+                              </div>
+                            </t>
+                            
+                            <!-- Item Años de Experiencia -->
+                            <div class="item-info-docencia-vertical-fie">
+                              <div class="icono-info-docencia-fie">
+                                <i class="fa fa-calendar-check text-primary"></i>
+                              </div>
+                              <div class="texto-info-docencia-fie">
+                                <span class="etiqueta-info-docencia-fie">Experiencia:</span>
+                                <span class="valor-info-docencia-fie"><t t-esc="empleado.x_anos_experiencia or 0"/> años
+                                  <t t-if="int(empleado.x_anos_experiencia or 0) > 10">
+                                    <span class="badge bg-success ms-2">Experimentado</span>
+                                  </t>
+                                  <t t-elif="int(empleado.x_anos_experiencia or 0) > 5">
+                                    <span class="badge bg-primary ms-2">Consolidada</span>
+                                  </t>
+                                  <t t-elif="int(empleado.x_anos_experiencia or 0) > 0">
+                                    <span class="badge bg-info ms-2">En Desarrollo</span>
+                                  </t>
+                                  <t t-else="">
+                                    <span class="badge bg-secondary ms-2">Nuevo</span>
+                                  </t>
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <!-- Item Estado -->
+                            <div class="item-info-docencia-vertical-fie">
+                              <div class="icono-info-docencia-fie">
+                                <i class="fa fa-chalkboard-teacher text-success"></i>
+                              </div>
+                              <div class="texto-info-docencia-fie">
+                                <span class="etiqueta-info-docencia-fie">Estado:</span>
+                                <span class="valor-info-docencia-fie">Activo</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- SECCIÓN 2: Asignaturas Impartidas -->
+                        <div class="seccion-docencia-vertical mb-4">
+                          <div class="seccion-encabezado-docencia-perfil">
+                            <div class="icono-seccion-docencia-perfil">
+                              <i class="fa fa-list-alt"></i>
+                            </div>
+                            <div class="titulo-seccion-docencia-perfil">
+                              <h6>Asignaturas Impartidas</h6>
+                              <p class="text-muted">Materias que dicta el docente</p>
+                            </div>
+                          </div>
+                          
+                          <div class="contenido-asignaturas-perfil-fie mt-3">
+                            <t t-set="docencia_text" t-value="empleado.x_docencia_periodo or ''"/>
+                            <t t-set="lineas" t-value="docencia_text.split('\n') if docencia_text else []"/>
+                            <t t-set="lineas_sin_vacias" t-value="[l for l in lineas if l.strip()]"/>
+                            
+                            <!-- Filtrar certificaciones y mantener solo asignaturas -->
+                            <t t-set="palabras_certificacion" t-value="['certificacion', 'certificación', 'diploma', 'diplomado', 'curso', 'especialización', 'especializacion', 'maestría', 'maestria', 'doctorado', 'phd', 'capacitacion', 'capacitación', 'taller', 'seminario', 'certificate', 'certification']"/>
+                            <t t-set="lineas_filtradas" t-value="[]"/>
+                            <t t-foreach="lineas_sin_vacias" t-as="linea">
+                              <t t-set="linea_lower" t-value="linea.lower()"/>
+                              <t t-set="es_certificacion" t-value="False"/>
+                              <t t-foreach="palabras_certificacion" t-as="palabra_cert">
+                                <t t-if="palabra_cert in linea_lower">
+                                  <t t-set="es_certificacion" t-value="True"/>
+                                </t>
+                              </t>
+                              <t t-if="not es_certificacion">
+                                <t t-set="dummy" t-value="lineas_filtradas.append(linea)"/>
+                              </t>
+                            </t>
+                            
+                            <t t-if="lineas_filtradas">
+                              <!-- Procesar y agrupar asignaturas por carrera -->
+                              <t t-set="asignaturas_agrupadas" t-value="{}"/>
+                              <t t-foreach="lineas_filtradas" t-as="asignatura_raw">
+                                <t t-set="asignatura_limpia" t-value="asignatura_raw.strip()"/>
+                                <t t-if="asignatura_limpia">
+                                  <!-- Detectar si tiene carrera al final (ej: "Materia - Carrera") -->
+                                  <t t-set="partes" t-value="asignatura_limpia.split(' - ')"/>
+                                  <t t-if="len(partes) >= 2">
+                                    <!-- Tiene carrera separada por guión -->
+                                    <t t-set="carrera" t-value="partes[-1].strip()"/>
+                                    <t t-set="materia" t-value="' - '.join(partes[:-1]).strip()"/>
+                                  </t>
+                                  <t t-else="">
+                                    <!-- Buscar palabras comunes de carreras al final -->
+                                    <t t-set="palabras" t-value="asignatura_limpia.split()"/>
+                                    <t t-set="carrera_encontrada" t-value="''"/>
+                                    <t t-set="materia_base" t-value="asignatura_limpia"/>
+                                    
+                                    <!-- Buscar patrones comunes -->
+                                    <t t-if="'Telematica' in asignatura_limpia or 'Telemática' in asignatura_limpia">
+                                      <t t-set="carrera_encontrada" t-value="'Telemática'"/>
+                                      <t t-set="materia_base" t-value="asignatura_limpia.replace('Telematica', '').replace('Telemática', '').replace(' - ', '').strip()"/>
+                                    </t>
+                                    <t t-elif="'Electronica' in asignatura_limpia or 'Electrónica' in asignatura_limpia">
+                                      <t t-set="carrera_encontrada" t-value="'Electrónica'"/>
+                                      <t t-set="materia_base" t-value="asignatura_limpia.replace('Electronica', '').replace('Electrónica', '').replace(' - ', '').strip()"/>
+                                    </t>
+                                    <t t-elif="'Sistemas' in asignatura_limpia">
+                                      <t t-set="carrera_encontrada" t-value="'Sistemas'"/>
+                                      <t t-set="materia_base" t-value="asignatura_limpia.replace('Sistemas', '').replace(' - ', '').strip()"/>
+                                    </t>
+                                    <t t-elif="'Industrial' in asignatura_limpia">
+                                      <t t-set="carrera_encontrada" t-value="'Industrial'"/>
+                                      <t t-set="materia_base" t-value="asignatura_limpia.replace('Industrial', '').replace(' - ', '').strip()"/>
+                                    </t>
+                                    <t t-else="">
+                                      <t t-set="carrera_encontrada" t-value="'General'"/>
+                                      <t t-set="materia_base" t-value="asignatura_limpia"/>
+                                    </t>
+                                    
+                                    <t t-set="carrera" t-value="carrera_encontrada"/>
+                                    <t t-set="materia" t-value="materia_base"/>
+                                  </t>
+                                  
+                                  <!-- Limpiar materia de caracteres extra -->
+                                  <t t-set="materia_final" t-value="materia.replace('•', '').replace('*', '').replace('-', '').strip()"/>
+                                  <t t-if="materia_final">
+                                    <!-- Agrupar por carrera -->
+                                    <t t-set="dummy" t-value="asignaturas_agrupadas.setdefault(carrera, []).append(materia_final)"/>
+                                  </t>
+                                </t>
+                              </t>
+                              
+                              <!-- Acordeón de asignaturas agrupadas -->
+                              <div class="asignaturas-acordeon-fie" id="acordeonAsignaturas">
+                                <t t-foreach="sorted(asignaturas_agrupadas.keys())" t-as="carrera_nombre">
+                                  <t t-set="carrera_id" t-value="'carrera_' + str(carrera_nombre_index)"/>
+                                  
+                                  <!-- Tarjeta de acordeón por carrera -->
+                                  <div class="accordion-item-fie mb-3">
+                                    <!-- Encabezado clickeable del acordeón -->
+                                    <div class="accordion-header-fie" 
+                                         data-bs-toggle="collapse" 
+                                         t-att-data-bs-target="'#' + carrera_id"
+                                         aria-expanded="false"
+                                         style="cursor: pointer;">
+                                      <div class="accordion-header-content-fie">
+                                        <!-- Icono de la carrera -->
+                                        <div class="icono-carrera-acordeon-fie">
+                                          <i class="fa fa-graduation-cap"></i>
+                                        </div>
+                                        
+                                        <!-- Información de la carrera -->
+                                        <div class="info-carrera-acordeon-fie">
+                                          <h6 class="nombre-carrera-acordeon-fie">
+                                            <t t-esc="carrera_nombre"/>
+                                          </h6>
+                                          <span class="cantidad-materias-fie">
+                                            <t t-esc="len(asignaturas_agrupadas[carrera_nombre])"/> asignaturas
+                                          </span>
+                                        </div>
+                                        
+                                        <!-- Icono de expansión/colapso -->
+                                        <div class="accordion-toggle-icon-fie">
+                                          <i class="fa fa-chevron-down"></i>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    
+                                    <!-- Contenido colapsable del acordeón -->
+                                    <div t-att-id="carrera_id" 
+                                         class="collapse accordion-body-fie"
+                                         data-bs-parent="#acordeonAsignaturas">
+                                      <div class="accordion-content-fie">
+                                        <!-- Lista compacta de asignaturas -->
+                                        <div class="materias-compactas-fie">
+                                          <t t-foreach="asignaturas_agrupadas[carrera_nombre]" t-as="materia">
+                                            <span class="materia-tag-fie">
+                                              <i class="fa fa-book-open me-1"></i>
+                                              <t t-esc="materia"/>
+                                            </span>
+                                          </t>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </t>
+                              </div>
+                              
+                              <!-- Resumen total compacto -->
+                              <div class="resumen-asignaturas-compacto-fie mt-3">
+                                <div class="resumen-card-fie">
+                                  <div class="resumen-icon-fie">
+                                    <i class="fa fa-chart-pie"></i>
+                                  </div>
+                                  <div class="resumen-stats-fie">
+                                    <div class="stat-numero-fie">
+                                      <t t-esc="sum([len(materias) for materias in asignaturas_agrupadas.values()])"/>
+                                    </div>
+                                    <div class="stat-label-fie">Total Asignaturas</div>
+                                  </div>
+                                  <div class="resumen-divider-fie"></div>
+                                  <div class="resumen-stats-fie">
+                                    <div class="stat-numero-fie">
+                                      <t t-esc="len(asignaturas_agrupadas)"/>
+                                    </div>
+                                    <div class="stat-label-fie">Áreas</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </t>
+                            <t t-else="">
+                              <div class="sin-asignaturas-fie">
+                                <div class="empty-state-asignaturas-fie">
+                                  <i class="fa fa-book-open"></i>
+                                  <h6>Sin asignaturas registradas</h6>
+                                  <p>No se han encontrado asignaturas específicas en el registro</p>
+                                </div>
+                              </div>
+                            </t>
+                          </div>
+                        </div>
+                        
+                      </div>
+                    </div>
+                  </t>
+                  <t t-else="">
+                    <div class="no-info-card">
+                      <div class="empty-state">
+                        <i class="fa fa-chalkboard-teacher"></i>
+                        <h6>Información de docencia no disponible</h6>
+                        <p class="no-info">No se ha registrado experiencia docente para este perfil.</p>
+                      </div>
+                    </div>
+                  </t>
+                </div>
+              </div>
+              
+              <div class="tab-pane fade" id="proyectos">
+                <div class="tab-header">
+                  <h5><i class="fa fa-lightbulb-o me-2"></i>Proyectos de Investigación</h5>
+                </div>
+                <div class="contenido-tab">
+                  <t t-if="empleado.x_proyectos">
+                    <div class="content-card">
+                      <div class="proyectos-wrapper">
+                        <div class="projects-header">
+                          <div class="project-icon">
+                            <i class="fa fa-flask"></i>
+                          </div>
+                          <div class="project-count">
+                            <span class="count-number"><t t-esc="empleado.x_total_proyectos or 0"/></span>
+                            <span class="count-label">Proyectos</span>
+                          </div>
+                        </div>
+                        <div class="info-formateada" t-raw="empleado.x_proyectos.replace('\n', '&amp;lt;br/&amp;gt;')"/>
+                      </div>
+                    </div>
+                  </t>
+                  <t t-else="">
+                    <div class="no-info-card">
+                      <div class="empty-state">
+                        <i class="fa fa-lightbulb-o"></i>
+                        <h6>Proyectos no disponibles</h6>
+                        <p class="no-info">No se han registrado proyectos de investigación para este docente.</p>
+                      </div>
+                    </div>
+                  </t>
+                </div>
+              </div>
+              
+              <div class="tab-pane fade" id="publicaciones">
+                <div class="tab-header">
+                  <h5><i class="fa fa-file-text me-2"></i>Producción Científica</h5>
+                </div>
+                <div class="contenido-tab">
+                  <t t-if="empleado.x_publicaciones">
+                    <div class="content-card">
+                      <div class="publicaciones-wrapper">
+                        <div class="publications-header">
+                          <div class="publication-icon">
+                            <i class="fa fa-book-open"></i>
+                          </div>
+                          <div class="publication-count">
+                            <span class="count-number"><t t-esc="empleado.x_total_publicaciones or 0"/></span>
+                            <span class="count-label">Publicaciones</span>
+                          </div>
+                          <t t-if="empleado.x_orcid">
+                            <div class="orcid-badge">
+                              <a t-att-href="'https://orcid.org/' + empleado.x_orcid" target="_blank" class="orcid-link-badge">
+                                <i class="fa fa-external-link me-1"></i>ORCID
+                              </a>
+                            </div>
+                          </t>
+                        </div>
+                        <div class="info-formateada" t-raw="empleado.x_publicaciones.replace('\n', '&amp;lt;br/&amp;gt;')"/>
+                      </div>
+                    </div>
+                  </t>
+                  <t t-else="">
+                    <div class="no-info-card">
+                      <div class="empty-state">
+                        <i class="fa fa-file-text"></i>
+                        <h6>Publicaciones no disponibles</h6>
+                        <p class="no-info">No se han registrado publicaciones científicas para este docente.</p>
+                      </div>
+                    </div>
+                  </t>
+                </div>
+              </div>
+              
+              <div class="tab-pane fade" id="idiomas">
+                <div class="tab-header">
+                  <h5><i class="fa fa-globe me-2"></i>Competencias Lingüísticas</h5>
+                </div>
+                <div class="contenido-tab">
+                  <t t-if="empleado.x_idiomas">
+                    <div class="content-card">
+                      <div class="idiomas-wrapper">
+                        <div class="languages-header">
+                          <div class="language-icon">
+                            <i class="fa fa-comments"></i>
+                          </div>
+                          <div class="language-title">
+                            <h6>Idiomas Dominados</h6>
+                            <p>Nivel de competencia lingüística</p>
+                          </div>
+                        </div>
+                        <div class="idiomas-grid">
+                          <div class="idioma-info" t-raw="empleado.x_idiomas.replace('\n', '&amp;lt;br/&amp;gt;')"/>
+                        </div>
+                      </div>
+                    </div>
+                  </t>
+                  <t t-else="">
+                    <div class="no-info-card">
+                      <div class="empty-state">
+                        <i class="fa fa-globe"></i>
+                        <h6>Información de idiomas no disponible</h6>
+                        <p class="no-info">No se ha registrado información sobre competencias lingüísticas.</p>
+                      </div>
+                    </div>
+                  </t>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="acciones-perfil mt-4">
+            <div class="row g-3">
+              <div class="col-12">
+                <t t-if="empleado.x_cv_url">
+                  <a t-att-href="empleado.x_cv_url" target="_blank" class="btn btn-cv btn-block">
+                    <i class="fa fa-download me-2"></i>Descargar CV
+                  </a>
+                </t>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </t>
+  </template>
+</odoo>

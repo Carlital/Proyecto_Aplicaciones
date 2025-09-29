@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_employee_import_form" model="ir.ui.view">
+        <field name="name">employee.import.form</field>
+        <field name="model">employee.import</field>
+        <field name="arch" type="xml">
+            <form string="Import Employees">
+                <sheet>
+                    <group>
+                        <field name="sheet_url" placeholder="URL CSV Datos Empleados (db_docentes)"/>
+                        <field name="imagenes_url" placeholder="URL CSV Imágenes (nombres_docentes)"/>
+                    </group>
+                    <group>
+                        <button string="Import Employees" type="object" name="import_employees" class="btn-primary"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_employee_import" model="ir.actions.act_window">
+        <field name="name">Import Employees</field>
+        <field name="res_model">employee.import</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+    <record id="action_fix_identification_digits" model="ir.actions.server">
+        <field name="name">Actualizar Cédulas a 10 Dígitos</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="state">code</field>
+        <field name="code">
+# Ejecutar el método de actualización de cédulas
+result = env['hr.employee'].action_fix_identification_digits()
+action = result
+        </field>
+    </record>
+
+    <menuitem id="menu_employee_import"
+          name="Import Employees"
+          parent="hr.menu_hr_employee_payroll"
+          action="action_employee_import"/>
+          
+    <menuitem id="menu_fix_identification_digits"
+          name=" Actualizar Cédulas"
+          parent="hr.menu_hr_employee_payroll"
+          action="action_fix_identification_digits"/>
+</odoo>

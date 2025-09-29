@@ -1,0 +1,20 @@
+.tabs-h .nav-link {
+    color: var(--bs-body-color);
+    background-color: var(--bs-light);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    margin-right: 5px;
+    transition: all 0.2s ease-in-out;
+}
+
+.tabs-h .nav-link.active {
+    background-color: var(--bs-primary);
+    color: var(--bs-black); /* Contraste alto siempre */
+    font-weight: bold;
+    border-color: var(--bs-primary);
+}
+
+.tabs-h .nav-link:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.1); /* Tono suave */
+    color: var(--bs-body-color);
+    border-color: var(--bs-primary);
+}

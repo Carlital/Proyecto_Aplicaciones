@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista del wizard para actualizar cédulas -->
+    <record id="view_identification_fix_wizard_form" model="ir.ui.view">
+        <field name="name">identification.fix.wizard.form</field>
+        <field name="model">identification.fix.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Actualizar Cédulas a 10 Dígitos">
+                <div class="alert alert-info" style="margin-bottom: 20px;">
+                    <h4><i class="fa fa-info-circle"/> Actualización de Cédulas de Empleados</h4>
+                    <p>
+                        Esta herramienta actualizará automáticamente todas las cédulas de empleados 
+                        que tengan 9 dígitos, completándolas con un cero al inicio para que tengan 10 dígitos.
+                    </p>
+                </div>
+                
+                <group>
+                    <group string="Estadísticas">
+                        <field name="employee_count" readonly="1"/>
+                        <field name="to_update_count" readonly="1"/>
+                        <field name="already_correct_count" readonly="1"/>
+                    </group>
+                </group>
+                
+                <group string="Vista Previa de Cambios">
+                    <field name="preview_text" nolabel="1" readonly="1" 
+                           widget="text" style="font-family: monospace; white-space: pre-wrap;"/>
+                </group>
+                
+                <footer>
+                    <button string="Actualizar Cédulas" type="object" 
+                            name="action_update_identifications" 
+                            class="btn-primary"
+                            confirm="¿Estás seguro de que quieres actualizar las cédulas? Esta acción no se puede deshacer."/>
+                    <button string="Cancelar" type="object" 
+                            name="action_cancel" 
+                            class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para el wizard -->
+    <record id="action_identification_fix_wizard" model="ir.actions.act_window">
+        <field name="name">Actualizar Cédulas a 10 Dígitos</field>
+        <field name="res_model">identification.fix.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_identification_fix_wizard_form"/>
+    </record>
+
+    <!-- Menú para acceder al wizard -->
+    <menuitem id="menu_identification_fix_wizard"
+              name="🔧 Actualizar Cédulas"
+              parent="hr.menu_hr_configuration"
+              action="action_identification_fix_wizard"
+              sequence="100"/>
+</odoo>

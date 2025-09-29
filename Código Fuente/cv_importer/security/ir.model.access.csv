@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cv_importer_user,access.cv.importer.user,model_hr_employee,,1,1,0,0
+access_cv_document_user,access.cv.document.user,model_cv_document,,1,1,1,0
+access_cv_document_manager,access.cv.document.manager,model_cv_document,hr.group_hr_manager,1,1,1,1
+access_cv_document_public,access.cv.document.public,model_cv_document,,1,0,0,0
+access_cv_bulk_downloader_user,access.cv.bulk.downloader.user,model_cv_bulk_downloader,,1,1,1,1
+access_cv_importer_config_user,access.cv.importer.config.user,model_cv_importer_config,,1,1,1,1
+access_cv_config_user,access.cv.config.user,model_cv_config,,1,1,1,1

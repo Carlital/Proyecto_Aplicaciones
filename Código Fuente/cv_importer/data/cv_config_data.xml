@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Configuración inicial para desarrollo local con N8N free trial -->
+    <record id="cv_config_default" model="cv.config">
+        <field name="n8n_webhook_url">https://n8n.pruebasbidata.site/webhook/process-cv</field>
+        <field name="local_development" eval="True"/>
+    </record>
+    
+    <!-- Configuración de parámetros del sistema -->
+    <record id="cv_importer_config_note" model="ir.config_parameter">
+        <field name="key">cv_importer.setup_note</field>
+        <field name="value">Configurado para N8N Free Trial (sin API key) + procesamiento local de PDFs + desarrollo local</field>
+    </record>
+</odoo>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de configuración de CV Importer -->
+    <record id="view_cv_importer_config_form" model="ir.ui.view">
+        <field name="name">cv.importer.config.form</field>
+        <field name="model">cv.importer.config</field>
+        <field name="arch" type="xml">
+            <form string="Configuración de CV Importer">
+                <group>
+                    <group string="Configuración N8N">
+                        <field name="n8n_webhook_url" placeholder="https://carlitalomas.app.n8n.cloud/webhook-test/process-cv"/>
+                        <field name="timeout"/>
+                    </group>
+                    <group string="Opciones">
+                        <field name="auto_apply_data"/>
+                    </group>
+                </group>
+                
+                <div class="alert alert-info">
+                    <strong>Ayuda:</strong>
+                    <ul>
+                        <li><strong>URL Cloud:</strong> https://n8n.pruebasbidata.site/webhook/process-cv</li>
+                    </ul>
+                </div>
+                
+                <footer>
+                    <button string="Probar Conexión" type="object" name="action_test_connection" class="btn-warning"/>
+                    <button string="Guardar Configuración" type="object" name="action_save_config" class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para configuración -->
+    <record id="action_cv_importer_config" model="ir.actions.act_window">
+        <field name="name">Configuración CV Importer</field>
+        <field name="res_model">cv.importer.config</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menú de configuración -->
+    <menuitem id="menu_cv_importer_config" name="Configuración" parent="menu_cv_importer_root" 
+              action="action_cv_importer_config" sequence="20"/>
+</odoo>

@@ -1,0 +1,39 @@
+<odoo>
+  <template id="snippet_lista_docentes_template" name="Lista Docentes">
+    <section class="s_banner oe_structure bg-white p-3" data-name="Lista Docentes">
+      <div class="container border rounded p-3">
+        <!-- Filtros -->
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-8">
+            <input type="text" class="form-control" id="busqueda_docente" placeholder="Buscar por nombre..."/>
+          </div>
+          <div class="col-md-3">
+            <select class="form-select" id="filtro_carrera">
+              <option value="">Todas las carreras</option>
+              <t t-foreach="request.env['x.carrera'].sudo().search([('facultad_id.name', '=', 'facultad de informatica y electronica')])" t-as="carrera">
+                <t t-if="request.env['hr.employee'].sudo().search_count([('x_carrera', '=', carrera.id)]) > 0">
+                  <option t-att-value="carrera.id">
+                    <t t-esc="carrera.name.lower().replace('carrera de ', '').title()"/>
+                  </option>
+                </t>
+              </t>
+            </select>
+          </div>
+          <div class="col-md-1 text-end">
+            <button class="btn btn-outline-secondary" id="btn-filtrar" style="color: #007bff;">
+              <i class="fa fa-search"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="row" id="lista-docentes"></div>
+
+        <div class="text-center mt-3">
+          <nav>
+            <ul class="pagination justify-content-center" id="pagination-docentes"></ul>
+          </nav>
+        </div>
+      </div>
+    </section>
+  </template>
+</odoo>

@@ -1,0 +1,56 @@
+<odoo>
+  <template id="snippet_tabs_horizontales" name="Tabs Horizontales" inherit_id="website.snippets">
+    <xpath expr="//div[@id='o_scroll']/t[@id='default_snippets']" position="after">
+      <div class="o_panel">
+        <div class="o_panel_header">Tabs Horizontales</div>
+        <div class="o_panel_body">
+          <t t-snippet="docente_snippet.tabs_horizontales_block"
+             t-thumbnail="/docente_snippet/static/src/img/tabs_horizontal.png">
+            <keywords>tabs horizontales</keywords>
+          </t>
+        </div>
+      </div>
+    </xpath>
+  </template>
+
+  <template id="tabs_horizontales_block" name="Tabs Horizontales Block">
+    <section class="oe_structure bg-white py-5" data-name="Tabs Horizontales">
+      <div class="container">
+        <!-- Tabs nav -->
+        <ul class="nav nav-tabs tabs-h mb-4" id="myTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="tab-h1-tab" data-bs-toggle="tab" href="#tab-h1" role="tab">Presentación</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" id="tab-h2-tab" data-bs-toggle="tab" href="#tab-h2" role="tab">Objetivos</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" id="tab-h3-tab" data-bs-toggle="tab" href="#tab-h3" role="tab">Infraestructura</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" id="tab-h4-tab" data-bs-toggle="tab" href="#tab-h4" role="tab">Evaluación</a>
+          </li>
+        </ul>
+
+        <div class="tab-content border p-4 bg-white" id="myTabContent">
+          <div class="tab-pane fade show active" id="tab-h1" role="tabpanel">
+            <h3>Presentación</h3>
+            <p>Texto editable para la presentación del programa o carrera.</p>
+          </div>
+          <div class="tab-pane fade" id="tab-h2" role="tabpanel">
+            <h3>Objetivos</h3>
+            <p>Objetivos académicos o formativos del plan de estudios.</p>
+          </div>
+          <div class="tab-pane fade" id="tab-h3" role="tabpanel">
+            <h3>Infraestructura</h3>
+            <p>Laboratorios, salas y equipos disponibles en la carrera.</p>
+          </div>
+          <div class="tab-pane fade" id="tab-h4" role="tabpanel">
+            <h3>Evaluación</h3>
+            <p>Criterios y métodos de evaluación aplicados.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+</odoo>

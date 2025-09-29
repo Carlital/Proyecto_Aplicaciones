@@ -1,0 +1,61 @@
+<odoo>
+  <template id="snippet_tabs_verticales" name="Tabs Verticales" inherit_id="website.snippets">
+    <xpath expr="//div[@id='o_scroll']/t[@id='default_snippets']" position="after">
+      <div class="o_panel">
+        <div class="o_panel_header">Tabs Verticales</div>
+        <div class="o_panel_body">
+          <t t-snippet="docente_snippet.tabs_verticales_block"
+             t-thumbnail="/docente_snippet/static/src/img/tabs_verticales.png">
+            <keywords>tabs verticales</keywords>
+          </t>
+        </div>
+      </div>
+    </xpath>
+  </template>
+
+  <template id="tabs_verticales_block" name="Tabs Verticales Block">
+    <section class="oe_structure bg-white py-5" data-name="Tabs Verticales">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4 mb-4 mb-md-0">
+            <ul class="nav flex-column nav-pills tabs-v" id="v-tabs" role="tablist" aria-orientation="vertical">
+              <li class="nav-item mb-2">
+                <a class="nav-link active" id="tab-1-tab" data-bs-toggle="pill" href="#tab-1" role="tab">Presentación</a>
+              </li>
+              <li class="nav-item mb-2">
+                <a class="nav-link" id="tab-2-tab" data-bs-toggle="pill" href="#tab-2" role="tab">Objetivos</a>
+              </li>
+              <li class="nav-item mb-2">
+                <a class="nav-link" id="tab-3-tab" data-bs-toggle="pill" href="#tab-3" role="tab">Infraestructura</a>
+              </li>
+              <li class="nav-item mb-2">
+                <a class="nav-link" id="tab-4-tab" data-bs-toggle="pill" href="#tab-4" role="tab">Evaluación</a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="col-md-8">
+            <div class="tab-content" id="v-tabs-content">
+              <div class="tab-pane fade show active" id="tab-1" role="tabpanel">
+                <h3 class="mb-3">Presentación</h3>
+                <p>Este es el texto de presentación. Puedes editar este contenido desde el editor visual de Odoo.</p>
+              </div>
+              <div class="tab-pane fade" id="tab-2" role="tabpanel">
+                <h3 class="mb-3">Objetivos</h3>
+                <p>Describe aquí los objetivos del programa académico.</p>
+              </div>
+              <div class="tab-pane fade" id="tab-3" role="tabpanel">
+                <h3 class="mb-3">Infraestructura</h3>
+                <p>Agrega imágenes, listas u otra información de infraestructura aquí.</p>
+              </div>
+              <div class="tab-pane fade" id="tab-4" role="tabpanel">
+                <h3 class="mb-3">Evaluación</h3>
+                <p>Describe los criterios de evaluación o requisitos de titulación.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+</odoo>

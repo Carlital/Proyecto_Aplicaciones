@@ -1,0 +1,2811 @@
+/* ==========================================================================
+   PERFIL DOCENTE - DISEÑO INSTITUCIONAL ROJO Y BLANCO
+   Colores institucionales: #b50018 (rojo principal) y blanco
+   ========================================================================== */
+
+/* Forzar que no se aplique text-transform automáticamente */
+.perfil-container * {
+  text-transform: none !important;
+}
+
+/* Asegurar que todo el contenido de texto mantenga capitalización normal */
+.perfil-container p,
+.perfil-container span,
+.perfil-container h1,
+.perfil-container h2,
+.perfil-container h3,
+.perfil-container h4,
+.perfil-container h5,
+.perfil-container h6,
+.perfil-container li,
+.perfil-container div {
+  text-transform: none !important;
+}
+
+.perfil-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin: 3rem auto;
+  max-width: 1200px;
+  min-height: 80vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.perfil-lado-izquierdo {
+  flex: 1 1 30%;
+  max-width: 30%;
+  min-width: 320px;
+}
+
+.perfil-lado-derecho {
+  flex: 1 1 65%;
+  max-width: 65%;
+  min-width: 300px;
+}
+
+/* ==========================================================================
+   TARJETA PRINCIPAL DEL PERFIL
+   ========================================================================== */
+
+.card-perfil {
+  border: none;
+  padding: 2rem 1.5rem;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #ffffff 0%, #fafafa 100%);
+  box-shadow: 
+    0 10px 30px rgba(181, 0, 24, 0.12),
+    0 3px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-perfil::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #b50018 0%, #d4002a 50%, #b50018 100%);
+}
+
+.card-perfil:hover {
+  transform: translateY(-5px);
+  box-shadow: 
+    0 20px 40px rgba(181, 0, 24, 0.15),
+    0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* ==========================================================================
+   FOTO DEL DOCENTE
+   ========================================================================== */
+
+.foto-container {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 1.5rem;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(181, 0, 24, 0.2);
+  transition: all 0.3s ease;
+  border: 4px solid white;
+}
+
+.foto-container:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 35px rgba(181, 0, 24, 0.25);
+}
+
+.foto-perfil {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.foto-placeholder {
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.foto-icon {
+  color: white;
+  font-size: 4rem;
+  opacity: 0.9;
+}
+
+.foto-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(181, 0, 24, 0.1) 0%, transparent 50%);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.foto-container:hover .foto-overlay {
+  background: linear-gradient(45deg, rgba(181, 0, 24, 0.2) 0%, transparent 70%);
+}
+
+/* ==========================================================================
+   NOMBRE Y CARGO
+   ========================================================================== */
+
+.nombre-container {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.nombre-docente {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 1.8rem;
+  line-height: 1.2;
+  text-transform: none !important;
+}
+
+.cargo-docente {
+  color: #b50018;
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 0;
+  padding: 0.5rem 1rem;
+  background: rgba(181, 0, 24, 0.08);
+  border-radius: 25px;
+  display: inline-block;
+  border: 2px solid rgba(181, 0, 24, 0.1);
+  text-transform: none !important;
+}
+
+/* ==========================================================================
+   INFORMACIÓN PERSONAL
+   ========================================================================== */
+
+.informacion-personal {
+  margin-bottom: 2rem;
+}
+
+.list-group-perfil {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid rgba(181, 0, 24, 0.1);
+  transition: all 0.3s ease;
+  word-wrap: break-word;
+}
+
+.info-item:hover {
+  background: rgba(181, 0, 24, 0.03);
+  padding-left: 0.5rem;
+  border-radius: 8px;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-icon {
+  color: #b50018;
+  font-size: 1.1rem;
+  margin-right: 0.8rem;
+  margin-top: 0.1rem;
+  min-width: 20px;
+  text-align: center;
+}
+
+.info-item span {
+  flex: 1;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #2c3e50;
+}
+
+.info-item strong {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.observacion-item {
+  background: rgba(181, 0, 24, 0.05);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(181, 0, 24, 0.15);
+  margin-top: 0.5rem;
+}
+
+.email-link, .orcid-link {
+  color: #b50018;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.email-link:hover, .orcid-link:hover {
+  color: #9e0014;
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   INFORMACIÓN DOCENCIA - DISEÑO VERTICAL ESPECÍFICO FIE
+   Clases súper específicas para evitar conflictos con otros CSS
+   ========================================================================== */
+
+/* CONTENEDOR PRINCIPAL VERTICAL COMPLETA */
+.docencia-wrapper-vertical-completa {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  gap: 2rem !important;
+}
+
+/* Cada sección individual */
+.seccion-docencia-vertical {
+  display: block !important;
+  width: 100% !important;
+  margin-bottom: 1.5rem !important;
+  background: rgba(181, 0, 24, 0.02) !important;
+  border-radius: 12px !important;
+  padding: 1.5rem !important;
+  border: 1px solid rgba(181, 0, 24, 0.1) !important;
+}
+
+/* Contenedor general de información docencia vertical */
+.contenedor-info-docencia-vertical-fie {
+  display: block !important;
+  width: 100% !important;
+}
+
+/* Cada item de información individual - SIEMPRE VERTICAL */
+.item-info-docencia-vertical-fie {
+  display: block !important;
+  width: 100% !important;
+  padding: 1rem !important;
+  margin-bottom: 0.8rem !important;
+  background: rgba(181, 0, 24, 0.05) !important;
+  border-radius: 8px !important;
+  border-left: 4px solid #b50018 !important;
+  box-sizing: border-box !important;
+}
+
+/* Ícono dentro de cada item */
+.icono-info-docencia-fie {
+  display: inline-block !important;
+  width: 30px !important;
+  text-align: center !important;
+  margin-right: 0.8rem !important;
+  vertical-align: top !important;
+}
+
+/* Contenedor del texto */
+.texto-info-docencia-fie {
+  display: inline-block !important;
+  vertical-align: top !important;
+}
+
+/* Etiqueta del campo */
+.etiqueta-info-docencia-fie {
+  font-weight: 600 !important;
+  color: #2c3e50 !important;
+  margin-right: 0.5rem !important;
+}
+
+/* Valor del campo */
+.valor-info-docencia-fie {
+  color: #b50018 !important;
+  font-weight: 500 !important;
+}
+
+/* Encabezados de sección */
+.seccion-encabezado-docencia-perfil {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  margin-bottom: 1.5rem !important;
+  padding: 1rem !important;
+  background: rgba(181, 0, 24, 0.05) !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(181, 0, 24, 0.1) !important;
+}
+
+.icono-seccion-docencia-perfil {
+  width: 50px !important;
+  height: 50px !important;
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%) !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.icono-seccion-docencia-perfil i {
+  color: white !important;
+  font-size: 1.5rem !important;
+}
+
+.titulo-seccion-docencia-perfil h6 {
+  margin: 0 0 0.2rem 0 !important;
+  color: #b50018 !important;
+  font-weight: 700 !important;
+  font-size: 1.1rem !important;
+}
+
+.titulo-seccion-docencia-perfil p {
+  margin: 0 !important;
+  color: #6c757d !important;
+  font-size: 0.9rem !important;
+}
+
+/* ==========================================================================
+   ASIGNATURAS ACORDEÓN - DISEÑO COMPACTO
+   ========================================================================== */
+
+/* Contenedor principal del acordeón */
+.asignaturas-acordeon-fie {
+  display: block !important;
+  width: 100% !important;
+}
+
+/* Item individual del acordeón */
+.accordion-item-fie {
+  background: white !important;
+  border: 1px solid rgba(181, 0, 24, 0.15) !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  transition: all 0.3s ease !important;
+}
+
+.accordion-item-fie:hover {
+  box-shadow: 0 4px 12px rgba(181, 0, 24, 0.1) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Encabezado del acordeón */
+.accordion-header-fie {
+  background: linear-gradient(135deg, rgba(181, 0, 24, 0.08) 0%, rgba(181, 0, 24, 0.03) 100%) !important;
+  padding: 1rem 1.5rem !important;
+  border-bottom: 1px solid rgba(181, 0, 24, 0.1) !important;
+  transition: all 0.3s ease !important;
+}
+
+.accordion-header-fie:hover {
+  background: linear-gradient(135deg, rgba(181, 0, 24, 0.12) 0%, rgba(181, 0, 24, 0.05) 100%) !important;
+}
+
+.accordion-header-content-fie {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+}
+
+/* Icono de la carrera */
+.icono-carrera-acordeon-fie {
+  width: 40px !important;
+  height: 40px !important;
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%) !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.icono-carrera-acordeon-fie i {
+  color: white !important;
+  font-size: 1.1rem !important;
+}
+
+/* Información de la carrera */
+.info-carrera-acordeon-fie {
+  flex: 1 !important;
+}
+
+.nombre-carrera-acordeon-fie {
+  margin: 0 0 0.2rem 0 !important;
+  color: #b50018 !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+}
+
+.cantidad-materias-fie {
+  color: #6c757d !important;
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+}
+
+/* Icono de expansión */
+.accordion-toggle-icon-fie {
+  color: #b50018 !important;
+  font-size: 1rem !important;
+  transition: transform 0.3s ease !important;
+}
+
+.accordion-header-fie[aria-expanded="true"] .accordion-toggle-icon-fie i {
+  transform: rotate(180deg) !important;
+}
+
+/* Contenido del acordeón */
+.accordion-body-fie {
+  border-top: none !important;
+}
+
+.accordion-content-fie {
+  padding: 1.5rem !important;
+}
+
+/* Tags de materias compactos */
+.materias-compactas-fie {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.5rem !important;
+}
+
+.materia-tag-fie {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: rgba(181, 0, 24, 0.08) !important;
+  color: #b50018 !important;
+  padding: 0.4rem 0.8rem !important;
+  border-radius: 20px !important;
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  border: 1px solid rgba(181, 0, 24, 0.15) !important;
+  transition: all 0.2s ease !important;
+}
+
+.materia-tag-fie:hover {
+  background: rgba(181, 0, 24, 0.12) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 6px rgba(181, 0, 24, 0.15) !important;
+}
+
+.materia-tag-fie i {
+  font-size: 0.75rem !important;
+  color: #b50018 !important;
+}
+
+/* Resumen compacto */
+.resumen-asignaturas-compacto-fie {
+  margin-top: 1.5rem !important;
+}
+
+.resumen-card-fie {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  padding: 1rem 1.5rem !important;
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%) !important;
+  border-radius: 12px !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(181, 0, 24, 0.25) !important;
+}
+
+.resumen-icon-fie {
+  width: 50px !important;
+  height: 50px !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.resumen-icon-fie i {
+  font-size: 1.5rem !important;
+  color: white !important;
+}
+
+.resumen-stats-fie {
+  text-align: center !important;
+}
+
+.stat-numero-fie {
+  font-size: 1.8rem !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  margin-bottom: 0.2rem !important;
+}
+
+.stat-label-fie {
+  font-size: 0.85rem !important;
+  opacity: 0.9 !important;
+  font-weight: 500 !important;
+}
+
+.resumen-divider-fie {
+  width: 2px !important;
+  height: 40px !important;
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-radius: 1px !important;
+}
+
+/* Estado vacío mejorado */
+.empty-state-asignaturas-fie {
+  text-align: center !important;
+  padding: 2rem !important;
+  color: #6c757d !important;
+}
+
+.empty-state-asignaturas-fie i {
+  font-size: 3rem !important;
+  color: #b50018 !important;
+  opacity: 0.3 !important;
+  margin-bottom: 1rem !important;
+}
+
+.empty-state-asignaturas-fie h6 {
+  color: #b50018 !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.empty-state-asignaturas-fie p {
+  margin: 0 !important;
+  font-size: 0.9rem !important;
+}
+
+/* Animaciones para el acordeón */
+.accordion-item-fie {
+  animation: fadeInUp 0.5s ease forwards !important;
+}
+
+.accordion-item-fie:nth-child(1) { animation-delay: 0.1s !important; }
+.accordion-item-fie:nth-child(2) { animation-delay: 0.2s !important; }
+.accordion-item-fie:nth-child(3) { animation-delay: 0.3s !important; }
+.accordion-item-fie:nth-child(4) { animation-delay: 0.4s !important; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .materias-compactas-fie {
+    gap: 0.3rem !important;
+  }
+  
+  .materia-tag-fie {
+    font-size: 0.8rem !important;
+    padding: 0.3rem 0.6rem !important;
+  }
+  
+  .resumen-card-fie {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 0.5rem !important;
+  }
+  
+  .resumen-divider-fie {
+    width: 40px !important;
+    height: 2px !important;
+  }
+}
+
+.asignaturas-agrupadas-perfil-fie {
+  display: block !important;
+  width: 100% !important;
+}
+
+.grupo-carrera-perfil-fie {
+  margin-bottom: 2rem !important;
+  background: rgba(181, 0, 24, 0.02) !important;
+  border-radius: 12px !important;
+  padding: 1.5rem !important;
+  border: 1px solid rgba(181, 0, 24, 0.1) !important;
+}
+
+.encabezado-carrera-perfil-fie {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  margin-bottom: 1.2rem !important;
+  padding-bottom: 0.8rem !important;
+  border-bottom: 2px solid rgba(181, 0, 24, 0.2) !important;
+}
+
+.icono-carrera-perfil-fie {
+  width: 45px !important;
+  height: 45px !important;
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 3px 10px rgba(181, 0, 24, 0.3) !important;
+}
+
+.icono-carrera-perfil-fie i {
+  color: white !important;
+  font-size: 1.3rem !important;
+}
+
+.nombre-carrera-perfil-fie {
+  color: #b50018 !important;
+  font-weight: 800 !important;
+  font-size: 1.2rem !important;
+  margin: 0 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+.lista-materias-perfil-fie {
+  display: block !important;
+  padding-left: 1rem !important;
+}
+
+.materia-item-perfil-fie {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 0.8rem !important;
+  padding: 0.6rem 0 !important;
+  border-bottom: 1px solid rgba(181, 0, 24, 0.08) !important;
+  transition: all 0.3s ease !important;
+}
+
+.materia-item-perfil-fie:last-child {
+  border-bottom: none !important;
+}
+
+.materia-item-perfil-fie:hover {
+  background: rgba(181, 0, 24, 0.05) !important;
+  padding-left: 0.5rem !important;
+  border-radius: 6px !important;
+  margin: 0 -0.5rem !important;
+}
+
+.bullet-materia-perfil-fie {
+  color: #b50018 !important;
+  font-weight: 900 !important;
+  font-size: 1.2rem !important;
+  line-height: 1 !important;
+  margin-top: 0.1rem !important;
+  flex-shrink: 0 !important;
+}
+
+.nombre-materia-perfil-fie {
+  color: #2c3e50 !important;
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+  font-weight: 500 !important;
+}
+
+.nombre-materia-perfil-fie span {
+  display: block !important;
+}
+
+/* Colores específicos para diferentes carreras */
+.grupo-carrera-perfil-fie:nth-child(1) .icono-carrera-perfil-fie {
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%) !important;
+}
+
+.grupo-carrera-perfil-fie:nth-child(2) .icono-carrera-perfil-fie {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.grupo-carrera-perfil-fie:nth-child(3) .icono-carrera-perfil-fie {
+  background: linear-gradient(135deg, #007bff 0%, #6610f2 100%) !important;
+}
+
+.grupo-carrera-perfil-fie:nth-child(4) .icono-carrera-perfil-fie {
+  background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%) !important;
+}
+
+.resumen-asignaturas-fie {
+  padding: 1rem !important;
+  background: rgba(181, 0, 24, 0.05) !important;
+  border-radius: 8px !important;
+  text-align: center !important;
+}
+
+.info-resumen-fie .texto-resumen-fie {
+  color: #2c3e50 !important;
+  font-size: 0.95rem !important;
+}
+
+.sin-asignaturas-fie .alert {
+  margin: 0 !important;
+}
+
+/* ==========================================================================
+   ANTI-COLUMNAS CSS - FORZAR DISEÑO VERTICAL
+   Prevenir que cualquier CSS automático cree columnas
+   ========================================================================== */
+
+/* Forzar que NUNCA se usen columnas CSS automáticas */
+.perfil-container *,
+.content-card *,
+.contenido-tab *,
+.docencia-wrapper *,
+.asignaturas-agrupadas-perfil-fie *,
+.grupo-carrera-perfil-fie *,
+.lista-materias-perfil-fie *,
+.contenido-asignaturas-perfil-fie * {
+  column-count: 1 !important;
+  column-gap: 0 !important;
+  column-width: auto !important;
+  columns: none !important;
+  column-fill: auto !important;
+  column-span: none !important;
+}
+
+/* Prevenir flexbox que pueda crear columnas */
+.asignaturas-agrupadas-perfil-fie,
+.lista-materias-perfil-fie,
+.contenido-asignaturas-perfil-fie {
+  display: block !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+}
+
+/* Asegurar que grid no cree columnas */
+.asignaturas-agrupadas-perfil-fie,
+.lista-materias-perfil-fie {
+  display: block !important;
+  grid-template-columns: none !important;
+  grid-auto-columns: none !important;
+}
+
+/* ==========================================================================
+   EXPERIENCIA - DISEÑO ESPECÍFICO
+   ========================================================================== */
+
+.fila-experiencia-perfil-fie {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1.5rem !important;
+  padding: 1.5rem !important;
+  background: rgba(181, 0, 24, 0.05) !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(181, 0, 24, 0.1) !important;
+}
+
+.icono-experiencia-perfil-fie {
+  width: 60px !important;
+  height: 60px !important;
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%) !important;
+  border-radius: 15px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.icono-experiencia-perfil-fie i {
+  color: white !important;
+  font-size: 1.8rem !important;
+}
+
+.datos-experiencia-perfil-fie {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.3rem !important;
+}
+
+.numero-experiencia-perfil-fie {
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
+  color: #b50018 !important;
+  line-height: 1 !important;
+}
+
+.texto-experiencia-perfil-fie {
+  color: #6c757d !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+}
+
+.descripcion-experiencia-perfil-fie {
+  margin-left: auto !important;
+}
+
+.descripcion-experiencia-perfil-fie .badge {
+  font-size: 0.85rem !important;
+  padding: 0.5rem 1rem !important;
+}
+
+/* ==========================================================================
+   RESUMEN FINAL - DISEÑO ESPECÍFICO
+   ========================================================================== */
+
+.resumen-final-docencia-perfil-fie {
+  padding: 1.5rem !important;
+  background: linear-gradient(135deg, rgba(181, 0, 24, 0.05) 0%, rgba(181, 0, 24, 0.02) 100%) !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(181, 0, 24, 0.1) !important;
+}
+
+.fila-resumen-perfil-fie {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+}
+
+.item-resumen-perfil-fie {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+.etiqueta-resumen-perfil-fie {
+  color: #6c757d !important;
+  font-weight: 500 !important;
+}
+
+.valor-resumen-perfil-fie {
+  color: #b50018 !important;
+  font-weight: 700 !important;
+}
+
+.separador-resumen-perfil-fie {
+  color: #b50018 !important;
+  font-weight: 700 !important;
+  opacity: 0.6 !important;
+}
+
+/* ==========================================================================
+   RESPONSIVE PARA DOCENCIA - ESPECÍFICO
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .fila-experiencia-perfil-fie {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 1rem !important;
+  }
+  
+  .descripcion-experiencia-perfil-fie {
+    margin-left: 0 !important;
+  }
+  
+  .fila-resumen-perfil-fie {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+  
+  .separador-resumen-perfil-fie {
+    display: none !important;
+  }
+  
+  .seccion-encabezado-docencia-perfil {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 0.8rem !important;
+  }
+  
+  .asignatura-item-vertical-fie {
+    display: block !important;
+    text-align: left !important;
+  }
+  
+  /* Forzar que en móviles también sea vertical */
+  .asignaturas-agrupadas-perfil-fie,
+  .contenido-asignaturas-perfil-fie {
+    column-count: 1 !important;
+    columns: none !important;
+  }
+  
+  .grupo-carrera-perfil-fie {
+    padding: 1rem !important;
+  }
+  
+  .encabezado-carrera-perfil-fie {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 0.8rem !important;
+  }
+  
+  .nombre-carrera-perfil-fie {
+    font-size: 1rem !important;
+  }
+  
+  .lista-materias-perfil-fie {
+    padding-left: 0 !important;
+  }
+  
+  .materia-item-perfil-fie {
+    padding: 0.8rem !important;
+    margin-bottom: 0.5rem !important;
+    background: rgba(181, 0, 24, 0.03) !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(181, 0, 24, 0.1) !important;
+  }
+  
+  .materia-item-perfil-fie:hover {
+    margin: 0 0 0.5rem 0 !important;
+  }
+}
+
+/* ==========================================================================
+   OVERRIDE PARA BOOTSTRAP Y OTROS FRAMEWORKS
+   Asegurar que ningún CSS externo interfiera
+   ========================================================================== */
+
+/* Override Bootstrap columns */
+.lista-asignaturas-vertical-fie.row,
+.contenido-asignaturas-perfil-fie.row {
+  display: block !important;
+  margin: 0 !important;
+  column-count: 1 !important;
+}
+
+.asignatura-item-vertical-fie.col,
+.asignatura-item-vertical-fie.col-12,
+.asignatura-item-vertical-fie.col-6,
+.asignatura-item-vertical-fie.col-4,
+.asignatura-item-vertical-fie.col-3 {
+  width: 100% !important;
+  max-width: 100% !important;
+  flex: none !important;
+  display: block !important;
+  column-count: 1 !important;
+}
+
+/* Override cualquier estilo de masonry o isotope */
+.lista-asignaturas-vertical-fie {
+  position: static !important;
+  height: auto !important;
+  column-count: 1 !important;
+}
+
+.asignatura-item-vertical-fie {
+  position: static !important;
+  transform: none !important;
+  left: auto !important;
+  top: auto !important;
+  width: 100% !important;
+  column-count: 1 !important;
+}
+
+/* ==========================================================================
+   MÉTRICAS ACADÉMICAS
+   ========================================================================== */
+
+.metricas-academicas {
+  margin-top: 2rem;
+}
+
+.metricas-titulo {
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%);
+  color: white;
+  padding: 0.8rem 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 15px rgba(181, 0, 24, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.metricas-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.metrica-card {
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%);
+  color: white;
+  padding: 1.2rem;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(181, 0, 24, 0.25);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.metrica-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(181, 0, 24, 0.35);
+}
+
+.metrica-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
+.metrica-numero {
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+
+.metrica-label {
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+  opacity: 0.95;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   TABS INSTITUCIONALES
+   ========================================================================== */
+
+.tabs-container {
+  margin-bottom: 0;
+  position: relative;
+}
+
+.custom-tabs {
+  border-bottom: none;
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -5px 20px rgba(181, 0, 24, 0.08);
+  padding: 0.8rem 1rem 0;
+  position: relative;
+}
+
+.custom-tabs .nav-link {
+  color: #6c757d;
+  border: none;
+  border-radius: 15px 15px 0 0;
+  margin-right: 5px;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  border: 2px solid transparent;
+}
+
+.custom-tabs .nav-link:hover {
+  background: rgba(181, 0, 24, 0.08);
+  color: #b50018;
+  transform: translateY(-3px);
+  border-color: rgba(181, 0, 24, 0.2);
+  box-shadow: 0 8px 25px rgba(181, 0, 24, 0.15);
+}
+
+.custom-tabs .nav-link.active {
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%) !important;
+  color: white !important;
+  box-shadow: 0 8px 30px rgba(181, 0, 24, 0.4);
+  transform: translateY(-5px);
+  border-color: #b50018;
+}
+
+/* ==========================================================================
+   CONTENIDO DE TABS
+   ========================================================================== */
+
+.tab-content-container {
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  overflow: hidden;
+  position: relative;
+}
+
+.tab-header {
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%);
+  color: white;
+  padding: 1.5rem 2rem;
+  margin: 0;
+  position: relative;
+}
+
+.tab-header h5 {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  text-transform: none;
+}
+
+.tab-header i {
+  font-size: 1.3rem;
+  margin-right: 0.8rem;
+}
+
+.contenido-tab {
+  padding: 2rem;
+  min-height: 300px;
+}
+
+.content-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  border: 1px solid rgba(181, 0, 24, 0.1);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.content-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #b50018 0%, #d4002a 100%);
+}
+
+.content-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+
+.no-info-card {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 15px;
+  border: 2px dashed rgba(181, 0, 24, 0.3);
+}
+
+.no-info-card i {
+  font-size: 4rem;
+  color: rgba(181, 0, 24, 0.4);
+  margin-bottom: 1.5rem;
+}
+
+.empty-state h6 {
+  color: #b50018;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.no-info {
+  color: #6c757d;
+  font-style: italic;
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   BOTONES DE ACCIÓN
+   ========================================================================== */
+
+.acciones-perfil {
+  margin-top: 2rem;
+}
+
+.btn-cv, .btn-contacto {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.btn-cv {
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(181, 0, 24, 0.3);
+}
+
+.btn-contacto {
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(181, 0, 24, 0.3);
+  opacity: 0.9;
+}
+
+.btn-cv:hover, .btn-contacto:hover {
+  transform: translateY(-3px);
+  color: white;
+  text-decoration: none;
+  box-shadow: 0 8px 25px rgba(181, 0, 24, 0.4);
+}
+
+/* ==========================================================================
+   CONTENIDO FORMATEADO
+   ========================================================================== */
+
+.text-justify {
+  text-align: justify;
+  line-height: 1.8;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
+.info-formateada {
+  line-height: 1.8;
+  color: #2c3e50;
+  font-size: 0.95rem;
+}
+
+.info-formateada strong, .idioma-info strong {
+  color: #b50018;
+  font-weight: 700;
+}
+
+.info-formateada h6, .idioma-info h6 {
+  color: #b50018;
+  font-weight: 800;
+  margin: 2rem 0 1rem 0;
+  padding: 0.8rem 1.5rem;
+  background: rgba(181, 0, 24, 0.1);
+  border-radius: 10px;
+  border-left: 4px solid #b50018;
+  font-size: 1.1rem;
+}
+
+/* ==========================================================================
+   ELEMENTOS ESPECÍFICOS DE CONTENIDO
+   ========================================================================== */
+
+.presentation-wrapper {
+  position: relative;
+  padding: 1rem 0;
+}
+
+.quote-mark {
+  font-size: 6rem;
+  color: rgba(181, 0, 24, 0.1);
+  position: absolute;
+  top: -1rem;
+  left: -0.5rem;
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+
+.text-content {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.presentation-footer {
+  margin-top: 2rem;
+  text-align: right;
+  border-top: 2px solid rgba(181, 0, 24, 0.1);
+  padding-top: 1rem;
+}
+
+.author-signature {
+  color: #b50018;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.docencia-wrapper {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.section-icon {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  background: rgba(181, 0, 24, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid rgba(181, 0, 24, 0.2);
+}
+
+.section-icon i {
+  font-size: 2rem;
+  color: #b50018;
+}
+
+.teaching-content {
+  flex: 1;
+}
+
+.teaching-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.stat-item {
+  background: rgba(181, 0, 24, 0.05);
+  padding: 1rem;
+  border-radius: 10px;
+  border-left: 4px solid #b50018;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.stat-item i {
+  color: #b50018;
+  font-size: 1.2rem;
+}
+
+.projects-header, .publications-header, .languages-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: rgba(181, 0, 24, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(181, 0, 24, 0.1);
+  flex-wrap: wrap;
+}
+
+.project-icon, .publication-icon, .language-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(181, 0, 24, 0.3);
+}
+
+.project-icon i, .publication-icon i, .language-icon i {
+  color: white;
+  font-size: 1.8rem;
+}
+
+.project-count, .publication-count {
+  text-align: center;
+}
+
+.count-number {
+  display: block;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #b50018;
+  line-height: 1;
+}
+
+.count-label {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.orcid-link-badge {
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(181, 0, 24, 0.3);
+}
+
+.orcid-link-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(181, 0, 24, 0.4);
+  color: white;
+  text-decoration: none;
+}
+
+.language-title h6 {
+  margin: 0 0 0.3rem 0;
+  color: #b50018;
+  font-weight: 700;
+}
+
+.language-title p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.idiomas-grid {
+  background: rgba(181, 0, 24, 0.03);
+  padding: 2rem;
+  border-radius: 15px;
+  border: 1px solid rgba(181, 0, 24, 0.1);
+}
+
+.idioma-info {
+  line-height: 1.9;
+  color: #2c3e50;
+  font-size: 0.95rem;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .perfil-lado-izquierdo, .perfil-lado-derecho {
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+  
+  .perfil-container {
+    flex-direction: column;
+    gap: 1.5rem;
+    margin: 2rem auto;
+  }
+  
+  .foto-container {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .custom-tabs {
+    padding: 0.3rem;
+  }
+  
+  .custom-tabs .nav-link {
+    font-size: 0.8rem;
+    padding: 0.6rem 0.8rem;
+    margin-right: 2px;
+    margin-bottom: 2px;
+  }
+  
+  .metricas-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+  }
+  
+  .docencia-wrapper {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .projects-header, .publications-header, .languages-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .teaching-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .perfil-container {
+    margin: 1rem auto;
+    gap: 1rem;
+  }
+  
+  .card-perfil {
+    padding: 1.5rem 1rem;
+  }
+  
+  .metricas-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+  
+  .custom-tabs .nav-link {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.6rem;
+  }
+  
+  .nombre-docente {
+    font-size: 1.5rem;
+  }
+  
+  .cargo-docente {
+    font-size: 1rem;
+  }
+}
+
+/* ==========================================================================
+   ANIMACIONES
+   ========================================================================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-perfil, .tab-content-container {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.metrica-card:nth-child(1) { animation-delay: 0.1s; }
+.metrica-card:nth-child(2) { animation-delay: 0.2s; }
+.metrica-card:nth-child(3) { animation-delay: 0.3s; }
+.metrica-card:nth-child(4) { animation-delay: 0.4s; }
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ==========================================================================
+   TABS MEJORADOS - SIN AZUL
+   ========================================================================== */
+
+.tabs-container {
+  margin-bottom: 0;
+  position: relative;
+}
+
+.tabs-container::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #b50018 50%, transparent 100%);
+  z-index: 1;
+}
+
+.custom-tabs {
+  border-bottom: none;
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -5px 20px rgba(181, 0, 24, 0.08);
+  padding: 0.8rem 1rem 0;
+  position: relative;
+  z-index: 2;
+}
+
+.custom-tabs .nav-link {
+  color: #495057;
+  border: none;
+  border-radius: 15px 15px 0 0;
+  margin-right: 5px;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  border: 2px solid transparent;
+}
+
+.custom-tabs .nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(181, 0, 24, 0.1) 0%, rgba(181, 0, 24, 0.05) 100%);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.3s ease;
+  z-index: -1;
+}
+
+.custom-tabs .nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #b50018 0%, #d4002a 100%);
+  transform: translateX(-50%);
+  transition: width 0.3s ease;
+}
+
+.custom-tabs .nav-link:hover {
+  background: linear-gradient(135deg, rgba(181, 0, 24, 0.08) 0%, rgba(181, 0, 24, 0.03) 100%);
+  color: #b50018;
+  transform: translateY(-3px);
+  border-color: rgba(181, 0, 24, 0.2);
+  box-shadow: 0 8px 25px rgba(181, 0, 24, 0.15);
+}
+
+.custom-tabs .nav-link:hover::before {
+  transform: scaleY(1);
+}
+
+.custom-tabs .nav-link:hover::after {
+  width: 80%;
+}
+
+.custom-tabs .nav-link.active {
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%) !important;
+  color: white !important;
+  box-shadow: 0 8px 30px rgba(181, 0, 24, 0.4);
+  transform: translateY(-5px);
+  border-color: #b50018;
+  position: relative;
+  z-index: 3;
+}
+
+.custom-tabs .nav-link.active::before {
+  transform: scaleY(1);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.custom-tabs .nav-link.active::after {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Eliminar cualquier rastro de azul */
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link {
+  background-color: #b50018 !important;
+  border-color: #b50018 !important;
+  color: white !important;
+}
+
+.nav-link:focus,
+.nav-link:hover {
+  border-color: rgba(181, 0, 24, 0.2) !important;
+  color: #b50018 !important;
+}
+
+/* ==========================================================================
+   CONTENIDO DE TABS - MÁS VISUAL Y DINÁMICO
+   ========================================================================== */
+
+.tab-content-container {
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  overflow: hidden;
+  position: relative;
+}
+
+.tab-content-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #b50018 50%, transparent 100%);
+}
+
+.tab-header {
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%);
+  color: white;
+  padding: 1.5rem 2rem;
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.tab-header h5 {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  text-transform: none !important;
+}
+
+.tab-header i {
+  font-size: 1.3rem;
+  margin-right: 0.8rem;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.contenido-tab {
+  padding: 2rem;
+  min-height: 300px;
+  position: relative;
+}
+
+.content-card {
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  padding: 2rem;
+  border-radius: 15px;
+  border: 1px solid rgba(181, 0, 24, 0.1);
+  box-shadow: 
+    0 4px 20px rgba(0,0,0,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.8);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.content-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #b50018 0%, #d4002a 100%);
+}
+
+.content-card::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle, rgba(181, 0, 24, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.content-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 
+    0 8px 30px rgba(0,0,0,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+}
+
+.no-info-card {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 15px;
+  border: 2px dashed rgba(181, 0, 24, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.no-info-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(181, 0, 24, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(181, 0, 24, 0.05) 0%, transparent 50%);
+}
+
+.no-info-card i {
+  font-size: 4rem;
+  color: rgba(181, 0, 24, 0.4);
+  margin-bottom: 1.5rem;
+  filter: drop-shadow(0 4px 8px rgba(181, 0, 24, 0.1));
+  position: relative;
+  z-index: 2;
+}
+
+.no-info {
+  color: #6c757d;
+  font-style: italic;
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  position: relative;
+  z-index: 2;
+}
+
+/* ==========================================================================
+   ACCIONES DEL PERFIL
+   ========================================================================== */
+
+.acciones-perfil {
+  margin-top: 2rem;
+}
+
+.btn-cv, .btn-contacto {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-cv {
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(181, 0, 24, 0.3);
+}
+
+.btn-contacto {
+  background: linear-gradient(135deg, #28a745 0%, #20923a 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-cv:hover, .btn-contacto:hover {
+  transform: translateY(-3px);
+  color: white;
+  text-decoration: none;
+}
+
+.btn-cv:hover {
+  box-shadow: 0 8px 25px rgba(181, 0, 24, 0.4);
+}
+
+.btn-contacto:hover {
+  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* ==========================================================================
+   CONTENIDO FORMATEADO - MÁS VISUAL
+   ========================================================================== */
+
+.text-justify {
+  text-align: justify;
+  line-height: 1.8;
+  color: #2c3e50;
+  font-size: 1rem;
+  position: relative;
+  max-width: none;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  text-transform: none !important;
+}
+
+.text-justify::first-letter {
+  font-size: 3em;
+  float: left;
+  line-height: 0.8;
+  margin: 0.1em 0.1em 0.1em 0;
+  color: #b50018;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(181, 0, 24, 0.2);
+}
+
+.info-formateada {
+  line-height: 1.8;
+  color: #2c3e50;
+  font-size: 0.95rem;
+  position: relative;
+  max-width: none;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Mejorar párrafos largos */
+.info-formateada p {
+  margin-bottom: 1.2rem;
+  text-align: justify;
+  line-height: 1.7;
+}
+
+/* Mejorar texto que se renderiza desde campos de texto */
+.info-formateada br + br {
+  display: none;
+}
+
+.info-formateada {
+  white-space: pre-line;
+}
+
+.info-formateada ul, .idioma-info ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin: 1.5rem 0;
+  position: relative;
+}
+
+.info-formateada li, .idioma-info li {
+  margin-bottom: 1rem;
+  padding: 0.8rem 1rem 0.8rem 3rem;
+  position: relative;
+  background: linear-gradient(135deg, rgba(181, 0, 24, 0.02) 0%, transparent 100%);
+  border-radius: 8px;
+  border-left: 3px solid rgba(181, 0, 24, 0.2);
+  transition: all 0.3s ease;
+}
+
+.info-formateada li:hover, .idioma-info li:hover {
+  background: linear-gradient(135deg, rgba(181, 0, 24, 0.05) 0%, rgba(181, 0, 24, 0.01) 100%);
+  border-left-color: #b50018;
+  transform: translateX(5px);
+  box-shadow: 0 3px 10px rgba(181, 0, 24, 0.1);
+}
+
+.info-formateada li::before, .idioma-info li::before {
+  content: '';
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(181, 0, 24, 0.3);
+}
+
+.info-formateada li::after, .idioma-info li::after {
+  content: '';
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+}
+
+.info-formateada strong, .idioma-info strong {
+  color: #b50018;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(181, 0, 24, 0.1);
+}
+
+.info-formateada h6, .idioma-info h6 {
+  color: #b50018;
+  font-weight: 800;
+  margin: 2rem 0 1rem 0;
+  padding: 0.8rem 1.5rem;
+  background: linear-gradient(135deg, rgba(181, 0, 24, 0.1) 0%, rgba(181, 0, 24, 0.05) 100%);
+  border-radius: 10px;
+  border-left: 4px solid #b50018;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+  text-transform: none !important;
+}
+
+.info-formateada h6::before, .idioma-info h6::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, #b50018 0%, #d4002a 100%);
+}
+
+.info-formateada h6::after, .idioma-info h6::after {
+  content: '📚';
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  opacity: 0.7;
+}
+
+.destacado {
+  background: linear-gradient(120deg, rgba(181, 0, 24, 0.15) 0%, rgba(181, 0, 24, 0.08) 100%);
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-weight: 700;
+  border: 1px solid rgba(181, 0, 24, 0.2);
+  color: #b50018;
+  display: inline-block;
+  margin: 0.2rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.destacado::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: left 0.5s;
+}
+
+.destacado:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(181, 0, 24, 0.2);
+}
+
+.destacado:hover::before {
+  left: 100%;
+}
+
+/* ==========================================================================
+   IDIOMAS - DISEÑO MEJORADO
+   ========================================================================== */
+
+.idiomas-grid {
+  background: linear-gradient(145deg, rgba(181, 0, 24, 0.03) 0%, rgba(181, 0, 24, 0.01) 100%);
+  padding: 2rem;
+  border-radius: 15px;
+  border: 1px solid rgba(181, 0, 24, 0.1);
+  box-shadow: 
+    0 4px 20px rgba(0,0,0,0.05),
+    inset 0 1px 0 rgba(255,255,255,0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+.idiomas-grid::before {
+  content: '🌍';
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 2rem;
+  opacity: 0.2;
+}
+
+.idioma-info {
+  line-height: 1.9;
+  color: #2c3e50;
+  font-size: 0.95rem;
+  position: relative;
+}
+
+/* ==========================================================================
+   TEXTO CON EFECTOS TIPOGRÁFICOS
+   ========================================================================== */
+
+.content-card p {
+  margin-bottom: 1.5rem;
+  text-indent: 2rem;
+  position: relative;
+}
+
+.content-card p:not(:first-child) {
+  text-indent: 0;
+}
+
+.content-card p:first-of-type::before {
+  content: '"';
+  position: absolute;
+  left: -1rem;
+  top: -0.5rem;
+  font-size: 4rem;
+  color: rgba(181, 0, 24, 0.2);
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+
+/* Efectos para enlaces */
+.content-card a {
+  color: #b50018;
+  text-decoration: none;
+  font-weight: 600;
+  position: relative;
+  padding: 0.2rem 0;
+}
+
+.content-card a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #b50018 0%, #d4002a 100%);
+  transition: width 0.3s ease;
+}
+
+.content-card a:hover::after {
+  width: 100%;
+}
+
+.content-card a:hover {
+  color: #9e0014;
+}
+
+/* Numeración automática para listas numeradas */
+.info-formateada ol {
+  counter-reset: custom-counter;
+  list-style: none;
+  padding-left: 0;
+}
+
+.info-formateada ol li {
+  counter-increment: custom-counter;
+  position: relative;
+  padding-left: 4rem;
+}
+
+.info-formateada ol li::before {
+  content: counter(custom-counter);
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 3px 8px rgba(181, 0, 24, 0.3);
+}
+
+.info-formateada ol li::after {
+  display: none;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .perfil-lado-izquierdo, .perfil-lado-derecho {
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+  
+  .perfil-container {
+    flex-direction: column;
+    gap: 1.5rem;
+    margin: 2rem auto;
+  }
+  
+  .foto-container {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .custom-tabs {
+    padding: 0.3rem;
+  }
+  
+  .custom-tabs .nav-link {
+    font-size: 0.8rem;
+    padding: 0.6rem 0.8rem;
+    margin-right: 2px;
+    margin-bottom: 2px;
+  }
+  
+  .metricas-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+  }
+  
+  .metrica-card {
+    padding: 1rem;
+  }
+  
+  .metrica-numero {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .perfil-container {
+    margin: 1rem auto;
+    gap: 1rem;
+  }
+  
+  .card-perfil {
+    padding: 1.5rem 1rem;
+  }
+  
+  .metricas-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+  
+  .metrica-card {
+    padding: 1rem;
+  }
+  
+  .metrica-numero {
+    font-size: 1.6rem;
+  }
+  
+  .custom-tabs .nav-link {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.6rem;
+  }
+  
+  .nombre-docente {
+    font-size: 1.5rem;
+  }
+  
+  .cargo-docente {
+    font-size: 1rem;
+  }
+  
+  .acciones-perfil .row {
+    gap: 0.5rem;
+  }
+  
+  .acciones-perfil .col-md-6 {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* ==========================================================================
+   ANIMACIONES Y EFECTOS ADICIONALES
+   ========================================================================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.card-perfil, .tab-content-container {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.metrica-card:nth-child(1) { animation-delay: 0.1s; }
+.metrica-card:nth-child(2) { animation-delay: 0.2s; }
+.metrica-card:nth-child(3) { animation-delay: 0.3s; }
+.metrica-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* ==========================================================================
+   ELEMENTOS ESPECÍFICOS DE CONTENIDO
+   ========================================================================== */
+
+/* Presentación */
+.presentation-wrapper {
+  position: relative;
+  padding: 1rem 0;
+}
+
+.quote-mark {
+  font-size: 6rem;
+  color: rgba(181, 0, 24, 0.1);
+  position: absolute;
+  top: -1rem;
+  left: -0.5rem;
+  font-family: Georgia, serif;
+  line-height: 1;
+  z-index: 1;
+}
+
+.text-content {
+  position: relative;
+  z-index: 2;
+  padding-left: 2rem;
+}
+
+.presentation-footer {
+  margin-top: 2rem;
+  text-align: right;
+  border-top: 2px solid rgba(181, 0, 24, 0.1);
+  padding-top: 1rem;
+}
+
+.author-signature {
+  color: #b50018;
+  font-weight: 600;
+  font-style: italic;
+}
+
+/* Docencia - Formato mejorado y organizado */
+.docencia-wrapper {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.section-icon {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, rgba(181, 0, 24, 0.1) 0%, rgba(181, 0, 24, 0.05) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid rgba(181, 0, 24, 0.2);
+}
+
+.section-icon i {
+  font-size: 2rem;
+  color: #b50018;
+}
+
+.teaching-content {
+  flex: 1;
+}
+
+/* Contenedor principal del contenido de docencia */
+.teaching-content .info-formateada {
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  padding: 0;
+  border-radius: 15px;
+  border: 1px solid rgba(181, 0, 24, 0.1);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+/* Secciones organizadas dentro del contenido de docencia */
+.docencia-section {
+  margin-bottom: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  border-left: 4px solid #b50018;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+
+.docencia-section-header {
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%);
+  color: white;
+  padding: 0.8rem 1.5rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.docencia-section-header i {
+  margin-right: 0.8rem;
+  font-size: 1rem;
+}
+
+.docencia-section-content {
+  padding: 1.2rem 1.5rem;
+  background: white;
+}
+
+.docencia-section-content p {
+  margin-bottom: 0.8rem;
+  line-height: 1.6;
+  color: #2c3e50;
+  font-size: 0.9rem;
+}
+
+.docencia-section-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.docencia-section-content li {
+  margin-bottom: 0.5rem;
+  padding: 0.4rem 0.8rem 0.4rem 2.5rem;
+  background: rgba(247, 248, 249, 0.8);
+  border-radius: 6px;
+  position: relative;
+  color: #2c3e50;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  transition: all 0.2s ease;
+}
+
+.docencia-section-content li:hover {
+  background: rgba(181, 0, 24, 0.05);
+  transform: translateX(3px);
+}
+
+.docencia-section-content li::before {
+  content: '•';
+  position: absolute;
+  left: 1rem;
+  top: 0.4rem;
+  color: #b50018;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+/* Modalidades y niveles en formato compacto */
+.modalidades-niveles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.modalidad-item, .nivel-item {
+  background: rgba(181, 0, 24, 0.08);
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  color: #b50018;
+  font-size: 0.85rem;
+}
+
+/* Certificaciones en formato de tarjetas */
+.certificaciones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.certificacion-item {
+  background: linear-gradient(135deg, rgba(181, 0, 24, 0.05) 0%, rgba(181, 0, 24, 0.02) 100%);
+  padding: 0.8rem;
+  border-radius: 8px;
+  border-left: 3px solid #b50018;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #2c3e50;
+}
+
+/* Logros en formato de línea de tiempo */
+.logros-timeline {
+  border-left: 2px solid rgba(181, 0, 24, 0.2);
+  padding-left: 1.5rem;
+  margin-left: 1rem;
+}
+
+.logro-item {
+  position: relative;
+  margin-bottom: 1rem;
+  padding: 0.8rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #2c3e50;
+}
+
+.logro-item::before {
+  content: '';
+  position: absolute;
+  left: -2rem;
+  top: 1rem;
+  width: 12px;
+  height: 12px;
+  background: #b50018;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 0 0 2px rgba(181, 0, 24, 0.2);
+}
+
+.logro-tipo {
+  background: rgba(181, 0, 24, 0.1);
+  color: #b50018;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+.teaching-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.stat-item {
+  background: rgba(181, 0, 24, 0.05);
+  padding: 1rem;
+  border-radius: 10px;
+  border-left: 4px solid #b50018;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.stat-item i {
+  color: #b50018;
+  font-size: 1.2rem;
+}
+
+/* Proyectos */
+.proyectos-wrapper {
+  position: relative;
+}
+
+.projects-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(181, 0, 24, 0.05) 0%, transparent 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(181, 0, 24, 0.1);
+}
+
+.project-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(181, 0, 24, 0.3);
+}
+
+.project-icon i {
+  color: white;
+  font-size: 1.8rem;
+}
+
+.project-count {
+  text-align: center;
+}
+
+.count-number {
+  display: block;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #b50018;
+  line-height: 1;
+}
+
+.count-label {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* Publicaciones */
+.publicaciones-wrapper {
+  position: relative;
+}
+
+.publications-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(181, 0, 24, 0.05) 0%, transparent 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(181, 0, 24, 0.1);
+  flex-wrap: wrap;
+}
+
+.publication-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(181, 0, 24, 0.3);
+}
+
+.publication-icon i {
+  color: white;
+  font-size: 1.8rem;
+}
+
+.publication-count {
+  text-align: center;
+}
+
+.orcid-badge {
+  margin-left: auto;
+}
+
+.orcid-link-badge {
+  background: linear-gradient(135deg, #a6ce39 0%, #8bc34a 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(166, 206, 57, 0.3);
+}
+
+.orcid-link-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(166, 206, 57, 0.4);
+  color: white;
+  text-decoration: none;
+}
+
+/* Idiomas */
+.idiomas-wrapper {
+  position: relative;
+}
+
+.languages-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(181, 0, 24, 0.05) 0%, transparent 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(181, 0, 24, 0.1);
+}
+
+.language-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(181, 0, 24, 0.3);
+}
+
+.language-icon i {
+  color: white;
+  font-size: 1.8rem;
+}
+
+.language-title h6 {
+  margin: 0 0 0.3rem 0;
+  color: #b50018;
+  font-weight: 700;
+}
+
+.language-title p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+/* Estados vacíos mejorados */
+.empty-state {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.empty-state h6 {
+  color: #b50018;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.empty-state .no-info {
+  color: #6c757d;
+  font-size: 1rem;
+}
+
+/* Scroll suave para navegación */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Efectos de hover para elementos interactivos */
+.content-card:hover .project-icon,
+.content-card:hover .publication-icon,
+.content-card:hover .language-icon,
+.content-card:hover .section-icon {
+  animation: pulse 1s infinite;
+}
+
+/* Responsive para elementos nuevos */
+@media (max-width: 768px) {
+  .docencia-wrapper {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .projects-header,
+  .publications-header,
+  .languages-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .teaching-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .orcid-badge {
+    margin-left: 0;
+    margin-top: 1rem;
+  }
+  
+  /* Responsive para secciones de docencia */
+  .modalidades-niveles {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .certificaciones-grid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+  
+  .docencia-section-header {
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+  }
+  
+  .docencia-section-content {
+    padding: 1rem;
+  }
+  
+  .logros-timeline {
+    border-left: 1px solid rgba(181, 0, 24, 0.2);
+    padding-left: 1rem;
+    margin-left: 0.5rem;
+  }
+  
+  /* Responsive específico para docencia FIE */
+  .fila-experiencia-perfil-fie {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 1rem !important;
+  }
+  
+  .descripcion-experiencia-perfil-fie {
+    margin-left: 0 !important;
+  }
+  
+  .fila-resumen-perfil-fie {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+  
+  .separador-resumen-perfil-fie {
+    display: none !important;
+  }
+  
+  .seccion-encabezado-docencia-perfil {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 0.8rem !important;
+  }
+  
+  .asignatura-item-vertical-fie {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 0.8rem !important;
+  }
+}
