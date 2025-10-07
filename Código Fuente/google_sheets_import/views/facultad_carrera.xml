@@ -9,16 +9,16 @@
             <kanban>
                 <templates>
                     <t t-name="kanban-box">
-                        <div class="o_kanban_record">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_image">
+                                <img t-att-src="kanban_image('hr.employee', 'image_128', record.id.raw_value)" 
+                                     alt="Employee Photo" class="o_image_64_contain"/>
+                            </div>
                             <div>
                                 <strong><field name="name"/></strong><br/>
                                 <field name="job_title"/><br/>
                                 <field name="x_facultad"/><br/>
                                 <field name="x_carrera"/>
-                            </div>
-                            <div>
-                                <img t-att-src="kanban_image('hr.employee', 'image_1920', record.id.value)"
-                                     class="img img-fluid mt-2" style="max-height:100px;"/>
                             </div>
                         </div>
                     </t>
@@ -115,5 +115,11 @@
             </xpath>
         </field>
     </record>
+
+    <menuitem id="menu_facultad_carrera"
+              name="Facultades / Carreras"
+              parent="hr.menu_hr_root"
+              sequence="96"
+              groups="hr.group_hr_user"/>
 
 </odoo>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Vista de configuración de CV Importer -->
+
+    <!-- Wizard de configuración (transient) -->
     <record id="view_cv_importer_config_form" model="ir.ui.view">
         <field name="name">cv.importer.config.form</field>
         <field name="model">cv.importer.config</field>
@@ -8,21 +9,21 @@
             <form string="Configuración de CV Importer">
                 <group>
                     <group string="Configuración N8N">
-                        <field name="n8n_webhook_url" placeholder="https://carlitalomas.app.n8n.cloud/webhook-test/process-cv"/>
+                        <field name="n8n_webhook_url" placeholder="https://n8n.pruebasbidata.site/webhook/process-cv"/>
                         <field name="timeout"/>
                     </group>
                     <group string="Opciones">
                         <field name="auto_apply_data"/>
                     </group>
                 </group>
-                
+
                 <div class="alert alert-info">
                     <strong>Ayuda:</strong>
                     <ul>
                         <li><strong>URL Cloud:</strong> https://n8n.pruebasbidata.site/webhook/process-cv</li>
                     </ul>
                 </div>
-                
+
                 <footer>
                     <button string="Probar Conexión" type="object" name="action_test_connection" class="btn-warning"/>
                     <button string="Guardar Configuración" type="object" name="action_save_config" class="btn-primary"/>
@@ -32,7 +33,7 @@
         </field>
     </record>
 
-    <!-- Acción para configuración -->
+    <!-- Acción del wizard -->
     <record id="action_cv_importer_config" model="ir.actions.act_window">
         <field name="name">Configuración CV Importer</field>
         <field name="res_model">cv.importer.config</field>
@@ -40,7 +41,95 @@
         <field name="target">new</field>
     </record>
 
-    <!-- Menú de configuración -->
-    <menuitem id="menu_cv_importer_config" name="Configuración" parent="menu_cv_importer_root" 
-              action="action_cv_importer_config" sequence="20"/>
+    <!-- Menú que abre el wizard -->
+    <menuitem id="menu_cv_importer_config"
+              name="Configuración"
+              parent="menu_cv_importer_root"
+              action="action_cv_importer_config"
+              sequence="20"/>
+
+    <!-- FORM principal de cv.config (modelo persistente) -->
+    <record id="view_cv_config_form" model="ir.ui.view">
+        <field name="name">cv.config.form.main</field>
+        <field name="model">cv.config</field>
+        <field name="arch" type="xml">
+            <form string="Configuración de CV Importer">
+                <sheet>
+                    <group>
+                        <group string="Configuración N8N (Free Trial)">
+                            <field name="n8n_webhook_url" placeholder="https://n8n.pruebasbidata.site/webhook/process-cv"/>
+                            <!-- Mantén API key oculta si la usas en futuro -->
+                            <field name="n8n_api_key" password="True" invisible="True"/>
+                            <div class="alert alert-info" style="margin: 5px 0;">
+                                <small><strong>ℹ️ Free Trial:</strong> N8N Free Trial no incluye API key - solo webhook funciona</small>
+                            </div>
+                        </group>
+
+                        <group string="Procesamiento Local">
+                            <field name="local_development"/>
+                            <!-- v17: sin attrs; usa expresiones python -->
+                            <field name="ngrok_url"
+                                   placeholder="https://abc123.ngrok-free.app"
+                                   invisible="not local_development"
+                                   required="local_development"/>
+                        </group>
+                    </group>
+
+                    <div class="alert alert-info">
+                        <strong>Configuración para Desarrollo Local (localhost):</strong>
+                        <ul>
+                            <li><strong>N8N URL:</strong> https://n8n.pruebasbidata.site/webhook/process-cv</li>
+                            <li><strong>Ngrok URL:</strong> Para recibir callbacks de N8N en tu Odoo local</li>
+                        </ul>
+                        <strong>Flujo:</strong> Odoo (local) → N8N (cloud) → Ngrok → Odoo (local)
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <strong>⚠️ Sin Ngrok:</strong> N8N funcionará pero los resultados no volverán automáticamente a Odoo.
+                    </div>
+
+                    <footer>
+                        <!-- Si necesitas esconder el botón fuera de local: -->
+                        <button string="📋 Guía Setup Local" type="object" name="action_setup_local_development"
+                                class="btn-info" invisible="not local_development"/>
+                        <button string="Probar N8N" type="object" name="action_test_n8n" class="btn-info"/>
+                        <button string="Guardar" special="save" class="btn-primary"/>
+                        <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- TREE de cv.config (opcional) -->
+    <record id="view_cv_config_tree" model="ir.ui.view">
+        <field name="name">cv.config.tree</field>
+        <field name="model">cv.config</field>
+        <field name="arch" type="xml">
+            <tree string="Configuraciones CV">
+                <field name="id"/>
+                <field name="n8n_webhook_url"/>
+                <field name="local_development"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Acción para abrir listado/form de cv.config -->
+    <record id="action_cv_config" model="ir.actions.act_window">
+        <field name="name">Configuración CV</field>
+        <field name="res_model">cv.config</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Configura la integración con N8N y el procesamiento local de PDFs
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú directo a cv.config (lista + formulario) -->
+    <menuitem id="menu_cv_config"
+              name="Configuración CV"
+              parent="menu_cv_importer_root"
+              action="action_cv_config"
+              sequence="25"/>
 </odoo>

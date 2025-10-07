@@ -1,0 +1,31 @@
+/* Fallback por si aún no se inyectan las variables desde QWeb */
+:root {
+  --gs-brand-primary: #004b8d;
+  --gs-brand-secondary: #f2a900;
+}
+
+/* Utilidades */
+.gs-brand-bg        { background-color: var(--gs-brand-primary); }
+.gs-brand-text      { color: var(--gs-brand-primary); }
+.gs-brand-accent    { color: var(--gs-brand-secondary); }
+.gs-brand-border    { border-color: var(--gs-brand-primary); }
+
+/* Ejemplos de componentes */
+.btn-gs {
+  background-color: var(--gs-brand-primary);
+  border-color: var(--gs-brand-primary);
+  color: #fff;
+
+  &:hover {
+    /* color-mix funciona en CSS nativo para “aclarar/oscurecer” a runtime */
+    background-color: color-mix(in srgb, var(--gs-brand-primary), black 10%);
+    border-color: color-mix(in srgb, var(--gs-brand-primary), black 10%);
+  }
+}
+
+.text-gs       { color: var(--gs-brand-secondary); }
+.badge-gs      { background: var(--gs-brand-secondary); color:#000; }
+.card-gs {
+  border: 1px solid color-mix(in srgb, var(--gs-brand-primary), white 70%);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--gs-brand-primary), transparent 85%);
+}

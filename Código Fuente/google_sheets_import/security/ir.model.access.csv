@@ -1,5 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_x_facultad,access_x_facultad,model_x_facultad,,1,1,1,1
 access_x_carrera,access_x_carrera,model_x_carrera,,1,1,1,1
-access_employee_import,access_employee_import,model_employee_import,,1,1,1,1
-access_hr_employee_public,hr.employee.public,model_hr_employee,,1,0,0,0
+access_employee_import_user,employee.import.user,model_employee_import,base.group_user,1,1,1,0
+access_employee_import_admin,employee.import.admin,model_employee_import,base.group_erp_manager,1,1,1,1
+access_google_sheets_branding_user,google_sheets_branding_user,model_google_sheets_branding,base.group_user,1,1,1,0
+access_google_sheets_dataset_version_user,google_sheets_dataset_version_user,model_google_sheets_dataset_version,base.group_user,1,0,0,0

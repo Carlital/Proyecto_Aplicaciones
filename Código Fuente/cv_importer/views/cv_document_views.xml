@@ -68,7 +68,7 @@
         </field>
     </record>
 
-    <!-- Vista de lista para cv.document -->
+    <!-- Tree View para listar CVs -->
     <record id="view_cv_document_tree" model="ir.ui.view">
         <field name="name">cv.document.tree</field>
         <field name="model">cv.document</field>

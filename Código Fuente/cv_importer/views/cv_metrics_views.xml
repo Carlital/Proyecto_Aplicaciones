@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <record id="view_cv_metrics_tree" model="ir.ui.view">
+    <field name="name">cv.metrics.tree</field>
+    <field name="model">cv.metrics</field>
+    <field name="arch" type="xml">
+      <tree create="false" delete="false">
+        <field name="operation_type"/>
+        <field name="execution_time"/>
+        <field name="file_size"/>
+        <field name="success"/>
+        <field name="error_message"/>
+        <field name="cv_candidate_id"/>
+        <field name="cache_hits"/>
+        <field name="cache_misses"/>
+        <field name="imported_at"/>
+        <field name="user_id"/>
+      </tree>
+    </field>
+  </record>
+
+  <record id="view_cv_metrics_form" model="ir.ui.view">
+    <field name="name">cv.metrics.form</field>
+    <field name="model">cv.metrics</field>
+    <field name="arch" type="xml">
+      <form string="CV Metrics">
+        <sheet>
+          <group>
+            <field name="operation_type"/>
+            <field name="success"/>
+            <field name="execution_time"/>
+            <field name="file_size"/>
+            <field name="cv_candidate_id"/>
+            <field name="error_message"/>
+            <field name="cache_hits"/>
+            <field name="cache_misses"/>
+            <field name="imported_at"/>
+            <field name="user_id"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_cv_metrics" model="ir.actions.act_window">
+    <field name="name">CV Metrics</field>
+    <field name="res_model">cv.metrics</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+
+  <menuitem id="menu_cv_metrics" name="Métricas" parent="menu_cv_importer_root"
+            action="action_cv_metrics" sequence="20"/>
+</odoo>

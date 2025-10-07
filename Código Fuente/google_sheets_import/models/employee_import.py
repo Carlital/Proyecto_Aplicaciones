@@ -7,7 +7,7 @@ import logging
 import subprocess
 from io import BytesIO
 from io import StringIO
-from odoo import models, fields, _
+from odoo import models, fields, api
 from odoo.exceptions import UserError
 from PIL import Image
 from io import BytesIO
@@ -169,9 +169,13 @@ class HREmployee(models.Model):
 class EmployeeImport(models.Model):
     _name = 'employee.import'
     _description = 'Importador de empleados con imágenes'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     sheet_url = fields.Char('URL CSV Datos Empleados (db_docentes)', required=True)
     imagenes_url = fields.Char('URL CSV Imágenes (nombres_docentes)', required=True)
+    name = fields.Char(required=True, tracking=True)
+    employee_id = fields.Many2one('hr.employee', required=True, tracking=True)
+    active = fields.Boolean(default=True, tracking=True)
 
 
     def normalizar(self, texto, lower=True):
@@ -259,6 +263,22 @@ class EmployeeImport(models.Model):
         except Exception as e:
             _logger.warning("Error al usar curl -k para descargar imagen desde %s: %s", url_imagen, str(e))
         return None
+
+    @api.constrains('employee_id')
+    def _check_access_rights(self):
+        for record in self:
+            if not self.env.user.has_group('base.group_erp_manager'):
+                if record.employee_id.user_id != self.env.user:
+                    raise UserError('Solo puede modificar sus propios datos')
+
+    def write(self, vals):
+        _logger.info(f'Modificación de registro: {self.id} - Usuario: {self.env.user.name}')
+        return super().write(vals)
+
+    def unlink(self):
+        if not self.env.user.has_group('base.group_erp_manager'):
+            raise UserError('Solo administradores pueden eliminar registros')
+        return super().unlink()
 
     def import_employees(self):
         if not self.sheet_url or not self.imagenes_url:
@@ -366,3 +386,14 @@ class EmployeeImport(models.Model):
 
         self.env.cr.commit()
         raise UserError(_(f'Se importaron o actualizaron {count} empleados correctamente.'))
+
+    def get_cv_data(self, cedula):
+        try:
+            # Opción 1: Deshabilitar verificación SSL
+            response = requests.get(
+                f'https://hojavida.espoch.edu.ec/cv/{cedula}',
+                verify=False  # No verificar SSL
+            )
+            return response.json()
+        except Exception as e:
+            return {'error': str(e)}

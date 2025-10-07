@@ -51,8 +51,9 @@
 
     <!-- Menú para acceder al wizard -->
     <menuitem id="menu_identification_fix_wizard"
-              name="🔧 Actualizar Cédulas"
-              parent="hr.menu_hr_configuration"
+              name="Actualizar Cédulas"
+              parent="hr.menu_hr_root"
               action="action_identification_fix_wizard"
-              sequence="100"/>
+              sequence="98"
+              groups="hr.group_hr_user"/>
 </odoo>

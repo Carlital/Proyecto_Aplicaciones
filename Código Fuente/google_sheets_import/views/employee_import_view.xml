@@ -45,4 +45,10 @@ action = result
           name=" Actualizar Cédulas"
           parent="hr.menu_hr_employee_payroll"
           action="action_fix_identification_digits"/>
+    
+    <menuitem id="menu_gs_import_root"
+            name="Google Sheets Import"
+            parent="hr.menu_hr_root"
+            sequence="95"
+            groups="hr.group_hr_user"/>
 </odoo>

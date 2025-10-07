@@ -6,3 +6,8 @@ access_cv_document_public,access.cv.document.public,model_cv_document,,1,0,0,0
 access_cv_bulk_downloader_user,access.cv.bulk.downloader.user,model_cv_bulk_downloader,,1,1,1,1
 access_cv_importer_config_user,access.cv.importer.config.user,model_cv_importer_config,,1,1,1,1
 access_cv_config_user,access.cv.config.user,model_cv_config,,1,1,1,1
+access_cv_import_user,cv.import,model_cv_import,base.group_user,1,1,1,0
+access_cv_import_manager,cv.import.manager,model_cv_import,base.group_erp_manager,1,1,1,1
+access_cv_config_admin,cv.config admin,model_cv_config,base.group_system,1,1,1,1
+access_cv_config_user,cv.config user,model_cv_config,base.group_user,1,0,0,0
+access_cv_metrics_user,access.cv.metrics.user,model_cv_metrics,base.group_user,1,0,0,0

@@ -1,106 +1,102 @@
-# -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import UserError
 import logging
 import base64
 import requests
-import json
 import urllib3
 from urllib.parse import urlparse
 import socket
 import ssl
-import traceback
-import io
 import time
+import os
+from pathlib import Path
+import tempfile
+import hashlib
 
-# Deshabilitar warnings SSL
+_logger = logging.getLogger(__name__)
+
+# ---------------------------
+# Helpers de archivos temporales
+# ---------------------------
+def _ensure_windows_path(p: str) -> str:
+    return os.path.normpath(p)
+
+def _ensure_dir_exists(file_path: str) -> str:
+    Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+    return file_path
+
+def _get_temp_path(env) -> Path:
+    db = getattr(getattr(env, 'cr', None), 'dbname', None) or 'default'
+    base = Path(tempfile.gettempdir()) / 'odoo_cv_importer' / db
+    base.mkdir(parents=True, exist_ok=True)
+    return base
+
+# ---------------------------
+# Configuración SSL (legacy solo cuando se solicite)
+# ---------------------------
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# Configurar SSL para permitir legacy renegotiation
-import os
 try:
-    # Configurar OpenSSL para permitir legacy renegotiation
-    ssl._create_default_https_context = ssl._create_unverified_context
-    
-    # Configurar variables de entorno para OpenSSL legacy
-    os.environ['OPENSSL_CONF'] = '/dev/null'  # Evitar configuración restrictiva
-    os.environ['PYTHONHTTPSVERIFY'] = '0'
-    os.environ['REQUESTS_CA_BUNDLE'] = ''
-    os.environ['CURL_CA_BUNDLE'] = ''
-    
-    # Forzar configuración SSL legacy a nivel de Python
-    import ssl
-    # Crear contexto SSL con configuración legacy forzada
+    # Guardamos el contexto seguro por defecto.
     _original_create_default_context = ssl.create_default_context
-    
+
+    # Contexto "legacy" para hosts con negociación antigua.
     def _create_legacy_ssl_context(*args, **kwargs):
-        context = _original_create_default_context(*args, **kwargs)
-        context.check_hostname = False
-        context.verify_mode = ssl.CERT_NONE
-        
-        # Configurar opciones SSL legacy
-        context.options |= ssl.OP_LEGACY_SERVER_CONNECT if hasattr(ssl, 'OP_LEGACY_SERVER_CONNECT') else 0
-        context.options |= ssl.OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION if hasattr(ssl, 'OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION') else 0
-        
-        # Configurar ciphers con seguridad reducida para máxima compatibilidad
+        ctx = _original_create_default_context(*args, **kwargs)
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        # Opciones de compatibilidad
+        if hasattr(ssl, 'OP_LEGACY_SERVER_CONNECT'):
+            ctx.options |= ssl.OP_LEGACY_SERVER_CONNECT
+        if hasattr(ssl, 'OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION'):
+            ctx.options |= ssl.OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION
         try:
-            context.set_ciphers('DEFAULT@SECLEVEL=0')
-        except:
+            ctx.set_ciphers('DEFAULT@SECLEVEL=0')
+        except Exception:
             try:
-                context.set_ciphers('DEFAULT@SECLEVEL=1')
-            except:
-                context.set_ciphers('DEFAULT')
-        
-        # Configurar protocolo mínimo para compatibilidad legacy
+                ctx.set_ciphers('DEFAULT@SECLEVEL=1')
+            except Exception:
+                pass
         try:
-            context.minimum_version = ssl.TLSVersion.TLSv1
-        except:
+            ctx.minimum_version = ssl.TLSVersion.TLSv1
+        except Exception:
             pass
-        
-        return context
-    
-    # Reemplazar función por defecto
-    ssl.create_default_context = _create_legacy_ssl_context
-    
-    # Crear también adaptador HTTPs personalizado para requests
+        return ctx
+
+    # Adaptador requests con el contexto legacy
     from urllib3.util.ssl_ import create_urllib3_context
-    from urllib3.poolmanager import PoolManager
     from requests.adapters import HTTPAdapter
-    
+
     class LegacySSLAdapter(HTTPAdapter):
         def init_poolmanager(self, *args, **kwargs):
             ctx = create_urllib3_context()
             ctx.check_hostname = False
             ctx.verify_mode = ssl.CERT_NONE
-            ctx.options |= ssl.OP_LEGACY_SERVER_CONNECT if hasattr(ssl, 'OP_LEGACY_SERVER_CONNECT') else 0
-            ctx.options |= ssl.OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION if hasattr(ssl, 'OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION') else 0
+            if hasattr(ssl, 'OP_LEGACY_SERVER_CONNECT'):
+                ctx.options |= ssl.OP_LEGACY_SERVER_CONNECT
+            if hasattr(ssl, 'OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION'):
+                ctx.options |= ssl.OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION
             try:
                 ctx.set_ciphers('DEFAULT@SECLEVEL=0')
-            except:
+            except Exception:
                 try:
-                    ctx.set_ciphers('DEFAULT@SECLEVEL=1') 
-                except:
-                    ctx.set_ciphers('DEFAULT')
+                    ctx.set_ciphers('DEFAULT@SECLEVEL=1')
+                except Exception:
+                    pass
             try:
                 ctx.minimum_version = ssl.TLSVersion.TLSv1
-            except:
+            except Exception:
                 pass
-            
             kwargs['ssl_context'] = ctx
             return super().init_poolmanager(*args, **kwargs)
-    
-    # Crear session global con adaptador SSL personalizado
-    global_session = requests.Session()
-    global_session.mount('https://', LegacySSLAdapter())
-    global_session.verify = False
-    
+
 except Exception as e:
-    print(f"Error configurando SSL legacy: {e}")
-    global_session = requests.Session()
-    global_session.verify = False
+    _logger.warning(f"No se pudo preparar LegacySSLAdapter: {e}")
+    LegacySSLAdapter = None  # type: ignore
 
-_logger = logging.getLogger(__name__)
-
+# ===========================================================
+#                       MODELOS
+# ===========================================================
 class CvDocument(models.Model):
     _name = 'cv.document'
     _description = 'Documento CV para procesamiento'
@@ -118,19 +114,25 @@ class CvDocument(models.Model):
         ('processed', 'Procesado'),
         ('error', 'Error')
     ], string='Estado', default='draft')
-    
-    n8n_webhook_url = fields.Char(string='URL Webhook N8N', default=lambda self: self.env['ir.config_parameter'].sudo().get_param('cv_importer.n8n_webhook_url', 'https://n8n.pruebasbidata.site/webhook/process-cv'))
+
+    n8n_webhook_url = fields.Char(
+        string='URL Webhook N8N',
+        default=lambda self: self.env['ir.config_parameter'].sudo().get_param(
+            'cv_importer.n8n_webhook_url',
+            'https://n8n.pruebasbidata.site/webhook/process-cv'
+        )
+    )
     processed_text = fields.Text(string='Texto Procesado')
     error_message = fields.Text(string='Mensaje de Error')
-    
+
     cv_download_url = fields.Char(string='URL de Descarga CV', compute='_compute_cv_download_url', store=True)
     auto_downloaded = fields.Boolean(string='Descargado Automáticamente', default=False)
-    
+
+    # Campos extraídos (solo como ejemplo; mantén los que uses)
     extracted_presentacion = fields.Text(string='Presentación Extraída')
     extracted_docencia = fields.Text(string='Docencia Extraída')
     extracted_proyectos = fields.Text(string='Proyectos Extraídos')
     extracted_publicaciones = fields.Text(string='Publicaciones Extraídas')
-    
     extracted_telefono = fields.Char(string='Teléfono Extraído')
     extracted_email_personal = fields.Char(string='Email Personal Extraído')
     extracted_titulo_principal = fields.Char(string='Título Principal Extraído')
@@ -138,790 +140,284 @@ class CvDocument(models.Model):
     extracted_orcid = fields.Char(string='ORCID Extraído')
     extracted_oficina = fields.Char(string='Oficina Extraída')
     extracted_idiomas = fields.Text(string='Idiomas Extraídos')
-    
     extracted_total_publicaciones = fields.Integer(string='Total Publicaciones')
     extracted_total_proyectos = fields.Integer(string='Total Proyectos')
-    
-    # Campos adicionales detallados extraídos del CV
     extracted_titulos_academicos = fields.Text(string='Títulos Académicos Extraídos')
     extracted_experiencia_laboral = fields.Text(string='Experiencia Laboral Extraída')
     extracted_capacitaciones = fields.Text(string='Capacitaciones Extraídas')
     extracted_docencia_detalle = fields.Text(string='Docencia Detallada Extraída')
     extracted_distinciones = fields.Text(string='Logros y Distinciones Extraídos')
-    
+
+    # ---------------------------
+    # Compute / create
+    # ---------------------------
     @api.depends('employee_id', 'employee_id.identification_id')
     def _compute_cv_download_url(self):
-        """Generar URL de descarga basada en la cédula del empleado"""
         for record in self:
             if record.employee_id and record.employee_id.identification_id:
-                cedula = record.employee_id.identification_id.zfill(10)
-                record.cv_download_url = f"https://hojavida.espoch.edu.ec/cv/{cedula}"
+                ced = record.employee_id.identification_id.zfill(10)
+                record.cv_download_url = f"https://hojavida.espoch.edu.ec/cv/{ced}"
             else:
                 record.cv_download_url = False
-    
+
     @api.model
     def create(self, vals):
-        if 'name' not in vals or not vals['name']:
-            if 'employee_id' in vals:
-                employee = self.env['hr.employee'].browse(vals['employee_id'])
-                vals['name'] = f"CV - {employee.name}"
+        if not vals.get('name') and vals.get('employee_id'):
+            employee = self.env['hr.employee'].browse(vals['employee_id'])
+            vals['name'] = f"CV - {employee.name}"
         return super().create(vals)
 
-    def action_test_connection(self):
-        """Probar conexión con el servidor institucional"""
-        for record in self:
-            if not record.cv_download_url:
-                raise UserError(_('No se puede generar URL de descarga. Verifica que el empleado tenga cédula.'))
-            
-            try:
-                # Probar resolución DNS
-                parsed_url = urlparse(record.cv_download_url)
-                host = parsed_url.hostname
-                port = parsed_url.port or (443 if parsed_url.scheme == 'https' else 80)
-                
-                _logger.info(f"Probando conexión con {host}:{port}")
-                
-                # Test DNS resolution
-                try:
-                    socket.gethostbyname(host)
-                    _logger.info(f"DNS resuelto correctamente para {host}")
-                except socket.gaierror as e:
-                    raise UserError(_(f"Error de DNS: No se puede resolver {host}. Detalles: {str(e)}"))
-                
-                # Test TCP connection
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.settimeout(10)
-                try:
-                    result = sock.connect_ex((host, port))
-                    if result == 0:
-                        _logger.info(f"Conexión TCP exitosa con {host}:{port}")
-                    else:
-                        raise UserError(_(f"No se puede conectar con {host}:{port}. Código de error: {result}"))
-                finally:
-                    sock.close()
-                
-                # Test HTTP HEAD request con SSL personalizado
-                headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                }
-                
-                # Usar sesión SSL personalizada
-                session = record._create_ssl_session()
-                session.headers.update(headers)
-                
-                response = session.head(
-                    record.cv_download_url,
-                    verify=False,
-                    timeout=15,
-                    allow_redirects=True
-                )
-                
-                message = f"""
-                Prueba de conexión exitosa:
-                - DNS: ✓ Resuelto
-                - TCP: ✓ Conectado
-                - HTTP: {response.status_code} ({requests.status_codes._codes.get(response.status_code, ['Unknown'])[0]})
-                - Content-Type: {response.headers.get('content-type', 'No especificado')}
-                - Content-Length: {response.headers.get('content-length', 'No especificado')}
-                - URL Final: {response.url}
-                """
-                
-                record.error_message = message
-                
-                return {
-                    'type': 'ir.actions.client',
-                    'tag': 'display_notification',
-                    'params': {
-                        'title': 'Prueba de Conexión',
-                        'message': message,
-                        'type': 'success',
-                        'sticky': True
-                    }
-                }
-                
-            except requests.exceptions.RequestException as e:
-                raise UserError(_(f"Error de conexión HTTP: {str(e)}"))
-            except Exception as e:
-                raise UserError(_(f"Error inesperado en prueba de conexión: {str(e)}"))
+    # ---------------------------
+    # SSL helpers / políticas
+    # ---------------------------
+    def _extract_host_port(self, url):
+        parsed = urlparse(url or '')
+        host = (parsed.hostname or '').lower()
+        port = parsed.port or (443 if parsed.scheme == 'https' else 80)
+        return host, port
 
-    def _create_ssl_session(self):
-        """Crear sesión HTTP con configuración SSL legacy"""
+    def _ensure_ssl_params(self):
+        ICP = self.env['ir.config_parameter'].sudo()
+        defaults = {
+            'cv_importer.allow_insecure_ssl': 'false',
+            'cv_importer.insecure_hosts': '',
+            'cv_importer.hojavida_pinned_sha256': '',
+            'cv_importer.n8n_verify_ssl': 'true',
+        }
+        for k, v in defaults.items():
+            current = ICP.get_param(k, default=None)
+            if current in (None, False, ''):
+                ICP.set_param(k, v)
+                _logger.info(f"cv_importer: creado parámetro {k}={v}")
+
+    def _should_verify_ssl(self, url):
+        self._ensure_ssl_params()
+        ICP = self.env['ir.config_parameter'].sudo()
+        allow_insecure = (ICP.get_param('cv_importer.allow_insecure_ssl', 'false') or '').lower() == 'true'
+        insecure_hosts_param = (ICP.get_param('cv_importer.insecure_hosts', '') or '').strip()
+        insecure_hosts = [h.strip().lower() for h in insecure_hosts_param.split(',') if h.strip()]
+        host, _ = self._extract_host_port(url)
+        return not (allow_insecure and host in insecure_hosts)
+
+    def _use_secure_ssl_context(self):
         try:
-            # Usar la sesión global que ya tiene el adaptador SSL configurado
-            session = requests.Session()
-            session.mount('https://', LegacySSLAdapter())
-            session.verify = False
-            
-            return session
-            
-        except Exception as e:
-            _logger.warning(f"No se pudo crear sesión SSL personalizada: {str(e)}")
-            # Fallback a sesión normal sin verificación SSL
-            fallback_session = requests.Session()
-            fallback_session.verify = False
-            return fallback_session
+            ssl.create_default_context = _original_create_default_context  # type: ignore[name-defined]
+            ssl._create_default_https_context = ssl.create_default_context
+        except Exception:
+            pass
 
-    def action_download_cv_from_url(self):
-        """Descargar CV desde la URL automática basada en cédula"""
+    def _use_insecure_ssl_context(self):
+        try:
+            ssl.create_default_context = _create_legacy_ssl_context  # type: ignore[name-defined]
+            ssl._create_default_https_context = ssl._create_unverified_context
+        except Exception:
+            pass
+
+    def _get_session_for_url(self, url):
+        verify = self._should_verify_ssl(url)
+        if verify:
+            self._use_secure_ssl_context()
+            s = requests.Session()
+            s.verify = True
+            return s
+        # inseguro -> solo con adaptador legacy
+        self._use_insecure_ssl_context()
+        s = requests.Session()
+        if LegacySSLAdapter:
+            s.mount('https://', LegacySSLAdapter())
+        s.verify = False
+        _logger.warning(f"SSL verify desactivado para {url}. Considera habilitar pinning (cv_importer.hojavida_pinned_sha256).")
+        return s
+
+    def _get_server_cert_sha256(self, host, port=443):
+        pem = ssl.get_server_certificate((host, port))
+        der = ssl.PEM_cert_to_DER_cert(pem)
+        return hashlib.sha256(der).hexdigest()
+
+    def _assert_pinned_cert(self, url, conf_key):
+        pin = (self.env['ir.config_parameter'].sudo().get_param(conf_key, '') or '').replace(':', '').strip().lower()
+        if not pin:
+            return
+        host, port = self._extract_host_port(url)
+        current = self._get_server_cert_sha256(host, port)
+        if current != pin:
+            raise UserError(_(f"Pinning SSL falló para {host}. Esperado {pin}, obtenido {current}."))
+
+    # ---------------------------
+    # Diagnóstico (HEAD)
+    # ---------------------------
+    def action_test_connection(self):
         for record in self:
             if not record.cv_download_url:
                 raise UserError(_('No se puede generar URL de descarga. Verifica que el empleado tenga cédula.'))
-            
+            parsed = urlparse(record.cv_download_url)
+            host = parsed.hostname
+            port = parsed.port or (443 if parsed.scheme == 'https' else 80)
+
+            # DNS
             try:
-                record.state = 'processing'
-                record.error_message = False
-                
-                _logger.info(f"Descargando CV desde: {record.cv_download_url}")
-                
-                # Configuración de headers para simular navegador
-                headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Accept': 'application/pdf,application/x-pdf,application/octet-stream,*/*',
-                    'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'Connection': 'keep-alive',
-                    'Upgrade-Insecure-Requests': '1',
-                    'Cache-Control': 'max-age=0'
-                }
-                
-                # Usar la sesión global con SSL legacy configurado
-                session = global_session
-                session.headers.update(headers)
-                
-                # Múltiples intentos de descarga
-                max_attempts = 3
-                for attempt in range(max_attempts):
-                    try:
-                        _logger.info(f"Intento {attempt + 1}/{max_attempts} para {record.employee_id.name}")
-                        
-                        response = session.get(
-                            record.cv_download_url,
-                            verify=False,  # Ignorar SSL por problemas de certificados
-                            timeout=45,
-                            allow_redirects=True,
-                            stream=True
-                        )
-                        
-                        # Si llegamos aquí, la descarga fue exitosa
-                        break
-                        
-                    except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
-                        if attempt == max_attempts - 1:
-                            # Último intento fallido
-                            raise e
-                        
-                        _logger.warning(f"Error SSL/conexión en intento {attempt + 1} para {record.employee_id.name}: {str(e)}")
-                        
-                        # Esperar un poco antes del siguiente intento
-                        import time
-                        time.sleep(2)
-                
-                _logger.info(f"Respuesta HTTP: {response.status_code} para {record.employee_id.name}")
-                _logger.info(f"Content-Type: {response.headers.get('content-type', 'No especificado')}")
-                
-                if response.status_code == 200:
-                    # Leer el contenido
-                    content = response.content
-                    content_type = response.headers.get('content-type', '').lower()
-                    
-                    _logger.info(f"Tamaño del contenido: {len(content)} bytes")
-                    _logger.info(f"Primeros 100 bytes: {content[:100]}")
-                    
-                    # Verificar que el contenido sea un PDF
-                    if (content.startswith(b'%PDF') or 
-                        'pdf' in content_type or 
-                        (len(content) > 1000 and b'PDF' in content[:1000])):
-                        
-                        # Guardar el PDF - asegurar que sea string base64
-                        try:
-                            pdf_base64 = base64.b64encode(content).decode('utf-8')
-                            record.cv_file = pdf_base64
-                            record.cv_filename = f"cv_{record.employee_id.identification_id}.pdf"
-                            record.auto_downloaded = True
-                            record.state = 'uploaded'
-                            
-                            _logger.info(f"CV guardado exitosamente:")
-                            _logger.info(f"  Tamaño original: {len(content)} bytes")
-                            _logger.info(f"  Tamaño base64: {len(pdf_base64)} caracteres")
-                            _logger.info(f"  Tipo guardado: {type(record.cv_file)}")
-                            
-                            # Verificar que se guardó correctamente
-                            test_decode = base64.b64decode(record.cv_file)
-                            if test_decode.startswith(b'%PDF'):
-                                _logger.info("✅ Archivo guardado y validado correctamente")
-                            else:
-                                _logger.warning("⚠️ Advertencia: El archivo guardado podría tener problemas")
-                            
-                        except Exception as save_error:
-                            _logger.error(f"❌ Error guardando PDF: {str(save_error)}")
-                            record.state = 'error'
-                            record.error_message = f"Error guardando PDF: {str(save_error)}"
-                            return
-                        
-                        _logger.info(f"CV descargado exitosamente para {record.employee_id.name} - {len(content)} bytes")
-                        
-                        # Procesar automáticamente
-                        record.action_upload_to_n8n()
-                        
-                    else:
-                        # Si no es PDF, revisar el contenido
-                        content_preview = content[:2000].decode('utf-8', errors='ignore')
-                        
-                        if any(keyword in content_preview.lower() for keyword in ['not found', '404', 'error', 'no existe']):
-                            record.state = 'error'
-                            record.error_message = f"CV no encontrado en el servidor institucional para la cédula {record.employee_id.identification_id}. El empleado podría no tener CV registrado."
-                            _logger.warning(f"CV no encontrado para {record.employee_id.name}")
-                        elif 'html' in content_preview.lower() or '<' in content_preview:
-                            record.state = 'error'
-                            record.error_message = f"La URL devolvió una página web en lugar de un PDF. Posible CV no disponible o página de error."
-                            _logger.warning(f"HTML recibido en lugar de PDF para {record.employee_id.name}")
-                        else:
-                            record.state = 'error'
-                            record.error_message = f"Contenido descargado no es un PDF válido. Content-Type: {content_type}, Tamaño: {len(content)} bytes"
-                            _logger.error(f"Contenido no es PDF para {record.employee_id.name}")
-                            
-                elif response.status_code == 404:
-                    record.state = 'error'
-                    record.error_message = f"CV no encontrado (Error 404). El empleado con cédula {record.employee_id.identification_id} no tiene CV registrado en el sistema institucional."
-                    _logger.warning(f"CV no encontrado (404) para {record.employee_id.name}")
-                    
-                elif response.status_code in [403, 401]:
-                    record.state = 'error'
-                    record.error_message = f"Acceso denegado al CV (Error {response.status_code}). Posible problema de permisos en el servidor institucional."
-                    _logger.warning(f"Acceso denegado ({response.status_code}) para {record.employee_id.name}")
-                    
-                else:
-                    record.state = 'error'
-                    record.error_message = f"Error descargando CV: HTTP {response.status_code}. Servidor institucional no disponible temporalmente."
-                    _logger.error(f"Error HTTP {response.status_code} descargando CV para {record.employee_id.name}")
-                
-            except requests.exceptions.Timeout:
-                record.state = 'error'
-                record.error_message = "Timeout al descargar CV. El servidor institucional no respondió en el tiempo esperado (45 segundos)."
-                _logger.error(f"Timeout descargando CV para {record.employee_id.name}")
-                
-            except requests.exceptions.ConnectionError as e:
-                record.state = 'error'
-                record.error_message = f"Error de conexión al descargar CV. Verifique la conectividad con hojavida.espoch.edu.ec. Detalles: {str(e)}"
-                _logger.error(f"Error de conexión descargando CV para {record.employee_id.name}: {str(e)}")
-                
-            except requests.exceptions.SSLError as e:
-                record.state = 'error'
-                record.error_message = f"Error de certificado SSL. El servidor institucional tiene problemas de certificados. Detalles: {str(e)}"
-                _logger.error(f"Error SSL descargando CV para {record.employee_id.name}: {str(e)}")
-                
+                socket.gethostbyname(host)
+            except socket.gaierror as e:
+                raise UserError(_(f"Error de DNS para {host}: {e}"))
+
+            # TCP
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(10)
+            try:
+                if s.connect_ex((host, port)) != 0:
+                    raise UserError(_(f"No se puede conectar a {host}:{port}"))
+            finally:
+                s.close()
+
+            # HTTP HEAD
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+            verify = self._should_verify_ssl(record.cv_download_url)
+            session = self._get_session_for_url(record.cv_download_url)
+            session.headers.update(headers)
+            if not verify:
+                self._assert_pinned_cert(record.cv_download_url, 'cv_importer.hojavida_pinned_sha256')
+
+            resp = session.head(record.cv_download_url, verify=verify, timeout=15, allow_redirects=True)
+            msg = (f"HTTP {resp.status_code} | Content-Type: {resp.headers.get('content-type')} | "
+                   f"URL final: {resp.url} | SSL Verify: {'ON' if verify else 'OFF'}")
+            record.error_message = msg
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {'title': 'Prueba de Conexión', 'message': msg, 'type': 'success', 'sticky': True}
+            }
+
+    # ---------------------------
+    # (Opcional) Descarga local – NO USAR si el SSL del host está roto
+    # ---------------------------
+    def action_download_cv_from_url(self):
+        """Dejar disponible para entornos donde el SSL funcione; en tu caso usa action_upload_to_n8n()."""
+        for record in self:
+            if not record.cv_download_url:
+                raise UserError(_('No se puede generar URL de descarga.'))
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+                'Accept': 'application/pdf,application/x-pdf,application/octet-stream,*/*',
+            }
+            verify = self._should_verify_ssl(record.cv_download_url)
+            session = self._get_session_for_url(record.cv_download_url)
+            session.headers.update(headers)
+            if not verify:
+                self._assert_pinned_cert(record.cv_download_url, 'cv_importer.hojavida_pinned_sha256')
+
+            try:
+                r = session.get(record.cv_download_url, verify=verify, timeout=45, allow_redirects=True, stream=True)
+                if r.status_code != 200:
+                    raise UserError(_(f"HTTP {r.status_code} al descargar CV"))
+                content = r.content
+                if not (content.startswith(b'%PDF') or b'PDF' in content[:1024]):
+                    raise UserError(_('El contenido descargado no parece un PDF'))
+                record.cv_file = base64.b64encode(content).decode('utf-8')
+                record.cv_filename = f"cv_{(record.cedula or '').zfill(10)}.pdf"
+                record.auto_downloaded = True
+                record.state = 'uploaded'
             except Exception as e:
                 record.state = 'error'
-                record.error_message = f"Error inesperado al descargar CV: {str(e)}"
-                _logger.error(f"Error inesperado descargando CV para {record.employee_id.name}: {str(e)}")
+                record.error_message = f"Error descargando CV: {e}"
 
+    def _prepare_file_path(self, filename):
+        temp_dir = _get_temp_path(self.env)
+        safe_name = os.path.basename(filename) if filename else f"tmp_{int(time.time())}.bin"
+        file_path = str(temp_dir / safe_name)
+        return _ensure_dir_exists(_ensure_windows_path(file_path))
+
+    # ---------------------------
+    # Envío a n8n (fetch-only)
+    # ---------------------------
     def action_upload_to_n8n(self):
-        """Subir CV a N8N para procesamiento"""
-        _logger.info("🚀 INICIANDO action_upload_to_n8n")
+        """Enviar a n8n para que ÉL descargue y procese el CV (evita SSL legacy en Odoo)."""
+        _logger.info("🚀 INICIANDO action_upload_to_n8n (fetch-only)")
         for record in self:
-            _logger.info(f"📋 Procesando record: {record.id} - {record.employee_id.name}")
-            if not record.cv_file:
-                _logger.error("❌ No hay archivo PDF para procesar")
-                raise UserError(_('No hay archivo PDF para procesar'))
-            
+            # obtener config (última) y webhook efectivo
+            config = self.env['cv.config'].search([], limit=1, order='id desc')
+            effective_webhook = config._get_effective_webhook() if config else record.n8n_webhook_url
+            if effective_webhook:
+                record.n8n_webhook_url = effective_webhook  # sincroniza campo legacy
             if not record.n8n_webhook_url:
-                _logger.error("❌ URL de webhook N8N no configurada")
                 raise UserError(_('URL de webhook N8N no configurada'))
-            
-            _logger.info("✅ Validaciones iniciales pasadas")
+
+            cedula = record.cedula or record.employee_id.identification_id
+            if not cedula:
+                raise UserError(_('El empleado debe tener una cédula asignada'))
+
+            download_url = record.cv_download_url or ''
+            if not download_url:
+                raise UserError(_('No se pudo construir la URL de descarga del CV'))
+
+            base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+            if 'localhost' in base_url or '127.0.0.1' in base_url:
+                config = self.env['cv.config'].search([], limit=1)
+                ngrok_url = (config.ngrok_url or self.env['ir.config_parameter'].sudo().get_param('cv_importer.ngrok_url', '')).strip()
+                if ngrok_url and not ngrok_url.startswith('http'):
+                    ngrok_url = f"https://{ngrok_url}"
+                callback_url = f"{(ngrok_url or base_url)}/cv/callback"
+            else:
+                callback_url = f"{base_url}/cv/callback"
+
+            payload = {
+                'cedula': str(cedula),
+                'employee_name': str(record.employee_id.name),
+                'download_url': str(download_url),
+                'odoo_callback_url': str(callback_url),
+                'prefer_fetch': True,
+                'timestamp': str(fields.Datetime.now().isoformat()),
+                'odoo_version': '17.0',
+                'module_version': '2.0',
+            }
+
+            self._ensure_ssl_params()
+            verify_n8n = (self.env['ir.config_parameter'].sudo()
+                          .get_param('cv_importer.n8n_verify_ssl', 'true') or '').lower() == 'true'
+            timeout = int(self.env['ir.config_parameter'].sudo().get_param('cv_importer.timeout', '60'))
+
+            headers = {
+                'Content-Type': 'application/json',
+                'User-Agent': 'Odoo-CV-Importer/2.0',
+                'Accept': 'application/json',
+                'Cache-Control': 'no-cache',
+            }
+
             try:
-                _logger.info("🔄 Iniciando procesamiento de PDF...")
-                if record.state not in ['uploaded', 'error']:
-                    record.state = 'processing'
-                record.error_message = False
-                
-                _logger.info("🔧 Preparando datos PDF...")
-                # Preparar datos para N8N con validaciones mejoradas
-                pdf_data = None
-                
-                # En Odoo, cv_file puede llegar como bytes o como string base64
-                if record.cv_file:
-                    try:
-                        # Log para debug
-                        _logger.info(f"📊 Datos del archivo:")
-                        _logger.info(f"  Tipo de cv_file: {type(record.cv_file)}")
-                        _logger.info(f"  Longitud cv_file: {len(str(record.cv_file))}")
-                        _logger.info(f"  Primeros 50 chars: {str(record.cv_file)[:50]}")
-                        
-                        # Manejar diferentes tipos de datos en cv_file
-                        if isinstance(record.cv_file, bytes):
-                            # Si es bytes, verificar si ya son datos PDF o base64
-                            if record.cv_file.startswith(b'%PDF'):
-                                # Es un PDF directo en bytes, convertir a base64
-                                pdf_data = base64.b64encode(record.cv_file).decode('utf-8')
-                                _logger.info(f"🔄 Convertido PDF directo a base64: {len(pdf_data)} chars")
-                            else:
-                                # Es base64 en bytes, verificar si realmente es base64 válido
-                                try:
-                                    # Intentar decodificar como string primero
-                                    pdf_string = record.cv_file.decode('utf-8')
-                                    
-                                    # Verificar que el contenido parece base64 válido
-                                    import string
-                                    valid_base64_chars = string.ascii_letters + string.digits + '+/='
-                                    sample_check = pdf_string[:min(100, len(pdf_string))]
-                                    
-                                    if all(c in valid_base64_chars for c in sample_check):
-                                        # Parece base64 válido, usar sin corregir padding aquí
-                                        pdf_data = pdf_string.strip()
-                                        
-                                        _logger.info(f"🔄 Base64 detectado: {len(pdf_data)} chars")
-                                        _logger.info(f"  Necesita padding: {len(pdf_data) % 4 != 0}")
-                                        
-                                        _logger.info(f"Usando bytes como base64 string: {len(pdf_data)} chars (padding será corregido después)")
-                                        
-                                        # NO VALIDAR AQUÍ - se validará después de corregir padding global
-                                        _logger.info(f"🔄 Base64 detectado, se validará después de corrección de padding")
-                                    else:
-                                        # No es base64 válido, tratar como PDF directo
-                                        pdf_data = base64.b64encode(record.cv_file).decode('utf-8')
-                                        _logger.info(f"Reinterpretado como PDF directo: {len(pdf_data)} chars")
-                                        
-                                except UnicodeDecodeError:
-                                    # No se puede decodificar como UTF-8, debe ser PDF directo
-                                    pdf_data = base64.b64encode(record.cv_file).decode('utf-8')
-                                    _logger.info(f"Bytes no UTF-8, convertido como PDF: {len(pdf_data)} chars")
-                        else:
-                            # Ya es string, usar directamente
-                            pdf_data = str(record.cv_file)
-                            _logger.info(f"🔄 Usando string directo: {len(pdf_data)} chars")
-                        
-                        # Limpiar y corregir padding base64 ANTES de validar
-                        if pdf_data:
-                            _logger.info(f"📋 Procesando padding base64...")
-                            _logger.info(f"  Longitud original: {len(pdf_data)}")
-                            
-                            pdf_data = pdf_data.strip()
-                            _logger.info(f"  Longitud después de strip: {len(pdf_data)}")
-                            
-                            # Verificar que solo contiene caracteres base64 válidos
-                            import string
-                            valid_chars = string.ascii_letters + string.digits + '+/='
-                            invalid_chars = [c for c in pdf_data if c not in valid_chars]
-                            if invalid_chars:
-                                _logger.error(f"❌ Caracteres inválidos en base64: {set(invalid_chars)}")
-                                # Limpiar caracteres inválidos
-                                pdf_data = ''.join(c for c in pdf_data if c in valid_chars)
-                                _logger.info(f"✅ Caracteres inválidos removidos, nueva longitud: {len(pdf_data)}")
-                            
-                            # Agregar padding si es necesario para que sea múltiplo de 4
-                            missing_padding = len(pdf_data) % 4
-                            if missing_padding:
-                                padding_needed = 4 - missing_padding
-                                pdf_data += '=' * padding_needed
-                                _logger.info(f"✅ Agregado padding base64: {padding_needed} caracteres '='")
-                                _logger.info(f"  Longitud final: {len(pdf_data)}")
-                            else:
-                                _logger.info(f"✅ No se necesita padding, longitud es múltiplo de 4")
-                        
-                        # Validar que el base64 es válido decodificándolo (DESPUÉS de corregir padding)
-                        try:
-                            _logger.info(f"🔍 Validando base64 corregido...")
-                            decoded_pdf = base64.b64decode(pdf_data)
-                            _logger.info(f"✅ Base64 decodificado exitosamente: {len(decoded_pdf)} bytes")
-                        except Exception as decode_error:
-                            _logger.error(f"❌ Error decodificando base64 DESPUÉS de corrección: {str(decode_error)}")
-                            _logger.error(f"  Longitud pdf_data: {len(pdf_data)}")
-                            _logger.error(f"  Primeros 100 chars: {pdf_data[:100]}")
-                            _logger.error(f"  Últimos 100 chars: {pdf_data[-100:]}")
-                            _logger.error(f"  Es múltiplo de 4: {len(pdf_data) % 4 == 0}")
-                            
-                            # Log adicional para debug
-                            import string
-                            valid_chars = string.ascii_letters + string.digits + '+/='
-                            invalid_chars = [c for c in pdf_data if c not in valid_chars]
-                            if invalid_chars:
-                                _logger.error(f"  Caracteres inválidos encontrados: {set(invalid_chars)}")
-                            
-                            raise UserError(_('El archivo no está en formato base64 válido después de corrección de padding'))
-                        
-                        # Verificar que el contenido decodificado es un PDF válido
-                        if len(decoded_pdf) < 10:
-                            _logger.error(f"❌ Archivo demasiado pequeño: {len(decoded_pdf)} bytes")
-                            raise UserError(_('El archivo está corrupto o es demasiado pequeño'))
-                        
-                        # Verificar header PDF con más flexibilidad
-                        header = decoded_pdf[:10]
-                        _logger.info(f"📄 Header detectado: {header}")
-                        
-                        if not (header.startswith(b'%PDF') or b'PDF' in header[:20]):
-                            # Log más detallado para debug
-                            _logger.error(f"❌ VALIDACIÓN PDF FALLIDA:")
-                            _logger.error(f"  Empleado: {record.employee_id.name}")
-                            _logger.error(f"  Archivo descargado desde: {record.cv_download_url}")
-                            _logger.error(f"  Tamaño decodificado: {len(decoded_pdf)} bytes")
-                            _logger.error(f"  Header detectado (bytes): {header}")
-                            _logger.error(f"  Header como string: {header.decode('latin1', errors='ignore')}")
-                            _logger.error(f"  Primeros 100 bytes: {decoded_pdf[:100]}")
-                            _logger.error(f"  Auto-descargado: {record.auto_downloaded}")
-                            
-                            # Buscar patrones comunes que indican problemas
-                            content_str = decoded_pdf[:1000].decode('latin1', errors='ignore').lower()
-                            if 'html' in content_str or '<html' in content_str:
-                                error_detail = "El servidor devolvió HTML en lugar de PDF (posible página de error)"
-                            elif '404' in content_str or 'not found' in content_str:
-                                error_detail = "El CV no fue encontrado en el servidor (Error 404)"
-                            elif len(decoded_pdf) < 1000:
-                                error_detail = f"Archivo demasiado pequeño ({len(decoded_pdf)} bytes) - posiblemente corrupto"
-                            elif decoded_pdf.startswith(b'<!DOCTYPE'):
-                                error_detail = "El servidor devolvió una página web en lugar del PDF"
-                            else:
-                                error_detail = f"Formato de archivo no reconocido. Header: {header.decode('latin1', errors='ignore')[:20]}"
-                            
-                            _logger.error(f"  Diagnóstico: {error_detail}")
-                            
-                            raise UserError(_(f'''El archivo descargado no es un PDF válido.
-
-🔍 DIAGNÓSTICO: {error_detail}
-
-📋 INFORMACIÓN TÉCNICA:
-• Empleado: {record.employee_id.name}
-• URL fuente: {record.cv_download_url}
-• Tamaño archivo: {len(decoded_pdf)} bytes
-• Header detectado: {header.decode('latin1', errors='ignore')[:20]}
-
-🔧 POSIBLES SOLUCIONES:
-1. Verificar que el empleado tenga CV en el sistema institucional
-2. Comprobar manualmente la URL en un navegador
-3. Contactar al administrador si el problema persiste
-
-💡 URL a verificar: {record.cv_download_url}'''))
-                        
-                        _logger.info(f"✅ PDF válido detectado: {len(decoded_pdf)} bytes decodificados, {len(pdf_data)} caracteres base64")
-                        
-                    except UserError as user_err:
-                        # Capturar UserError específicos (como validación PDF)
-                        _logger.error(f"❌ UserError en validación: {str(user_err)}")
-                        record.state = 'error'
-                        record.error_message = f"""❌ ERROR DE VALIDACIÓN
-
-{str(user_err)}
-
-📊 INFORMACIÓN ADICIONAL:
-• Timestamp: {fields.Datetime.now()}
-• Documento ID: {record.id}
-• Método: Validación de archivo PDF
-• Estado anterior: {record.state}
-
-🔧 Para obtener más información técnica, revisa los logs del sistema."""
-                        
-                        # Re-lanzar para que el usuario vea el error
-                        raise
-                    except base64.binascii.Error as e:
-                        # Este bloque solo debería ejecutarse si la validación final falla
-                        _logger.error(f"❌ Error base64 en validación final: {str(e)}")
-                        record.state = 'error'
-                        record.error_message = f"""❌ ERROR DE CODIFICACIÓN BASE64 (VALIDACIÓN FINAL)
-
-El archivo no se pudo decodificar como base64 válido incluso después de corrección de padding.
-
-🔍 DETALLES TÉCNICOS:
-• Error: {str(e)}
-• Empleado: {record.employee_id.name}
-• Tipo de archivo: {type(record.cv_file)}
-• Longitud final: {len(pdf_data) if 'pdf_data' in locals() else 'No disponible'}
-
-🔧 POSIBLES CAUSAS:
-1. Archivo corrupto durante la descarga
-2. Problema en el almacenamiento de Odoo  
-3. Archivo contiene caracteres no válidos para base64
-
-💡 SOLUCIÓN: Intenta descargar el CV nuevamente."""
-                        
-                        raise UserError(_('El archivo no está en formato base64 válido (validación final)'))
-                    except Exception as e:
-                        _logger.error(f"❌ Error procesando PDF: {str(e)}")
-                        _logger.error(f"  Tipo de error: {type(e).__name__}")
-                        
-                        record.state = 'error'
-                        record.error_message = f"""❌ ERROR PROCESANDO ARCHIVO PDF"""
-                        
-                        raise UserError(_(f'Error procesando el archivo PDF: {str(e)}'))
-                
-                _logger.info(f"📄 PDF preparado: {len(pdf_data)} caracteres base64")
-                if not pdf_data:
-                    _logger.error("❌ No se pudo procesar el archivo PDF")
-                    raise UserError(_('No se pudo procesar el archivo PDF'))
-                
-                # Validar que la cédula esté presente
-                cedula = record.cedula or record.employee_id.identification_id
-                if not cedula:
-                    raise UserError(_('El empleado debe tener una cédula asignada'))
-                
-                # NO PROCESAR PDF LOCALMENTE - Solo enviarlo a N8N
-                _logger.info("📤 Enviando PDF directamente a N8N para procesamiento...")
-                
-                base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
-                
-                # Configuración especial para desarrollo local
-                if 'localhost' in base_url or '127.0.0.1' in base_url:
-                    # Para desarrollo local, verificar si hay ngrok configurado
-                    config = self.env['cv.config'].search([], limit=1)
-                    ngrok_url = config.ngrok_url if config else ''
-                    
-                    # También buscar en parámetros del sistema como fallback
-                    if not ngrok_url:
-                        ngrok_url = self.env['ir.config_parameter'].sudo().get_param('cv_importer.ngrok_url', '')
-                    
-                    if ngrok_url:
-                        # Limpiar URL si tiene espacios o caracteres extraños
-                        ngrok_url = ngrok_url.strip()
-                        if not ngrok_url.startswith('http'):
-                            ngrok_url = f"https://{ngrok_url}"
-                        callback_url = f"{ngrok_url}/cv/callback"
-                        _logger.info(f"🔧 Usando ngrok URL configurada: {ngrok_url}")
-                    else:
-                        # Si no hay ngrok configurado, advertir que N8N no podrá devolver datos
-                        callback_url = f"{base_url}/cv/callback"
-                        _logger.warning("⚠️ Desarrollo local sin ngrok - N8N no podrá devolver resultados automáticamente")
-                        _logger.warning(f"💡 Configura un túnel ngrok en: HR > CV Importer > Configuración")
-                elif 'ngrok' in base_url:
-                    # Ya está usando ngrok
-                    callback_url = f"{base_url}/cv/callback"
-                    _logger.info("🔧 Detectado ngrok en configuración")
-                else:
-                    # Producción normal
-                    callback_url = f"{base_url}/cv/callback"
-                
-                payload = {
-                    'cedula': str(cedula),
-                    'employee_name': str(record.employee_id.name),
-                    'pdf_data': str(pdf_data),  # Base64 string limpio
-                    'filename': str(record.cv_filename or f"cv_{cedula}.pdf"),
-                    'odoo_callback_url': str(callback_url),
-                    'download_url': str(record.cv_download_url or ''),
-                    'auto_downloaded': bool(record.auto_downloaded),
-                    'content_length': int(len(pdf_data)),
-                    'timestamp': str(fields.Datetime.now().isoformat()),
-                    'odoo_version': '17.0',
-                    'module_version': '2.0'
-                }
-                
-                # Validar que todos los valores del payload sean serializables a JSON
-                try:
-                    import json
-                    json.dumps(payload)
-                    _logger.info("✅ Payload validado - todos los valores son serializables a JSON")
-                except (TypeError, ValueError) as e:
-                    _logger.error(f"❌ Error: El payload contiene valores no serializables: {str(e)}")
-                    # Log detallado del payload para debug
-                    for key, value in payload.items():
-                        _logger.error(f"  {key}: {type(value)} = {repr(value)}")
-                    raise UserError(_('Error preparando datos para N8N: valores no serializables'))
-                
-                # LOGGING DETALLADO PARA DEBUG
-                _logger.info(f"=== ENVIANDO CV A N8N ===")
-                _logger.info(f"Empleado: {record.employee_id.name}")
-                _logger.info(f"Cédula: {cedula} (tipo: {type(cedula)})")
-                _logger.info(f"Filename: {payload['filename']}")
-                _logger.info(f"PDF size: {len(pdf_data)} chars")
-                _logger.info(f"Callback URL: {payload['odoo_callback_url']}")
-                _logger.info(f"Webhook URL: {record.n8n_webhook_url}")
-                _logger.info(f"Payload keys: {list(payload.keys())}")
-                
-                # Verificar que el PDF es válido antes de enviar a N8N
-                try:
-                    test_decode = base64.b64decode(pdf_data)
-                    _logger.info(f"📋 Validación final PDF antes de envío:")
-                    _logger.info(f"  PDF base64 válido: ✅")
-                    _logger.info(f"  Tamaño decodificado: {len(test_decode)} bytes")
-                    _logger.info(f"  Header: {test_decode[:10]}")
-                    
-                    # Verificar que parece ser un PDF
-                    if test_decode.startswith(b'%PDF'):
-                        _logger.info("  Estructura PDF válida: ✅")
-                    else:
-                        _logger.warning("  ⚠️ Advertencia: El archivo podría no ser un PDF válido")
-                        _logger.warning(f"  Header detectado: {test_decode[:20]}")
-                        
-                except Exception as e:
-                    _logger.error(f"❌ Error validando PDF antes de envío: {str(e)}")
-                    raise UserError(_('El archivo PDF no es válido para envío a N8N'))
-                
-                headers = {
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'Odoo-CV-Importer/2.0',
-                    'Accept': 'application/json',
-                    'Cache-Control': 'no-cache'
-                }
-                
-                _logger.info(f"Enviando CV a N8N para empleado {record.employee_id.name}")
-                
-                # Log del payload (sin el PDF completo para no saturar logs)
-                payload_summary = {k: v if k != 'pdf_data' else f"[BASE64_DATA:{len(v)}_chars]" for k, v in payload.items()}
-                _logger.info(f"📤 Payload summary: {payload_summary}")
-                
-                # Verificar algunos caracteres del inicio y final del base64 para debug
-                _logger.info(f"🔍 PDF Data debug:")
-                _logger.info(f"  Primeros 50 chars: {payload['pdf_data'][:50]}")
-                _logger.info(f"  Últimos 50 chars: {payload['pdf_data'][-50:]}")
-                _logger.info(f"  Longitud total: {len(payload['pdf_data'])}")
-                _logger.info(f"  Es múltiplo de 4: {len(payload['pdf_data']) % 4 == 0}")
-                
-                # Hacer la petición con timeout configurable
-                timeout = int(self.env['ir.config_parameter'].sudo().get_param('cv_importer.timeout', '60'))
-                
-                response = requests.post(
-                    record.n8n_webhook_url,
+                resp = requests.post(
+                    record.n8n_webhook_url,  # ya efectivo
                     json=payload,
                     headers=headers,
                     timeout=timeout,
-                    verify=False
+                    verify=verify_n8n
                 )
-                
-                _logger.info(f"Respuesta de N8N: {response.status_code}")
-                _logger.info(f"Headers respuesta: {dict(response.headers)}")
-                _logger.info(f"Contenido respuesta: {response.text}")
-                
-                if response.status_code in [200, 201]:
-                    record.state = 'uploaded'
-                    _logger.info(f"CV enviado exitosamente a N8N para {record.employee_id.name}")
-                    
-                    # Intentar parsear respuesta como JSON para logging adicional
-                    try:
-                        response_json = response.json()
-                        _logger.info(f"Respuesta JSON de N8N: {response_json}")
-                    except:
-                        _logger.info("Respuesta de N8N no es JSON válido")
-                    
-                elif response.status_code == 404:
+                _logger.info(f"Respuesta N8N: {resp.status_code} - {resp.text[:400]}")
+                if resp.status_code in (200, 201):
+                    if record.state not in ['processing', 'processed']:
+                        record.state = 'uploaded'
+                elif resp.status_code == 404:
                     record.state = 'error'
-                    record.error_message = f"Webhook N8N no encontrado (404). Verifica que:\n1. La URL sea correcta: {record.n8n_webhook_url}\n2. El workflow esté activado en N8N\n3. El endpoint exista"
-                    _logger.error(f"Webhook N8N no encontrado: {record.n8n_webhook_url}")
-                    
-                elif response.status_code >= 500:
+                    record.error_message = f"Webhook N8N no encontrado (404): {record.n8n_webhook_url}"
+                elif resp.status_code >= 500:
                     record.state = 'error'
-                    record.error_message = f"Error del servidor N8N ({response.status_code}): {response.text}"
-                    _logger.error(f"Error del servidor N8N: {response.status_code} - {response.text}")
-                    
+                    record.error_message = f"Error del servidor N8N ({resp.status_code}): {resp.text}"
                 else:
                     record.state = 'error'
-                    record.error_message = f"Error en N8N: {response.status_code} - {response.text}"
-                    _logger.error(f"Error enviando CV a N8N: {response.status_code} - {response.text}")
-                
-            except requests.exceptions.ConnectionError as e:
-                record.state = 'error'
-                error_msg = f"No se pudo conectar con N8N.\n\nURL: {record.n8n_webhook_url}\n\nVerifica que:\n1. El servidor N8N esté ejecutándose\n2. La URL del webhook sea correcta\n3. No haya firewall bloqueando la conexión\n\nError: {str(e)}"
-                record.error_message = error_msg
-                _logger.error(f"Error de conexión con N8N para {record.employee_id.name}: {str(e)}")
-                
+                    record.error_message = f"Error en N8N: {resp.status_code} - {resp.text}"
             except requests.exceptions.Timeout as e:
                 record.state = 'error'
-                error_msg = f"Timeout al conectar con N8N. El servidor tardó más de {timeout} segundos en responder.\n\nIntenta:\n1. Aumentar el timeout en configuración\n2. Verificar que N8N no esté sobrecargado\n\nError: {str(e)}"
-                record.error_message = error_msg
-                _logger.error(f"Timeout con N8N para {record.employee_id.name}: {str(e)}")
-                
+                record.error_message = f"Timeout conectando con N8N: {e}"
+            except requests.exceptions.ConnectionError as e:
+                record.state = 'error'
+                record.error_message = f"No se pudo conectar con N8N: {e}"
             except Exception as e:
                 record.state = 'error'
-                
-                # Crear mensaje de error detallado
-                error_type = type(e).__name__
-                error_msg = str(e)
-                
-                # Log detallado del error
-                _logger.error(f"🔥 ERROR PROCESANDO CV para {record.employee_id.name}")
-                _logger.error(f"  ID del record: {record.id}")
-                _logger.error(f"  Tipo de error: {error_type}")
-                _logger.error(f"  Mensaje: {error_msg}")
-                _logger.error(f"  Cédula: {record.cedula}")
-                _logger.error(f"  Estado actual: {record.state}")
-                
-                # Si el archivo existe, mostrar información sobre él
-                if record.cv_file:
-                    try:
-                        cv_file_info = f"  Tipo cv_file: {type(record.cv_file)}"
-                        cv_file_length = f"  Longitud cv_file: {len(str(record.cv_file))}"
-                        cv_file_preview = f"  Primeros 100 chars: {str(record.cv_file)[:100]}..."
-                        
-                        _logger.error("📄 INFORMACIÓN DEL ARCHIVO:")
-                        _logger.error(cv_file_info)
-                        _logger.error(cv_file_length)
-                        _logger.error(cv_file_preview)
-                        
-                        # Intentar decodificar para más info
-                        try:
-                            decoded = base64.b64decode(str(record.cv_file))
-                            _logger.error(f"  Decodificado exitoso: {len(decoded)} bytes")
-                            _logger.error(f"  Header del archivo: {decoded[:20]}")
-                        except Exception as decode_err:
-                            _logger.error(f"  Error decodificando: {str(decode_err)}")
-                            
-                    except Exception as info_err:
-                        _logger.error(f"  Error obteniendo info del archivo: {str(info_err)}")
-                
-                # Crear mensaje de error user-friendly pero informativo
-                if "PDF válido" in error_msg:
-                    detailed_error = f"""❌ ERROR DE VALIDACIÓN PDF
-
-🔍 DETALLES:
-- Empleado: {record.employee_id.name}
-- Cédula: {record.cedula or 'No disponible'}
-- Error técnico: {error_type}: {error_msg}
-
-📋 POSIBLES CAUSAS:
-1. El archivo descargado no es un PDF válido
-2. El archivo está corrupto o dañado
-3. La URL institucional devolvió contenido incorrecto
-4. Problema en la codificación base64
-
-🔧 SOLUCIONES SUGERIDAS:
-1. Verificar manualmente la URL: {record.cv_download_url or 'No disponible'}
-2. Intentar descargar nuevamente el CV
-3. Verificar que el empleado tenga CV en el sistema institucional
-4. Contactar al administrador si el problema persiste
-
-📊 INFORMACIÓN TÉCNICA:
-- Timestamp: {fields.Datetime.now()}
-- Método de descarga: {'Automático' if record.auto_downloaded else 'Manual'}
-- Estado anterior: {record.state}
-"""
-                else:
-                    detailed_error = f"""❌ ERROR INESPERADO
-
-🔍 DETALLES:
-- Empleado: {record.employee_id.name}
-- Cédula: {record.cedula or 'No disponible'}
-- Tipo de error: {error_type}
-- Mensaje: {error_msg}
-
-📋 INFORMACIÓN DEL SISTEMA:
-- ID del documento: {record.id}
-- Estado anterior: {record.state}
-- Timestamp: {fields.Datetime.now()}
-
-🔧 ACCIONES RECOMENDADAS:
-1. Revisar los logs del sistema para más detalles
-2. Intentar procesar nuevamente el documento
-3. Verificar la conectividad con N8N
-4. Contactar al administrador del sistema
-
-📞 SOPORTE:
-Si el problema persiste, proporciona el ID del documento ({record.id}) 
-y el timestamp ({fields.Datetime.now()}) al soporte técnico.
-"""
-                
-                record.error_message = detailed_error
-                _logger.error(f"🔥 Error procesando CV para {record.employee_id.name}: {str(e)}")
-                
-                # Log completo del stack trace para debug
-                import traceback
-                _logger.error("📋 STACK TRACE COMPLETO:")
-                _logger.error(traceback.format_exc())
-                
-                # No lanzar UserError para permitir que el proceso masivo continúe
+                record.error_message = f"Error inesperado enviando a N8N: {e}"
 
     def action_download_and_process(self):
-        """Descargar CV y procesar automáticamente"""
-        self.action_download_cv_from_url()
-        # El procesamiento se hace automáticamente en action_download_cv_from_url()
+        """Compat: si alguien llama este botón, reenvía a n8n (fetch-only)."""
+        self.action_upload_to_n8n()
 
     def action_reset_to_draft(self):
-        """Resetear documento a borrador"""
         self.write({
             'state': 'draft',
             'error_message': False,
@@ -933,14 +429,13 @@ y el timestamp ({fields.Datetime.now()}) al soporte técnico.
         })
 
     def action_apply_extracted_data(self):
-        """Aplicar datos extraídos al empleado"""
         for record in self:
             if record.state != 'processed':
                 raise UserError(_('El documento debe estar procesado para aplicar los datos'))
-            
+
             update_vals = {}
-            
-            # Aplicar secciones principales
+
+            # Secciones principales
             if record.extracted_presentacion:
                 update_vals['x_presentacion'] = record.extracted_presentacion
             if record.extracted_docencia:
@@ -949,8 +444,8 @@ y el timestamp ({fields.Datetime.now()}) al soporte técnico.
                 update_vals['x_proyectos'] = record.extracted_proyectos
             if record.extracted_publicaciones:
                 update_vals['x_publicaciones'] = record.extracted_publicaciones
-            
-            # Aplicar campos adicionales extraídos
+
+            # Campos adicionales
             if record.extracted_telefono:
                 update_vals['phone'] = record.extracted_telefono
             if record.extracted_email_personal:
@@ -969,95 +464,107 @@ y el timestamp ({fields.Datetime.now()}) al soporte técnico.
                 update_vals['x_total_publicaciones'] = record.extracted_total_publicaciones
             if record.extracted_total_proyectos:
                 update_vals['x_total_proyectos'] = record.extracted_total_proyectos
-            
-            # Mapear campos detallados adicionales
+
+            # Detallados
             if record.extracted_titulos_academicos:
                 update_vals['x_titulos_academicos'] = record.extracted_titulos_academicos
             if record.extracted_experiencia_laboral:
                 update_vals['x_experiencia_laboral'] = record.extracted_experiencia_laboral
+
             if record.extracted_capacitaciones:
                 update_vals['x_capacitaciones'] = record.extracted_capacitaciones
             if record.extracted_docencia_detalle:
-                update_vals['x_formacion_continua'] = record.extracted_docencia_detalle  # Mapear docencia detalle a formación continua
+                update_vals['x_formacion_continua'] = record.extracted_docencia_detalle
             if record.extracted_distinciones:
                 update_vals['x_distinciones'] = record.extracted_distinciones
-            
-            # También usar proyectos extraídos para participación en proyectos
+
+            # Reutilización
             if record.extracted_proyectos:
                 update_vals['x_participacion_proyectos'] = record.extracted_proyectos
-            
-            # Usar publicaciones extraídas para el detalle de publicaciones
             if record.extracted_publicaciones:
                 update_vals['x_publicaciones_detalle'] = record.extracted_publicaciones
-            
-            if update_vals:
-                record.employee_id.write(update_vals)
-                _logger.info(f"Datos aplicados al empleado {record.employee_id.name}: {len(update_vals)} campos actualizados")
-            else:
+
+            if not update_vals:
                 raise UserError(_('No hay datos extraídos para aplicar'))
 
-    def action_test_n8n_connection(self):
-        """Probar conexión con N8N"""
-        for record in self:
-            if not record.n8n_webhook_url:
-                raise UserError(_('URL de webhook N8N no configurada'))
-            
-            try:
-                # Hacer una petición simple de prueba
-                response = requests.get(
-                    record.n8n_webhook_url.replace('/webhook/process-cv', '/webhook/test'),
-                    timeout=10
-                )
-                
-                if response.status_code in [200, 404]: 
-                    return {
-                        'type': 'ir.actions.client',
-                        'tag': 'display_notification',
-                        'params': {
-                            'title': 'Conexión N8N',
-                            'message': f'✅ Conexión exitosa con N8N en: {record.n8n_webhook_url}',
-                            'type': 'success'
-                        }
-                    }
-                else:
-                    raise UserError(f"Error de conexión: {response.status_code}")
-                    
-            except requests.exceptions.ConnectionError:
-                raise UserError(f"❌ No se pudo conectar con N8N.\n\n"
-                              f"URL: {record.n8n_webhook_url}\n\n"
-                              f"Verifica que:\n"
-                              f"1. El servidor N8N esté ejecutándose\n"
-                              f"2. La URL sea correcta\n"
-                              f"3. No haya firewall bloqueando la conexión")
-            except requests.exceptions.Timeout:
-                raise UserError(f"❌ Timeout al conectar con N8N.\n\n"
-                              f"El servidor tardó demasiado en responder.")
-            except Exception as e:
-                raise UserError(f"❌ Error inesperado: {str(e)}")
+            # Evitar fallos si algún campo x_ no existe en hr.employee
+            employee = record.employee_id
+            to_write = {k: v for k, v in update_vals.items() if k in employee._fields}
+            missing = [k for k in update_vals if k not in employee._fields]
+            if missing:
+                _logger.warning("Campos destino inexistentes en hr.employee: %s", ", ".join(missing))
+            if to_write:
+                employee.write(to_write)
+            else:
+                raise UserError(_('No hay campos destino disponibles en hr.employee para escribir.'))
 
+
+    def action_test_n8n_connection(self):
+        """Prueba conectividad usando GET y fallback POST si webhook no acepta GET."""
+        import requests
+        for record in self:
+            config = self.env['cv.config'].search([], limit=1, order='id desc')
+            effective_webhook = config._get_effective_webhook() if config else record.n8n_webhook_url
+            if not effective_webhook:
+                raise UserError(_('URL de webhook N8N no configurada'))
+            try:
+                resp = requests.get(effective_webhook, timeout=10)
+                if 200 <= resp.status_code < 300:
+                    msg = f"Conexión exitosa (GET {resp.status_code})"
+                    level = 'success'
+                elif resp.status_code == 404 and 'not registered for get' in (resp.text or '').lower():
+                    payload = {"test": True, "method": "fallback_post", "timestamp": fields.Datetime.now().isoformat()}
+                    post_resp = requests.post(effective_webhook, json=payload, timeout=10)
+                    if 200 <= post_resp.status_code < 300:
+                        msg = f"Conexión exitosa vía POST (HTTP {post_resp.status_code})"
+                        level = 'success'
+                    else:
+                        msg = f"Fallo POST HTTP {post_resp.status_code}: {post_resp.text[:140] or 'Sin cuerpo'}"
+                        level = 'danger'
+                else:
+                    msg = f"Fallo HTTP {resp.status_code}: {resp.text[:140] or 'Sin cuerpo'}"
+                    level = 'danger'
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': 'Conexión N8N',
+                        'message': msg,
+                        'type': level,
+                        'sticky': level != 'success',
+                    }
+                }
+            except requests.exceptions.Timeout:
+                raise UserError(_('Timeout: el endpoint no respondió.'))
+            except requests.exceptions.ConnectionError as e:
+                raise UserError(_('Error de conexión: %s') % e)
+            except Exception as e:
+                raise UserError(_('Error inesperado: %s') % e)
+
+# -----------------------------------------------------------
+# HR Employee – acciones de alto nivel
+# -----------------------------------------------------------
 class HrEmployeeCV(models.Model):
     _inherit = 'hr.employee'
-    
+
     cv_document_ids = fields.One2many('cv.document', 'employee_id', string='Documentos CV')
     cv_document_count = fields.Integer(string='Cantidad de CVs', compute='_compute_cv_document_count')
-    
-    # Campos adicionales para información extraída de CV
-    x_email_personal = fields.Char(string='Email Personal', help='Email personal extraído del CV')
-    x_titulo_principal = fields.Char(string='Título Principal', help='Título académico principal (Ing., Dr., etc.)')
-    x_anos_experiencia = fields.Integer(string='Años de Experiencia', help='Años de experiencia profesional')
-    x_orcid = fields.Char(string='ORCID', help='Identificador ORCID del investigador')
-    x_oficina = fields.Char(string='Oficina', help='Ubicación de la oficina')
-    x_idiomas = fields.Text(string='Idiomas', help='Idiomas y niveles de dominio')
-    x_total_publicaciones = fields.Integer(string='Total Publicaciones', help='Número total de publicaciones')
-    x_total_proyectos = fields.Integer(string='Total Proyectos', help='Número total de proyectos dirigidos')
-    
+
+    x_email_personal = fields.Char(string='Email Personal')
+    x_titulo_principal = fields.Char(string='Título Principal')
+    x_anos_experiencia = fields.Integer(string='Años de Experiencia')
+    x_orcid = fields.Char(string='ORCID')
+    x_oficina = fields.Char(string='Oficina')
+    x_idiomas = fields.Text(string='Idiomas')
+    x_total_publicaciones = fields.Integer(string='Total Publicaciones')
+    x_total_proyectos = fields.Integer(string='Total Proyectos')
+
     @api.depends('cv_document_ids')
     def _compute_cv_document_count(self):
         for employee in self:
             employee.cv_document_count = len(employee.cv_document_ids)
-    
+
     def action_view_cv_documents(self):
-        """Ver documentos CV del empleado"""
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
@@ -1067,9 +574,8 @@ class HrEmployeeCV(models.Model):
             'domain': [('employee_id', '=', self.id)],
             'context': {'default_employee_id': self.id}
         }
-    
+
     def action_create_cv_document(self):
-        """Crear nuevo documento CV"""
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
@@ -1081,131 +587,210 @@ class HrEmployeeCV(models.Model):
         }
 
     def action_download_cv_auto(self):
-        """Descargar CV automáticamente desde URL institucional"""
+        """Procesar CV vía n8n (descarga en n8n para saltar SSL roto)."""
         self.ensure_one()
-        
         if not self.identification_id:
-            raise UserError(_('El empleado debe tener una cédula para descargar el CV automáticamente'))
-        
-        # Verificar si ya existe un documento CV
-        existing_cv = self.env['cv.document'].search([
-            ('employee_id', '=', self.id)
-        ], limit=1)
-        
+            raise UserError(_('El empleado debe tener una cédula para procesar el CV'))
+
+        existing_cv = self.env['cv.document'].search([('employee_id', '=', self.id)], limit=1)
         if existing_cv:
-            # Si existe, resetear y descargar de nuevo
             existing_cv.action_reset_to_draft()
-            existing_cv.action_download_and_process()
-            return {
-                'type': 'ir.actions.act_window',
-                'name': f'CV actualizado para {self.name}',
-                'res_model': 'cv.document',
-                'res_id': existing_cv.id,
-                'view_mode': 'form',
-                'target': 'current'
-            }
+            existing_cv.state = 'uploaded'       # se envía a n8n
+            existing_cv.auto_downloaded = False  # descargará n8n
+            existing_cv.action_upload_to_n8n()
+            res_id = existing_cv.id
         else:
-            # Crear nuevo documento CV
             cv_doc = self.env['cv.document'].create({
                 'employee_id': self.id,
                 'name': f'CV - {self.name}',
-                'cv_file': base64.b64encode(b'dummy'),  # Temporal
-                'cv_filename': 'temp.pdf'
+                # placeholder mínimo (no se usará, n8n descarga)
+                'cv_file': base64.b64encode(b'dummy'),
+                'cv_filename': f'cv_{self.identification_id}.pdf',
             })
-            
-            # Descargar automáticamente
-            cv_doc.action_download_and_process()
-            
-            return {
-                'type': 'ir.actions.act_window',
-                'name': f'CV descargado para {self.name}',
-                'res_model': 'cv.document',
-                'res_id': cv_doc.id,
-                'view_mode': 'form',
-                'target': 'current'
-            }
+            cv_doc.state = 'uploaded'
+            cv_doc.auto_downloaded = False
+            cv_doc.action_upload_to_n8n()
+            res_id = cv_doc.id
 
+        return {
+            'type': 'ir.actions.act_window',
+            'name': f'CV procesado vía n8n - {self.name}',
+            'res_model': 'cv.document',
+            'res_id': res_id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
+
+    def action_test_n8n_connection(self):
+        """Prueba conectividad (GET + fallback POST) usando URL efectiva del último cv.config."""
+        import requests
+        for record in self:
+            config = self.env['cv.config'].search([], limit=1, order='id desc')
+            url = config._get_effective_webhook() if config else False
+            if not url:
+                raise UserError(_('Configura primero un webhook en cv.config'))
+            try:
+                resp = requests.get(url, timeout=10)
+                if 200 <= resp.status_code < 300:
+                    msg = f"Conexión exitosa (GET {resp.status_code})"
+                    level = 'success'
+                elif resp.status_code == 404 and 'not registered for get' in (resp.text or '').lower():
+                    payload = {"test": True, "method": "fallback_post", "timestamp": fields.Datetime.now().isoformat()}
+                    post_resp = requests.post(url, json=payload, timeout=10)
+                    if 200 <= post_resp.status_code < 300:
+                        msg = f"Conexión exitosa vía POST (HTTP {post_resp.status_code})"
+                        level = 'success'
+                    else:
+                        msg = f"Fallo POST HTTP {post_resp.status_code}: {post_resp.text[:140] or 'Sin cuerpo'}"
+                        level = 'danger'
+                else:
+                    msg = f"Fallo HTTP {resp.status_code}: {resp.text[:140] or 'Sin cuerpo'}"
+                    level = 'danger'
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': 'Conexión N8N',
+                        'message': msg,
+                        'type': level,
+                        'sticky': level != 'success',
+                    }
+                }
+            except requests.exceptions.Timeout:
+                raise UserError(_('Timeout: el endpoint no respondió.'))
+            except requests.exceptions.ConnectionError as e:
+                raise UserError(_('Error de conexión: %s') % e)
+            except Exception as e:
+                raise UserError(_('Error inesperado: %s') % e)
+
+# -----------------------------------------------------------
+# Configuración (Modelo base)
+# -----------------------------------------------------------
 class CvConfig(models.Model):
     _name = 'cv.config'
     _description = 'Configuración CV Importer'
     _rec_name = 'id'
 
-    # Configuración de N8N
+    n8n_webhook_url_prod = fields.Char(
+        string='Webhook Producción',
+        help='Webhook principal de n8n para procesamiento real.'
+    )
+    n8n_webhook_url_test = fields.Char(
+        string='Webhook Pruebas',
+        help='Webhook alterno de n8n para pruebas (no producción).'
+    )
+    environment = fields.Selection(
+        [('prod', 'Producción'), ('test', 'Pruebas')],
+        string='Entorno Activo',
+        default='prod',
+        help='Selecciona qué URL usar para envíos y pruebas.'
+    )
+    n8n_api_key = fields.Char(string='API Key N8N')
+    ngrok_url = fields.Char(string='URL Ngrok',
+                            help='URL de ngrok para callbacks cuando Odoo está en localhost. '
+                                 'Ej: https://abc123.ngrok-free.app')
+    local_development = fields.Boolean(string='Modo Desarrollo Local', default=True)
+
+    # Campo legacy (mantener). Se seguirá usando si no se configura producción.
     n8n_webhook_url = fields.Char(
-        string='URL Webhook N8N',
-        help='URL del webhook de N8N para procesamiento de CV',
-        default='https://n8n.pruebasbidata.site/webhook/process-cv'
-    )
-    n8n_api_key = fields.Char(
-        string='API Key N8N',
-        help='API Key para autenticación en N8N'
-    )
-    
-    # Configuración para desarrollo local
-    ngrok_url = fields.Char(
-        string='URL Ngrok (Desarrollo Local)',
-        help='URL de ngrok para recibir callbacks cuando Odoo está en localhost. Ejemplo: https://abc123.ngrok-free.app'
-    )
-    local_development = fields.Boolean(
-        string='Modo Desarrollo Local',
-        default=True,
-        help='Activa optimizaciones para desarrollo local (localhost)'
-    )
-    
-    # Configuración de ngrok (para desarrollo local)
-    ngrok_url = fields.Char(
-        string='URL de Ngrok',
-        help='URL de ngrok para desarrollo local (ejemplo: https://abc123.ngrok.io)'
+        string='(Legacy) Webhook N8N',
+        help='Usado si no se define Webhook Producción.'
     )
 
+    def _get_effective_webhook(self):
+        """Devuelve el webhook según entorno. Producción > legacy si vacío."""
+        self.ensure_one()
+        if self.environment == 'test' and self.n8n_webhook_url_test:
+            return self.n8n_webhook_url_test
+        return self.n8n_webhook_url_prod or self.n8n_webhook_url
+
     def action_test_n8n(self):
-        """Probar conexión con N8N"""
-        if not self.n8n_webhook_url:
-            raise UserError(_('Debes configurar la URL del webhook de N8N'))
-            
-        try:
-            test_payload = {
+        """Prueba POST al webhook efectivo. Éxito solo 2xx."""
+        import requests
+        for rec in self:
+            url = rec._get_effective_webhook()
+            if not url:
+                raise UserError(_('Configura un webhook (producción o test).'))
+            payload = {
                 'test': True,
-                'message': 'Prueba de conexión desde Odoo',
+                'entorno': rec.environment,
                 'timestamp': fields.Datetime.now().isoformat()
             }
-            
-            response = requests.post(
-                self.n8n_webhook_url,
-                json=test_payload,
-                timeout=10
-            )
-            
-            if response.status_code in [200, 201]:
+            try:
+                r = requests.post(url, json=payload, timeout=10)
+                ok = 200 <= r.status_code < 300
+                if ok:
+                    msg = f"OK HTTP {r.status_code}"
+                else:
+                    msg = f"Fallo HTTP {r.status_code}: {r.text[:160] or 'Sin cuerpo'}"
                 return {
                     'type': 'ir.actions.client',
                     'tag': 'display_notification',
                     'params': {
-                        'title': _('¡Prueba exitosa!'),
-                        'message': _('N8N está respondiendo correctamente'),
-                        'type': 'success',
-                        'sticky': False,
+                        'title': f'Test N8N ({rec.environment})',
+                        'message': msg,
+                        'type': 'success' if ok else 'danger',
+                        'sticky': not ok,
                     }
                 }
-            else:
-                raise UserError(_('N8N respondió con código: %s') % response.status_code)
-                
-        except Exception as e:
-            raise UserError(_('Error conectando con N8N: %s') % str(e))
-    
-    def action_setup_local_development(self):
-        """Guía para configurar desarrollo local"""
-        message = """
+            except requests.exceptions.Timeout:
+                raise UserError(_('Timeout al conectar con el webhook.'))
+            except requests.exceptions.ConnectionError as e:
+                raise UserError(_('Error de conexión: %s') % e)
+            except Exception as e:
+                raise UserError(_('Error inesperado: %s') % e)
 
-"""
-        
+    def action_init_cv_importer_params(self):
+        ICP = self.env['ir.config_parameter'].sudo()
+        created, updated = [], []
+        defaults = {
+            'cv_importer.allow_insecure_ssl': 'false',
+            'cv_importer.insecure_hosts': '',
+            'cv_importer.hojavida_pinned_sha256': '',
+            'cv_importer.n8n_verify_ssl': 'true',
+        }
+        for k, v in defaults.items():
+            current = ICP.get_param(k, default=None)
+            if current in (None, False, ''):
+                ICP.set_param(k, v)
+                created.append(f"{k}={v}")
+            else:
+                updated.append(f"{k}={current}")
+
+        msg = []
+        if created:
+            msg.append("Creados:\n- " + "\n- ".join(created))
+        if updated:
+            msg.append("Existentes:\n- " + "\n- ".join(updated))
+        if not msg:
+            msg.append("Sin cambios")
+
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': 'Configuración Desarrollo Local',
-                'message': message,
-                'type': 'info',
-                'sticky': True,
+                'title': 'Parámetros cv_importer',
+                'message': "\n\n".join(msg) + "\n\nAjusta valores en Ajustes → Técnico → Parámetros del sistema.",
+                'type': 'success',
+                'sticky': False,
             }
         }
+
+    def _register_hook(self):
+        res = super()._register_hook()
+        try:
+            ICP = self.env['ir.config_parameter'].sudo()
+            defaults = {
+                'cv_importer.allow_insecure_ssl': 'false',
+                'cv_importer.insecure_hosts': '',
+                'cv_importer.hojavida_pinned_sha256': '',
+                'cv_importer.n8n_verify_ssl': 'true',
+            }
+            for k, v in defaults.items():
+                current = ICP.get_param(k, default=None)
+                if current in (None, False, ''):
+                    ICP.set_param(k, v)
+                    _logger.info(f"cv_importer: _register_hook creó {k}={v}")
+        except Exception as e:
+            _logger.warning(f"No se pudieron inicializar parámetros cv_importer: {e}")
+        return res

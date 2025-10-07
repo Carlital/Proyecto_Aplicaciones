@@ -1,34 +1,33 @@
 # -*- coding: utf-8 -*-
 {
-    'name': 'CV Importer con N8N',
-    'version': '2.0',
-    'summary': 'Procesamiento automatizado de CVs usando N8N',
+    'name': 'CV Importer',
+    'version': '17.0.1.0',
     'description': '''
-        Módulo para procesar automáticamente CVs de docentes usando N8N:
-        - Subir archivos PDF de CVs
-        - Enviar a N8N para conversión a texto plano
-        - Extraer automáticamente información relevante
-        - Llenar campos de empleados (presentación, docencia, proyectos, publicaciones)
-        - Integración con páginas de docentes por cédula
+        Módulo para importación segura de CVs desde ESPOCH.
+        - Control de acceso por usuario
+        - Validación de datos
+        - Registro de auditoría
+        - Cache de datos
     ''',
+    'author': 'Carla Lomas',
+    'license': 'LGPL-3',
     'category': 'Human Resources',
-    'author': 'Odoo Specialist',
-    'depends': ['hr', 'website'],
-    'external_dependencies': {
-        'python': ['requests', 'urllib3', 'reportlab'],
-    },
+    'depends': ['base', 'hr'],
     'data': [
         'security/ir.model.access.csv',
-        'data/config_data.xml',
-        'data/cv_config_data.xml',
-        'views/cv_document_views.xml',
+        'security/cv_security.xml',
         'views/cv_config_views.xml',
-        'views/cv_config_new_views.xml',
+        'views/cv_document_views.xml',
         'views/hr_employee_views.xml',
+        'views/cv_metrics_views.xml',
+        'data/cv_config_data.xml',
+        'data/config_data.xml',
     ],
-    'demo': [],
+    'test': [
+        'tests/test_cv_parser.py',
+    ],
     'installable': True,
-    'application': True,
+    'application': False,
     'auto_install': False,
-    'license': 'LGPL-3',
 }
+
