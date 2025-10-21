@@ -1,0 +1,59 @@
+<odoo>
+    <record id="view_google_sheets_dataset_version_tree" model="ir.ui.view">
+        <field name="name">google.sheets.dataset.version.tree</field>
+        <field name="model">google.sheets.dataset.version</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="sheet_gid"/>
+                <field name="row_count"/>
+                <field name="import_datetime"/>
+                <field name="user_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_google_sheets_dataset_version_form" model="ir.ui.view">
+        <field name="name">google.sheets.dataset.version.form</field>
+        <field name="model">google.sheets.dataset.version</field>
+        <field name="arch" type="xml">
+            <form string="Dataset Version">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="sheet_url"/>
+                        <field name="sheet_gid"/>
+                        <field name="row_count"/>
+                        <field name="hash_sha256" readonly="1"/>
+                        <field name="import_datetime" readonly="1"/>
+                        <field name="user_id" readonly="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Schema">
+                            <field name="json_schema" widget="text" readonly="1"/>
+                        </page>
+                        <page string="Metadata">
+                            <field name="meta_json" widget="text" readonly="1"/>
+                        </page>
+                        <page string="Notas">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_google_sheets_dataset_versions" model="ir.actions.act_window">
+        <field name="name">Dataset Versions</field>
+        <field name="res_model">google.sheets.dataset.version</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_google_sheets_dataset_versions"
+            name="Dataset Versions"
+            parent="google_sheets_import.menu_hr_gs_import"
+            action="google_sheets_import.action_google_sheets_dataset_versions"
+            sequence="20"
+            groups="hr.group_hr_user"/>
+</odoo>

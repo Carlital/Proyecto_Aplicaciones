@@ -1,0 +1,106 @@
+<odoo>
+
+    <!-- Vistas -->
+    <record id="view_google_sheets_branding_tree" model="ir.ui.view">
+        <field name="name">google.sheets.branding.tree</field>
+        <field name="model">google.sheets.branding</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="logo" widget="image" optional="show"/>
+                <field name="active"/>
+                <field name="primary_color" widget="colorpicker"/>
+                <field name="secondary_color" widget="colorpicker"/>
+                <field name="create_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_google_sheets_branding_form" model="ir.ui.view">
+        <field name="name">google.sheets.branding.form</field>
+        <field name="model">google.sheets.branding</field>
+        <field name="arch" type="xml">
+            <form string="Branding">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="active"/>
+                    </group>
+                    <group>
+                        <field name="primary_color" widget="colorpicker"/>
+                        <field name="secondary_color" widget="colorpicker"/>
+                    </group>
+                    <group>
+                        <field name="logo" widget="image"/>
+                    </group>
+                    <notebook>
+                        <page string="CSS">
+                            <field name="stylesheet_css" placeholder="/* CSS adicional */" widget="text" help="CSS adicional para aplicar al importador de Google Sheets."/>
+                        </page>
+                        <page string="Notas">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_google_sheets_branding_search" model="ir.ui.view">
+        <field name="name">google.sheets.branding.search</field>
+        <field name="model">google.sheets.branding</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Branding">
+                <field name="name"/>
+                <filter name="filter_active" string="Activos" domain="[('active','=',True)]"/>
+                <filter name="filter_inactive" string="Archivados" domain="[('active','=',False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACCIÓN (debe ir ANTES del menú que la referencia) -->
+    <record id="action_google_sheets_branding" model="ir.actions.act_window">
+        <field name="name">Branding</field>
+        <field name="res_model">google.sheets.branding</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="google_sheets_import.view_google_sheets_branding_search"/>
+    </record>
+
+    <!-- Menús -->
+    <menuitem id="menu_hr_gs_import"
+            name="Google Sheets Import"
+            parent="hr.menu_hr_root"
+            sequence="95"
+            groups="hr.group_hr_user"/>
+
+    <!-- Branding colgando del contenedor anterior -->
+    <menuitem id="menu_google_sheets_branding"
+            name="Branding"
+            parent="google_sheets_import.menu_hr_gs_import"
+            action="google_sheets_import.action_google_sheets_branding"
+            sequence="10"
+            groups="hr.group_hr_user"/>
+
+
+    <!-- Ajustes en Configuración -->
+    <record id="res_config_settings_view_form_inherit_gs" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.google.sheets.branding</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[contains(@class,'o_settings_container')]" position="inside">
+                <div class="app_settings_block" data-string="Google Sheets Import" string="Google Sheets Import" data-key="google_sheets_import">
+                    <h2>Google Sheets Import - Branding</h2>
+                    <div class="row mt16">
+                        <div class="col-6">
+                            <field name="gs_brand_primary_color" widget="colorpicker"/>
+                            <field name="gs_brand_secondary_color" widget="colorpicker"/>
+                            <field name="gs_brand_stylesheet" placeholder="/* CSS extra */" widget="text" help="CSS adicional aplicado globalmente al importador."/>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

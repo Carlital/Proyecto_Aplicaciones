@@ -1,0 +1,173 @@
+/* Fallback por si aún no se inyectan las variables desde QWeb */
+:root {
+  --gs-brand-primary: #BC0613;
+  --gs-brand-secondary: #FFFFFF;
+}
+
+/* Utilidades */
+.gs-brand-bg        { background-color: var(--gs-brand-primary); }
+.gs-brand-text      { color: var(--gs-brand-primary); }
+.gs-brand-accent    { color: var(--gs-brand-secondary); }
+.gs-brand-border    { border-color: var(--gs-brand-primary); }
+
+/* Ejemplos de componentes */
+.btn-gs {
+  background-color: var(--gs-brand-primary);
+  border-color: var(--gs-brand-primary);
+  color: #fff;
+
+  &:hover {
+    /* color-mix funciona en CSS nativo para “aclarar/oscurecer” a runtime */
+    background-color: color-mix(in srgb, var(--gs-brand-primary), black 10%);
+    border-color: color-mix(in srgb, var(--gs-brand-primary), black 10%);
+  }
+}
+
+.text-gs       { color: var(--gs-brand-secondary); }
+.badge-gs      { background: var(--gs-brand-secondary); color:#000; }
+.card-gs {
+  border: 1px solid color-mix(in srgb, var(--gs-brand-primary), white 70%);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--gs-brand-primary), transparent 85%);
+}
+/* Utility: hide elements without relying on Bootstrap */
+.d-none { display: none !important; }
+.hidden-item { display: none !important; }
+
+/* Toggle labels for "Ver materias" button */
+.collapse-toggle .when-not-collapsed { display: none; }
+.collapse-toggle:not(.collapsed) .when-not-collapsed { display: inline; }
+.collapse-toggle:not(.collapsed) .when-collapsed { display: none; }
+
+/* Minor polish */
+.collapse-toggle {
+  line-height: 1.2;
+  padding: 2px 10px;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: #ffffff;
+  color: #444;
+  transition: background-color .15s ease, color .15s ease, box-shadow .15s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.collapse-toggle:hover {
+  background: #f6f8fa;
+  color: #222;
+}
+
+.collapse-toggle::after {
+  content: '▾';
+  margin-left: 8px;
+  display: inline-block;
+  transition: transform .2s ease;
+}
+
+.collapse-toggle:not(.collapsed)::after {
+  transform: rotate(180deg);
+}
+
+.grupo-carrera-perfil-fie .lista-materias-perfil-fie { margin-top: 8px; }
+
+/* Pager styling */
+.eur-pager {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+/* Reduce blank space within the tab that contains Asignaturas */
+#eur_conocimientos .contenido-tab {
+  min-height: auto;
+  padding-bottom: .5rem;
+}
+
+.eur-page-btn {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.1);
+  color: #444;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.eur-page-btn:hover { background: #f6f8fa; }
+.eur-page-btn.active {
+  background: #111827;
+  color: #fff;
+  border-color: #BC0613;
+}
+.eur-page-btn:disabled {
+  opacity: .4;
+  cursor: default;
+}
+
+/* Improved layout for Titles and Publications */
+.titulos-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: .75rem;
+}
+@media (min-width: 768px) {
+  .titulos-grid { grid-template-columns: 1fr 1fr; }
+}
+.titulo-card {
+  display: flex;
+  gap: .75rem;
+  align-items: flex-start;
+  padding: .75rem .9rem;
+  background: rgba(181,0,24,.03);
+  border: 1px solid rgba(181,0,24,.12);
+  border-radius: 10px;
+}
+.titulo-icon {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%);
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(181,0,24,.25);
+}
+.titulo-info { flex: 1; }
+.titulo-grado { font-weight: 700; color: #2c3e50; }
+.titulo-inst { font-size: .9rem; }
+.titulo-nivel { background: #b50018; color: #fff; margin-top: .25rem; }
+
+.publicaciones-lista { display: flex; flex-direction: column; gap: .6rem; margin-top: .5rem; }
+.pub-item { display:flex; align-items:flex-start; gap:.6rem; padding:.5rem .4rem; border-bottom:1px solid rgba(181,0,24,.08); }
+.pub-item:last-child { border-bottom: none; }
+.pub-bullet { color:#b50018; margin-top:.15rem; }
+.pub-text { flex:1; color:#2c3e50; }
+.pub-year { background:#111827; color:#fff; }
+
+/* Override caret content with safe unicode (placed later to win cascade) */
+.collapse-toggle::after {
+  content: "\25BE" !important; /* small down triangle */
+}
+
+/* Unified small pill buttons for toggles */
+.eur-btn {
+  --eur-accent: #b50018;
+  --eur-border: rgba(0,0,0,0.12);
+  background: #ffffff;
+  border: 1px solid var(--eur-border);
+  color: var(--eur-accent);
+  padding: 4px 12px;
+  line-height: 1.2;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 12px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  transition: background-color .15s ease, color .15s ease, box-shadow .15s ease, border-color .15s ease, transform .05s ease;
+}
+.eur-btn:hover { background: #fff5f6; border-color: var(--eur-accent); color: var(--eur-accent); }
+.eur-btn:active { transform: translateY(1px); }
+.collapse-toggle.eur-btn:not(.collapsed) { background: var(--eur-accent); color: #fff; border-color: var(--eur-accent); }
+
+/* Tighten spacing only for Asignaturas (safety re-assert) */
+[data-snippet="s_docencia_asignaturas"] { padding-bottom: .25rem !important; }
+[data-snippet="s_docencia_asignaturas"] .seccion-docencia-vertical { margin-bottom: .5rem !important; }
+[data-snippet="s_docencia_asignaturas"] .asignaturas-agrupadas-perfil-fie { margin-bottom: 0 !important; }
+[data-snippet="s_docencia_asignaturas"] .grupo-carrera-perfil-fie:last-child { margin-bottom: 0 !important; }
+[data-snippet="s_docencia_asignaturas"] .grupo-carrera-perfil-fie.is-last-visible { margin-bottom: 0 !important; }

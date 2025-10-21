@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Configuración de N8N -->
+    <record id="cv_importer_n8n_webhook_default" model="ir.config_parameter">
+        <field name="key">cv_importer.n8n_webhook_url</field>
+        <field name="value">https://n8n.pruebasbidata.site/webhook/process-cv</field>
+    </record>
+
+    <!-- Configuración del servidor de callbacks -->
+    <record id="cv_importer_auto_apply_data" model="ir.config_parameter">
+        <field name="key">cv_importer.auto_apply_data</field>
+        <field name="value">True</field>
+    </record>
+
+    <!-- Configuración del timeout -->
+    <record id="cv_importer_timeout" model="ir.config_parameter">
+        <field name="key">cv_importer.timeout</field>
+        <field name="value">60</field>
+    </record>
+</odoo>

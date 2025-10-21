@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extensión de vista de empleado -->
+    <record id="view_hr_employee_cv_form" model="ir.ui.view">
+        <field name="name">hr.employee.cv.form</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button type="object" name="action_view_cv_documents" class="oe_stat_button" icon="fa-file-pdf-o">
+                    <field name="cv_document_count" string="CVs" widget="statinfo"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Acción para crear CV desde empleado -->
+    <record id="action_create_cv_from_employee" model="ir.actions.act_window">
+        <field name="name">Crear CV</field>
+        <field name="res_model">cv.document</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Agregar opción en el menú de acción del empleado -->
+    <record id="view_hr_employee_cv_action" model="ir.ui.view">
+        <field name="name">hr.employee.cv.action</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button string="Descargar CV Automático" type="object" name="action_download_cv_auto" class="btn-primary"/>
+                <button string="Crear CV Manual" type="object" name="action_create_cv_document" class="btn-secondary"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista de lista de empleados con información de CV -->
+    <record id="view_hr_employee_cv_tree" model="ir.ui.view">
+        <field name="name">hr.employee.cv.tree</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="cv_document_count" string="CVs"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

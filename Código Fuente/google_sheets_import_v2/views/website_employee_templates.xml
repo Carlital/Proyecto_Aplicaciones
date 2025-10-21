@@ -1,0 +1,634 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- =========================================================
+       PÁGINA PERFIL (solo se agrega zonas oe_structure)
+     ========================================================= -->
+  <template id="perfil_docente_template" name="Perfil Docente">
+    <t t-call="website.layout">
+      <t t-set="title">Perfil de <t t-esc="empleado.name"/></t>
+
+      <div class="perfil-container container">
+
+        <!-- LADO IZQUIERDO (igual que ya tienes) -->
+        <div class="perfil-lado-izquierdo">
+          <div class="card-perfil text-center shadow-lg">
+            <t t-if="empleado.image_1920">
+              <div class="foto-container">
+                <img t-att-src="'/web/image/hr.employee/%s/image_1920' % empleado.id"
+                     alt="Foto del docente" class="foto-perfil"
+                     onerror="this.onerror=null; this.src='/web/static/img/placeholder.png';"/>
+                <div class="foto-overlay"></div>
+              </div>
+            </t>
+            <t t-else="">
+              <div class="foto-container foto-placeholder">
+                <i class="fa fa-user foto-icon"></i>
+                <div class="foto-overlay"></div>
+              </div>
+            </t>
+
+            <div class="nombre-container">
+              <h3 class="nombre-docente"><t t-esc="empleado.name"/></h3>
+              <h5 class="cargo-docente"><t t-esc="empleado.job_title or 'Docente'"/></h5>
+            </div>
+
+            <div class="informacion-personal">
+              <ul class="list-group-perfil text-start">
+                <li class="info-item"><i class="fa fa-id-card info-icon"></i>
+                  <span><strong>Cédula:</strong> <t t-esc="empleado.identification_id or 'No registrado'"/></span>
+                </li>
+                <li class="info-item"><i class="fa fa-venus-mars info-icon"></i>
+                  <span><strong>Género:</strong> <t t-esc="empleado.gender or 'No especificado'"/></span>
+                </li>
+                <li class="info-item"><i class="fa fa-graduation-cap info-icon"></i>
+                  <span><strong>Modalidad:</strong> <t t-esc="empleado.x_modalidad or 'No especificado'"/></span>
+                </li>
+                <li class="info-item"><i class="fa fa-clock-o info-icon"></i>
+                  <span><strong>Dedicación:</strong> <t t-esc="empleado.x_tiempo_dedicacion or 'No especificado'"/></span>
+                </li>
+                <li class="info-item"><i class="fa fa-university info-icon"></i>
+                  <span><strong>Facultad:</strong> <t t-esc="(empleado.x_facultad and empleado.x_facultad.name) or 'No asignada'"/></span>
+                </li>
+                <li class="info-item"><i class="fa fa-book info-icon"></i>
+                  <span><strong>Carrera:</strong> <t t-esc="(empleado.x_carrera and empleado.x_carrera.name) or 'No asignada'"/></span>
+                </li>
+                <li t-if="empleado.x_oficina" class="info-item"><i class="fa fa-map-marker info-icon"></i>
+                  <span><strong>Oficina:</strong> <t t-esc="empleado.x_oficina"/></span>
+                </li>
+                <li class="info-item"><i class="fa fa-envelope info-icon"></i>
+                  <span>
+                    <strong>Email institucional:</strong>
+                    <t t-if="empleado.work_email">
+                      <a t-att-href="'mailto:' + empleado.work_email" class="email-link"><t t-esc="empleado.work_email"/></a>
+                    </t>
+                    <t t-else="">No registrado</t>
+                  </span>
+                </li>
+                <li t-if="empleado.x_email_personal" class="info-item"><i class="fa fa-envelope-o info-icon"></i>
+                  <span><strong>Email personal:</strong> <a t-att-href="'mailto:' + empleado.x_email_personal" class="email-link"><t t-esc="empleado.x_email_personal"/></a></span>
+                </li>
+                <li t-if="empleado.x_orcid" class="info-item"><i class="fa fa-external-link info-icon"></i>
+                  <span><strong>ORCID:</strong> <a t-att-href="'https://orcid.org/' + empleado.x_orcid" target="_blank" class="orcid-link"><t t-esc="empleado.x_orcid"/></a></span>
+                </li>
+                <li t-if="empleado.x_observacion" class="info-item observacion-item"><i class="fa fa-info-circle info-icon"></i>
+                  <span><strong>Observación:</strong> <t t-esc="empleado.x_observacion"/></span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Métricas (igual) -->
+            <div class="metricas-academicas mt-4">
+              <h6 class="metricas-titulo"><i class="fa fa-chart-bar me-2"></i>Métricas Académicas</h6>
+              <div class="metricas-grid">
+                <div class="metrica-card"><i class="fa fa-calendar metrica-icon"></i><div class="metrica-numero"><t t-esc="empleado.x_anos_experiencia or 0"/></div><div class="metrica-label">Años Experiencia</div></div>
+                <div class="metrica-card"><i class="fa fa-file-text metrica-icon"></i><div class="metrica-numero"><t t-esc="empleado.x_total_publicaciones or 0"/></div><div class="metrica-label">Publicaciones</div></div>
+                <div class="metrica-card"><i class="fa fa-lightbulb-o metrica-icon"></i><div class="metrica-numero"><t t-esc="empleado.x_total_proyectos or 0"/></div><div class="metrica-label">Proyectos</div></div>
+                <div class="metrica-card"><i class="fa fa-star metrica-icon"></i><div class="metrica-numero"><t t-esc="int((empleado.x_total_publicaciones or 0) + (empleado.x_total_proyectos or 0))"/></div><div class="metrica-label">Total Logros</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LADO DERECHO: TABS -->
+        <div class="perfil-lado-derecho">
+          <div class="tabs-container">
+            <ul class="nav nav-tabs custom-tabs" role="tablist">
+              <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#eur_conocimientos"><i class="fa fa-graduation-cap me-2"></i>Conocimientos</a></li>
+              <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#eur_analisis"><i class="fa fa-line-chart me-2"></i>Análisis</a></li>
+              <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#eur_diseno"><i class="fa fa-cubes me-2"></i>Diseño</a></li>
+              <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#eur_investigacion"><i class="fa fa-flask me-2"></i>Investigación</a></li>
+              <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#eur_practica"><i class="fa fa-tools me-2"></i>Práctica</a></li>
+              <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#eur_transferibles"><i class="fa fa-users me-2"></i>Transferibles</a></li>
+            </ul>
+          </div>
+
+          <div class="tab-content-container">
+            <div class="tab-content border-0 p-0">
+
+              <!-- EUR-ACE: CONOCIMIENTOS Y COMPRENSIÓN -->
+              <div class="tab-pane fade show active" id="eur_conocimientos">
+                <div class="tab-header"><h5><i class="fa fa-graduation-cap me-2"></i>Conocimientos y Comprensión</h5></div>
+                <div class="contenido-tab">
+                  <div id="eur_conocimientos_zone" class="oe_structure">
+                    <t t-call="google_sheets_import.s_docente_presentacion"/>
+                    <!-- Mostrar títulos detallados como desplegable para evitar duplicación visual -->
+                    <t t-if="empleado.x_titulos_academicos">
+                      <div class="mt-3">
+                        <a href="#" class="btn btn-sm eur-btn rounded-pill titulos-toggle" onclick="var b=this;var c=b.closest('.contenido-tab').querySelector('#eur_titulos_block'); if(c){c.classList.toggle('d-none'); b.textContent=c.classList.contains('d-none')?'Ver todos los títulos':'Ocultar títulos';} return false;">
+                          Ver todos los títulos
+                        </a>
+                      </div>
+                      <div id="eur_titulos_block" class="mt-2 d-none">
+                        <t t-call="google_sheets_import.s_eurace_titulos"/>
+                      </div>
+                    </t>
+                    <t t-call="google_sheets_import.s_docencia_info_general"/>
+                    <t t-call="google_sheets_import.s_docencia_asignaturas"/>
+                  </div>
+                </div>
+              </div>
+
+              <!-- EUR-ACE: ANÁLISIS DE INGENIERÍA -->
+              <div class="tab-pane fade" id="eur_analisis">
+                <div class="tab-header"><h5><i class="fa fa-line-chart me-2"></i>Análisis de ingeniería</h5></div>
+                <div class="contenido-tab">
+                  <div id="eur_analisis_zone" class="oe_structure">
+                    <t t-call="google_sheets_import.s_eurace_analisis_intro"/>
+                  </div>
+                </div>
+              </div>
+
+              <!-- EUR-ACE: DISEÑO DE INGENIERÍA -->
+              <div class="tab-pane fade" id="eur_diseno">
+                <div class="tab-header"><h5><i class="fa fa-cubes me-2"></i>Diseño de ingeniería</h5></div>
+                <div class="contenido-tab">
+                  <div id="eur_diseno_zone" class="oe_structure">
+                    <t t-call="google_sheets_import.s_docente_proyectos"/>
+                  </div>
+                </div>
+              </div>
+
+              <!-- EUR-ACE: INVESTIGACIÓN -->
+              <div class="tab-pane fade" id="eur_investigacion">
+                <div class="tab-header"><h5><i class="fa fa-flask me-2"></i>Investigación</h5></div>
+                <div class="contenido-tab">
+                  <div id="eur_investigacion_zone" class="oe_structure">
+                    <t t-call="google_sheets_import.s_docente_publicaciones"/>
+                    <t t-call="google_sheets_import.s_docente_logros"/>
+                  </div>
+                </div>
+              </div>
+
+              <!-- EUR-ACE: PRÁCTICA DE INGENIERÍA -->
+              <div class="tab-pane fade" id="eur_practica">
+                <div class="tab-header"><h5><i class="fa fa-tools me-2"></i>Práctica de ingeniería</h5></div>
+                <div class="contenido-tab">
+                  <div id="eur_practica_zone" class="oe_structure">
+                    <t t-call="google_sheets_import.s_docencia_certificaciones"/>
+                  </div>
+                </div>
+              </div>
+
+              <!-- EUR-ACE: HABILIDADES TRANSFERIBLES -->
+              <div class="tab-pane fade" id="eur_transferibles">
+                <div class="tab-header"><h5><i class="fa fa-users me-2"></i>Habilidades transferibles</h5></div>
+                <div class="contenido-tab">
+                  <div id="eur_transferibles_zone" class="oe_structure">
+                    <t t-call="google_sheets_import.s_docente_idiomas"/>
+                    <t t-call="google_sheets_import.s_eurace_contacto"/>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Descargar CV -->
+          <div class="acciones-perfil mt-4">
+            <div class="row g-3">
+              <div class="col-12">
+                <t t-if="cv_download_href">
+                  <a t-att-href="cv_download_href" target="_blank" class="btn btn-cv w-100">
+                    <i class="fa fa-download me-2"></i>Descargar CV
+                  </a>
+                </t>
+                <t t-elif="empleado.x_cv_url">
+                  <a t-att-href="empleado.x_cv_url" target="_blank" class="btn btn-cv w-100">
+                    <i class="fa fa-download me-2"></i>Descargar CV (externo)
+                  </a>
+                </t>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </t>
+  </template>
+
+  <!-- =========================================================
+       SNIPPETS (bloques movibles) texto NO editable
+     ========================================================= -->
+
+  <!-- Presentación -->
+  <template id="s_docente_presentacion" name="Docente · Presentación">
+    <section class="content-card s_docente_block o_not_editable"
+             data-snippet="s_docente_presentacion" data-name="Presentación"
+             contenteditable="false">
+      <t t-if="empleado.x_presentacion">
+        <div class="seccion-docencia-vertical mb-0">
+          <div class="seccion-encabezado-docencia-perfil">
+            <div class="icono-seccion-docencia-perfil"><i class="fa fa-user-tie"></i></div>
+            <div class="titulo-seccion-docencia-perfil">
+              <h6>Presentación</h6><p class="text-muted">Resumen profesional</p>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="presentacion-caja">
+              <div class="presentacion-texto" style="white-space: pre-line;" t-esc="(empleado.x_presentacion or '').strip()"/>
+              <div class="presentacion-firma"><i class="fa fa-user-graduate me-1"></i>
+                <span t-esc="empleado.name"/>
+                <t t-if="empleado.job_title"><span class="text-muted"> · <t t-esc="empleado.job_title"/></span></t>
+              </div>
+            </div>
+          </div>
+        </div>
+      </t>
+      <t t-else="">
+        <div class="no-info-card"><div class="empty-state"><i class="fa fa-user-circle"></i>
+          <h6>Presentación no disponible</h6><p class="no-info">El docente aún no ha proporcionado información de presentación.</p>
+        </div></div>
+      </t>
+    </section>
+  </template>
+
+  <!-- Docencia · Información general -->
+  <template id="s_docencia_info_general" name="Docencia · Información General">
+    <section class="content-card s_docente_block o_not_editable"
+             data-snippet="s_docencia_info_general" data-name="Info General Docencia"
+             contenteditable="false">
+      <div class="seccion-docencia-vertical mb-2">
+        <div class="seccion-encabezado-docencia-perfil">
+          <div class="icono-seccion-docencia-perfil"><i class="fa fa-graduation-cap"></i></div>
+          <div class="titulo-seccion-docencia-perfil"><h6>Información General</h6><p class="text-muted">Datos básicos de la actividad docente</p></div>
+        </div>
+        <div class="contenedor-info-docencia-vertical-fie mt-3">
+          <div class="item-info-docencia-vertical-fie"><div class="icono-info-docencia-fie"><i class="fa fa-clock-o text-primary"></i></div><div class="texto-info-docencia-fie"><span class="etiqueta-info-docencia-fie">Modalidad:</span><span class="valor-info-docencia-fie"><t t-esc="empleado.x_modalidad or 'No especificado'"/></span></div></div>
+          <div class="item-info-docencia-vertical-fie"><div class="icono-info-docencia-fie"><i class="fa fa-calendar text-success"></i></div><div class="texto-info-docencia-fie"><span class="etiqueta-info-docencia-fie">Dedicación:</span><span class="valor-info-docencia-fie"><t t-esc="empleado.x_tiempo_dedicacion or 'No especificado'"/></span></div></div>
+          <div class="item-info-docencia-vertical-fie"><div class="icono-info-docencia-fie"><i class="fa fa-university text-info"></i></div><div class="texto-info-docencia-fie"><span class="etiqueta-info-docencia-fie">Facultad:</span><span class="valor-info-docencia-fie"><t t-esc="(empleado.x_facultad and empleado.x_facultad.name) or 'No asignada'"/></span></div></div>
+          <div class="item-info-docencia-vertical-fie"><div class="icono-info-docencia-fie"><i class="fa fa-book text-warning"></i></div><div class="texto-info-docencia-fie"><span class="etiqueta-info-docencia-fie">Carrera:</span><span class="valor-info-docencia-fie"><t t-esc="(empleado.x_carrera and empleado.x_carrera.name) or 'No asignada'"/></span></div></div>
+          <t t-if="empleado.x_oficina">
+            <div class="item-info-docencia-vertical-fie"><div class="icono-info-docencia-fie"><i class="fa fa-map-marker text-danger"></i></div><div class="texto-info-docencia-fie"><span class="etiqueta-info-docencia-fie">Oficina:</span><span class="valor-info-docencia-fie"><t t-esc="empleado.x_oficina"/></span></div></div>
+          </t>
+          <div class="item-info-docencia-vertical-fie">
+            <div class="icono-info-docencia-fie"><i class="fa fa-calendar-check text-primary"></i></div>
+            <div class="texto-info-docencia-fie">
+              <span class="etiqueta-info-docencia-fie">Experiencia:</span>
+              <span class="valor-info-docencia-fie">
+                <t t-set="anios" t-value="int(empleado.x_anos_experiencia or 0)"/><t t-esc="anios"/> años
+                <t t-if="anios &gt; 10"><span class="badge bg-success ms-2">Experimentado</span></t>
+                <t t-if="anios &gt; 5 and anios &lt;= 10"><span class="badge bg-primary ms-2">Consolidada</span></t>
+                <t t-if="anios &gt; 0 and anios &lt;= 5"><span class="badge bg-info ms-2">En Desarrollo</span></t>
+                <t t-if="anios == 0"><span class="badge bg-secondary ms-2">Nuevo</span></t>
+              </span>
+            </div>
+          </div>
+          <div class="item-info-docencia-vertical-fie">
+            <div class="icono-info-docencia-fie"><i class="fa fa-chalkboard-teacher text-success"></i></div>
+            <div class="texto-info-docencia-fie"><span class="etiqueta-info-docencia-fie">Estado:</span><span class="valor-info-docencia-fie">Activo</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <!-- Docencia · Asignaturas -->
+  <template id="s_docencia_asignaturas" name="Docencia · Asignaturas">
+    <section class="content-card s_docente_block o_not_editable"
+             data-snippet="s_docencia_asignaturas" data-name="Asignaturas"
+             contenteditable="false">
+      <div class="seccion-docencia-vertical mb-2">
+        <div class="seccion-encabezado-docencia-perfil">
+          <div class="icono-seccion-docencia-perfil"><i class="fa fa-list-alt"></i></div>
+          <div class="titulo-seccion-docencia-perfil"><h6>Asignaturas Impartidas</h6><p class="text-muted">Agrupadas por carrera</p></div>
+        </div>
+        <div class="contenido-asignaturas-perfil-fie mt-3">
+          <t t-if="empleado.x_formacion_continua">
+            <t t-set="asig_lineas" t-value="[(l or '').strip() for l in (empleado.x_formacion_continua or '').split('\n') if (l or '').strip()]"/>
+            <t t-set="asig_parsed" t-value="[]"/>
+            <t t-foreach="asig_lineas" t-as="a">
+              <t t-set="parts" t-value="[p.strip() for p in a.split(' - ') if p.strip()]"/>
+              <t t-set="titulo" t-value="parts and parts[0] or a"/>
+              <t t-set="chips" t-value="parts[1:]"/>
+              <t t-set="car" t-value="(chips and chips[-1]) or ((empleado.x_carrera and empleado.x_carrera.name) or 'General')"/>
+              <t t-set="periodo" t-value="(a.find('(') != -1 and a.rfind(')') != -1) and a[a.find('(')+1:a.rfind(')')] or ''"/>
+              <t t-set="asig_parsed" t-value="asig_parsed + [{'car':car,'titulo':titulo,'periodo':periodo}]"/>
+            </t>
+            <t t-set="carreras" t-value="sorted(list(set([i['car'] for i in asig_parsed])))"/>
+            <div class="asignaturas-agrupadas-perfil-fie eur-collapsible" style="position: relative;">
+              <t t-foreach="carreras" t-as="car">
+                <t t-set="items" t-value="[i for i in asig_parsed if i['car']==car]"/>
+                <div class="grupo-carrera-perfil-fie">
+                  <div class="encabezado-carrera-perfil-fie">
+                    <div class="icono-carrera-perfil-fie"><i class="fa fa-layer-group"></i></div>
+                    <h6 class="nombre-carrera-perfil-fie"><t t-esc="car"/></h6>
+                    <span class="badge bg-light text-dark ms-auto"><t t-esc="len(items)"/> asignaturas</span>
+                    <a href="#" class="btn btn-sm ms-2 eur-btn eur-carrera-toggle collapse-toggle collapsed" aria-expanded="false">
+                      <span class="when-collapsed">Ver materias</span>
+                      <span class="when-not-collapsed">Ocultar materias</span>
+                    </a>
+                  </div>
+                  <ul class="lista-materias-perfil-fie eur-carrera-content d-none">
+                    <t t-foreach="sorted(items, key=lambda j: j['titulo'])" t-as="it">
+                      <t t-set="titu" t-value="(it['titulo'] or '')"/>
+                      <li class="materia-item-perfil-fie">
+                        <t t-if="not titu.lstrip().startswith(('·','-','*'))"><div class="bullet-materia-perfil-fie">·</div></t>
+                        <div class="nombre-materia-perfil-fie">
+                          <span><t t-esc="titu"/></span>
+                          <t t-if="it['periodo']"><small class="text-muted">(<t t-esc="it['periodo']"/>)</small></t>
+                        </div>
+                      </li>
+                    </t>
+                  </ul>
+                </div>
+              </t>
+            </div>
+          </t>
+          <t t-else="">
+            <div class="sin-asignaturas-fie">
+              <div class="empty-state-asignaturas-fie">
+                <i class="fa fa-book-open"></i>
+                <h6>Sin asignaturas registradas</h6>
+                <p>No se han encontrado asignaturas específicas en el registro</p>
+              </div>
+            </div>
+          </t>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <!-- Docencia · Certificaciones -->
+  <template id="s_docencia_certificaciones" name="Docencia · Certificaciones">
+    <section class="content-card s_docente_block o_not_editable"
+             data-snippet="s_docencia_certificaciones" data-name="Certificaciones"
+             contenteditable="false">
+      <div class="seccion-docencia-vertical mb-4">
+        <div class="seccion-encabezado-docencia-perfil">
+          <div class="icono-seccion-docencia-perfil"><i class="fa fa-certificate"></i></div>
+          <div class="titulo-seccion-docencia-perfil"><h6>Certificaciones y Capacitaciones</h6><p class="text-muted">Agrupadas por institución</p></div>
+        </div>
+        <div class="contenido-certificaciones-perfil-fie mt-3">
+          <t t-if="empleado.x_capacitaciones">
+            <t t-set="cert_lineas" t-value="[(l or '').strip() for l in (empleado.x_capacitaciones or '').split('\n') if (l or '').strip()]"/>
+            <t t-set="cert_parsed" t-value="[]"/>
+            <t t-foreach="cert_lineas" t-as="c">
+              <t t-set="parts" t-value="[p.strip() for p in c.split(' - ') if p.strip()]"/>
+              <t t-set="titulo" t-value="parts and parts[0] or c"/>
+              <t t-set="chips" t-value="parts[1:]"/>
+              <t t-set="kw" t-value="['universidad','escuela','instituto','politec','politécnica','college','academy','acad','tecnol','empresa','google','microsoft','aws','cisco','oracle','udemy','coursera','platzi','edx']"/>
+              <t t-set="org" t-value="''"/>
+              <t t-foreach="chips" t-as="chip">
+                <t t-foreach="kw" t-as="k"><t t-if="k in chip.lower() and not org"><t t-set="org" t-value="chip"/></t></t>
+              </t>
+              <t t-set="org" t-value="org or (chips and chips[0]) or 'Otros'"/>
+              <t t-set="periodo" t-value="(c.find('(') != -1 and c.rfind(')') != -1) and c[c.find('(')+1:c.rfind(')')] or ''"/>
+              <t t-set="cert_parsed" t-value="cert_parsed + [{'org':org,'titulo':titulo,'periodo':periodo}]"/>
+            </t>
+            <t t-set="orgs" t-value="sorted(list(set([i['org'] for i in cert_parsed])))"/>
+            <div class="asignaturas-agrupadas-perfil-fie">
+              <t t-foreach="orgs" t-as="org">
+                <t t-set="items" t-value="[i for i in cert_parsed if i['org']==org]"/>
+                <div class="grupo-carrera-perfil-fie">
+                  <div class="encabezado-carrera-perfil-fie">
+                    <div class="icono-carrera-perfil-fie"><i class="fa fa-building"></i></div>
+                    <h6 class="nombre-carrera-perfil-fie"><t t-esc="org"/></h6>
+                    <span class="badge bg-light text-dark ms-auto"><t t-esc="len(items)"/> certificaciones</span>
+                  </div>
+                  <ul class="lista-materias-perfil-fie">
+                    <t t-foreach="sorted(items, key=lambda j: j['titulo'])" t-as="it">
+                      <t t-set="titu" t-value="(it['titulo'] or '')"/>
+                      <li class="materia-item-perfil-fie">
+                        <div class="bullet-materia-perfil-fie">·</div>
+                        <div class="nombre-materia-perfil-fie">
+                          <span><t t-esc="titu"/></span>
+                          <t t-if="it['periodo']"><small class="text-muted">(<t t-esc="it['periodo']"/>)</small></t>
+                        </div>
+                      </li>
+                    </t>
+                  </ul>
+                </div>
+              </t>
+            </div>
+          </t>
+          <t t-else="">
+            <div class="empty-state-certificaciones-fie">
+              <i class="fa fa-certificate"></i>
+              <h6>Sin certificaciones registradas</h6>
+              <p>No se han encontrado certificaciones o capacitaciones</p>
+            </div>
+          </t>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <!-- Proyectos -->
+  <template id="s_docente_proyectos" name="Docente · Proyectos">
+    <section class="content-card s_docente_block o_not_editable"
+             data-snippet="s_docente_proyectos" data-name="Proyectos"
+             contenteditable="false">
+      <t t-if="empleado.x_proyectos">
+        <div class="proyectos-wrapper">
+          <div class="projects-header">
+            <div class="project-icon"><i class="fa fa-flask"></i></div>
+            <div class="project-info">
+              <div class="project-title">Proyectos de Investigación y Desarrollo</div>
+              <div class="project-count"><t t-esc="len([b for b in (empleado.x_proyectos or '').strip().split('\n\n') if b.strip()])"/></div>
+            </div>
+          </div>
+          <div class="info-formateada" style="white-space: pre-line;" t-esc="(empleado.x_proyectos or '').strip()"/>
+        </div>
+      </t>
+      <t t-else="">
+        <div class="no-info-card"><div class="empty-state"><i class="fa fa-lightbulb-o"></i>
+          <h6>Proyectos no disponibles</h6><p class="no-info">No se han registrado proyectos de investigación para este docente.</p>
+        </div></div>
+      </t>
+    </section>
+  </template>
+
+    <!-- Publicaciones -->
+  <template id="s_docente_publicaciones" name="Docente · Publicaciones">
+    <section class="content-card s_docente_block o_not_editable"
+             data-snippet="s_docente_publicaciones" data-name="Publicaciones"
+             contenteditable="false">
+      <t t-if="empleado.x_publicaciones">
+        <div class="publicaciones-wrapper">
+          <div class="publications-header">
+            <div class="publication-icon"><i class="fa fa-book-open"></i></div>
+            <div class="publication-count">
+              <span class="count-number"><t t-esc="empleado.x_total_publicaciones or 0"/></span>
+              <span class="count-label">Publicaciones</span>
+            </div>
+            <t t-if="empleado.x_orcid">
+              <div class="orcid-badge">
+                <a t-att-href="'https://orcid.org/' + empleado.x_orcid" target="_blank" class="orcid-link-badge">
+                  <i class="fa fa-external-link me-1"></i> ORCID
+                </a>
+              </div>
+            </t>
+          </div>
+          <div class="publicaciones-lista">
+            <t t-set="pub_rows" t-value="[(l or '').strip() for l in (empleado.x_publicaciones or '').split('\n') if (l or '').strip()]"/>
+            <t t-foreach="pub_rows" t-as="row">
+              <t t-set="anio" t-value="(row.find('(') != -1 and row.rfind(')') != -1) and row[row.find('(')+1:row.rfind(')')] or ''"/>
+              <div class="pub-item">
+                <div class="pub-bullet"><i class="fa fa-file-text"></i></div>
+                <div class="pub-text"><t t-esc="row"/></div>
+                <t t-if="anio and anio.isdigit()"><span class="badge pub-year"><t t-esc="anio"/></span></t>
+              </div>
+            </t>
+          </div>
+        </div>
+      </t>
+      <t t-else="">
+        <div class="no-info-card">
+          <div class="empty-state">
+            <i class="fa fa-file-text"></i>
+            <h6>Publicaciones no disponibles</h6>
+            <p class="no-info">No se han registrado publicaciones científicas para este docente.</p>
+          </div>
+        </div>
+      </t>
+    </section>
+  </template>
+
+
+  <!-- ============================= -->
+  <!-- PERFIL DOCENTE — VERSIÓN B   -->
+  <!-- Índice por anclas, 1 columna -->
+  <!-- ============================= -->
+
+  <!-- ============================= -->
+  <!-- PERFIL DOCENTE — VERSIÓN C   -->
+  <!-- Una columna limpia           -->
+  <!-- ============================= -->
+
+  <!-- ============================= -->
+  <!-- PERFIL DOCENTE — VERSIÓN D   -->
+  <!-- Bloques EUR-ACE             -->
+  <!-- ============================= -->
+
+  <!-- Logros y Distinciones -->
+  <template id="s_docente_logros" name="Docente · Logros y Distinciones">
+    <section class="content-card s_docente_block o_not_editable"
+             data-snippet="s_docente_logros" data-name="Logros"
+             contenteditable="false">
+      <div class="seccion-docencia-vertical mb-4">
+        <div class="seccion-encabezado-docencia-perfil">
+          <div class="icono-seccion-docencia-perfil"><i class="fa fa-trophy"></i></div>
+          <div class="titulo-seccion-docencia-perfil"><h6>Logros y Distinciones</h6><p class="text-muted">Premios, reconocimientos y acreditaciones</p></div>
+        </div>
+        <div class="mt-2">
+          <t t-if="empleado.x_distinciones">
+            <t t-set="logros" t-value="[(l or '').strip() for l in (empleado.x_distinciones or '').split('\n') if (l or '').strip()]"/>
+            <ul class="lista-materias-perfil-fie">
+              <t t-foreach="logros" t-as="lg">
+                <li class="materia-item-perfil-fie">
+                  <div class="bullet-materia-perfil-fie">•</div>
+                  <div class="nombre-materia-perfil-fie"><span><t t-esc="lg"/></span></div>
+                </li>
+              </t>
+            </ul>
+          </t>
+          <t t-else="">
+            <div class="empty-state-asignaturas-fie">
+              <i class="fa fa-star"></i>
+              <h6>Sin logros registrados</h6>
+              <p>Esta sección se completará cuando se registren distinciones del docente.</p>
+            </div>
+          </t>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <!-- Idiomas -->
+  <template id="s_docente_idiomas" name="Docente · Idiomas">
+    <section class="content-card s_docente_block o_not_editable"
+             data-snippet="s_docente_idiomas" data-name="Idiomas"
+             contenteditable="false">
+      <div class="idiomas-wrapper">
+        <div class="languages-header">
+          <div class="language-icon"><i class="fa fa-comments"></i></div>
+          <div class="language-title"><h6>Idiomas Dominados</h6><p>Nivel de competencia lingüística</p></div>
+        </div>
+        <t t-if="empleado.x_idiomas">
+          <div class="idiomas-grid" style="white-space: pre-line;">
+            <div class="idioma-info" t-esc="(empleado.x_idiomas or '')"/>
+          </div>
+        </t>
+        <t t-else="">
+          <div class="no-info-card">
+            <div class="empty-state">
+              <i class="fa fa-globe"></i>
+              <h6>Información de idiomas no disponible</h6>
+              <p class="no-info">No se ha registrado información sobre competencias lingüísticas.</p>
+            </div>
+          </div>
+        </t>
+      </div>
+    </section>
+  </template>
+
+  <!-- EUR-ACE: Conocimientos – Títulos Académicos -->
+  <template id="s_eurace_titulos" name="EUR-ACE – Títulos">
+    <section class="content-card s_docente_block o_not_editable" data-snippet="s_eurace_titulos" data-name="EUR-ACE Títulos" contenteditable="false">
+      <t t-if="empleado.x_titulos_academicos">
+        <div class="seccion-docencia-vertical mb-4">
+          <div class="seccion-encabezado-docencia-perfil">
+            <div class="icono-seccion-docencia-perfil"><i class="fa fa-mortar-board"></i></div>
+            <div class="titulo-seccion-docencia-perfil"><h6>Títulos Académicos</h6><p class="text-muted">Formación y grados</p></div>
+          </div>
+          <div class="info-formateada mt-3" style="white-space: pre-line;" t-esc="(empleado.x_titulos_academicos or '')"/>
+        </div>
+      </t>
+    </section>
+  </template>
+
+  <!-- EUR-ACE: Análisis – Introducción métrica -->
+  <template id="s_eurace_analisis_intro" name="EUR-ACE – Análisis Intro">
+    <section class="content-card s_docente_block o_not_editable" data-snippet="s_eurace_analisis_intro" data-name="EUR-ACE Análisis Intro" contenteditable="false">
+      <div class="seccion-docencia-vertical mb-3">
+        <div class="seccion-encabezado-docencia-perfil">
+          <div class="icono-seccion-docencia-perfil"><i class="fa fa-line-chart"></i></div>
+          <div class="titulo-seccion-docencia-perfil"><h6>Resultados Analíticos</h6><p class="text-muted">Producción y participación</p></div>
+        </div>
+        <div class="metricas-grid mt-3">
+          <div class="metrica-card"><i class="fa fa-file-text metrica-icon"></i><div class="metrica-numero"><t t-esc="empleado.x_total_publicaciones or 0"/></div><div class="metrica-label">Publicaciones</div></div>
+          <div class="metrica-card"><i class="fa fa-lightbulb-o metrica-icon"></i><div class="metrica-numero"><t t-esc="empleado.x_total_proyectos or 0"/></div><div class="metrica-label">Proyectos</div></div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <!-- EUR-ACE: Transferibles – Contacto -->
+  <template id="s_eurace_contacto" name="EUR-ACE – Contacto">
+    <section class="content-card s_docente_block o_not_editable" data-snippet="s_eurace_contacto" data-name="EUR-ACE Contacto" contenteditable="false">
+      <div class="seccion-docencia-vertical mb-4">
+        <div class="seccion-encabezado-docencia-perfil">
+          <div class="icono-seccion-docencia-perfil"><i class="fa fa-envelope"></i></div>
+          <div class="titulo-seccion-docencia-perfil"><h6>Contacto</h6><p class="text-muted">Vías de comunicación</p></div>
+        </div>
+        <div class="mt-3">
+          <ul class="list-group-perfil text-start">
+            <t t-if="empleado.x_contacto">
+              <li class="info-item"><i class="fa fa-info-circle info-icon"></i>
+                <span t-esc="empleado.x_contacto"/>
+              </li>
+            </t>
+            <t t-if="empleado.work_email">
+              <li class="info-item"><i class="fa fa-envelope info-icon"></i>
+                <a t-att-href="'mailto:' + empleado.work_email" class="email-link"><t t-esc="empleado.work_email"/></a>
+              </li>
+            </t>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </template>
+
+</odoo>
+
+
+
+
+
+
+
+
+
+
+

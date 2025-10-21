@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cv_document_form" model="ir.ui.view">
+        <field name="name">cv.document.form</field>
+        <field name="model">cv.document</field>
+        <field name="arch" type="xml">
+            <form string="Documento CV">
+                <header>
+                    <!-- Eliminado: la descarga la hará N8N directamente -->
+                    <button string="Probar Conexión N8N" type="object" name="action_test_n8n_connection" 
+                            class="btn-warning" invisible="state == 'processing'"/>
+                    <button string="Subir a N8N" type="object" name="action_upload_to_n8n" 
+                            class="btn-primary" invisible="state not in ['uploaded', 'error']"/>
+                    <button string="Aplicar Datos" type="object" name="action_apply_extracted_data" 
+                            class="btn-success" invisible="state != 'processed'"/>
+                    <button string="Resetear" type="object" name="action_reset_to_draft" 
+                            class="btn-secondary" invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,uploaded,processing,processed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nombre del documento"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="employee_id" required="1"/>
+                            <field name="cedula" readonly="1"/>
+                            <field name="cv_filename" readonly="1"/>
+                            <field name="cv_download_url" readonly="1"/>
+                            <field name="auto_downloaded" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="n8n_webhook_url"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Archivo CV">
+                <field name="cv_file" filename="cv_filename" readonly="auto_downloaded == True"/>
+                        <div invisible="auto_downloaded == False" class="alert alert-info">
+                            <i class="fa fa-info-circle"/> Este CV fue descargado automáticamente desde la URL institucional.
+                        </div>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Datos Extraídos" invisible="state not in ['processed']">
+                            <group>
+                                <field name="extracted_presentacion" widget="text"/>
+                                <field name="extracted_docencia" widget="text"/>
+                                <field name="extracted_proyectos" widget="text"/>
+                                <field name="extracted_publicaciones" widget="text"/>
+                            </group>
+                        </page>
+                        <page string="Texto Procesado" invisible="processed_text == False">
+                            <field name="processed_text" widget="text" readonly="1"/>
+                        </page>
+                        <page string="Errores" invisible="error_message == False">
+                            <field name="error_message" widget="text" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree View para listar CVs -->
+    <record id="view_cv_document_tree" model="ir.ui.view">
+        <field name="name">cv.document.tree</field>
+        <field name="model">cv.document</field>
+        <field name="arch" type="xml">
+            <tree string="Documentos CV" decoration-success="state=='processed'" 
+                  decoration-danger="state=='error'" decoration-info="state=='processing'">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="cedula"/>
+                <field name="cv_filename"/>
+                <field name="auto_downloaded"/>
+                <field name="state"/>
+                <field name="create_date"/>
+                <!-- Eliminado: la descarga la hará N8N directamente -->
+                <button string="Procesar" type="object" name="action_upload_to_n8n" 
+                        icon="fa-play" invisible="state not in ['uploaded', 'error']"/>
+                <button string="Aplicar" type="object" name="action_apply_extracted_data" 
+                        icon="fa-check" invisible="state != 'processed'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda para cv.document -->
+    <record id="view_cv_document_search" model="ir.ui.view">
+        <field name="name">cv.document.search</field>
+        <field name="model">cv.document</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Documentos CV">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="cedula"/>
+                <separator/>
+                <filter name="draft" string="Borrador" domain="[('state', '=', 'draft')]"/>
+                <filter name="processing" string="Procesando" domain="[('state', '=', 'processing')]"/>
+                <filter name="processed" string="Procesado" domain="[('state', '=', 'processed')]"/>
+                <filter name="error" string="Error" domain="[('state', '=', 'error')]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_employee" string="Empleado" context="{'group_by': 'employee_id'}"/>
+                    <filter name="group_state" string="Estado" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción para cv.document -->
+    <record id="action_cv_document" model="ir.actions.act_window">
+        <field name="name">Documentos CV</field>
+        <field name="res_model">cv.document</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_cv_document_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crear un nuevo documento CV
+            </p>
+            <p>
+                Sube archivos PDF de CVs de empleados para procesarlos automáticamente con N8N.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú principal -->
+    <menuitem id="menu_cv_importer_root" name="CV Importer" parent="hr.menu_hr_root" sequence="50"/>
+    
+    <!-- Submenús -->
+    <menuitem id="menu_cv_document" name="Documentos CV" parent="menu_cv_importer_root" 
+              action="action_cv_document" sequence="10"/>
+
+    <!-- Wizard para subir CV -->
+    <record id="view_cv_upload_wizard" model="ir.ui.view">
+        <field name="name">cv.upload.wizard</field>
+        <field name="model">cv.document</field>
+        <field name="arch" type="xml">
+            <form string="Subir CV">
+                <group>
+                    <field name="employee_id" required="1"/>
+                    <field name="cv_file" filename="cv_filename" required="1"/>
+                    <field name="cv_filename" invisible="1"/>
+                    <field name="n8n_webhook_url"/>
+                </group>
+                <footer>
+                    <button string="Subir y Procesar" type="object" name="action_upload_to_n8n" class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para wizard -->
+    <record id="action_cv_upload_wizard" model="ir.actions.act_window">
+        <field name="name">Subir CV</field>
+        <field name="res_model">cv.document</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_cv_upload_wizard"/>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menú para wizard -->
+    <menuitem id="menu_cv_upload_wizard" name="Subir CV" parent="menu_cv_importer_root" 
+              action="action_cv_upload_wizard" sequence="5"/>
+
+    <!-- Vista para descarga masiva -->
+    <record id="view_cv_bulk_downloader_form" model="ir.ui.view">
+        <field name="name">cv.bulk.downloader.form</field>
+        <field name="model">cv.bulk.downloader</field>
+        <field name="arch" type="xml">
+            <form string="Descarga Masiva de CVs">
+                <group>
+                    <group>
+                        <field name="download_all"/>
+                        <field name="overwrite_existing"/>
+                    </group>
+                </group>
+                
+                <group string="Empleados a Procesar" invisible="download_all == True">
+                    <field name="employee_ids" nolabel="1" 
+                           domain="[('identification_id', '!=', False)]"/>
+                </group>
+                
+                <div invisible="download_all == False" class="alert alert-info">
+                    <i class="fa fa-info-circle"/> Se procesarán todos los empleados que tengan cédula.
+                </div>
+                
+                <footer>
+                    <button string="Descargar CVs" type="object" name="action_download_cvs" class="btn-primary"/>
+                    <button string="Ver CVs Existentes" type="object" name="action_view_cv_documents" class="btn-secondary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para descarga masiva -->
+    <record id="action_cv_bulk_downloader" model="ir.actions.act_window">
+        <field name="name">Descarga Masiva de CVs</field>
+        <field name="res_model">cv.bulk.downloader</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menú para descarga masiva -->
+    <menuitem id="menu_cv_bulk_downloader" name="Descarga Masiva" parent="menu_cv_importer_root" 
+              action="action_cv_bulk_downloader" sequence="15"/>
+</odoo>

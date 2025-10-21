@@ -1,0 +1,1692 @@
+/* ==========================================================================
+   PERFIL DOCENTE - DISEÑO INSTITUCIONAL ROJO Y BLANCO
+   ========================================================================== */
+
+/* Forzar que no se aplique text-transform automáticamente */
+.perfil-container * {
+  text-transform: none !important;
+}
+
+/* Asegurar que todo el contenido de texto mantenga capitalización normal */
+.perfil-container p,
+.perfil-container span,
+.perfil-container h1,
+.perfil-container h2,
+.perfil-container h3,
+.perfil-container h4,
+.perfil-container h5,
+.perfil-container h6,
+.perfil-container li,
+.perfil-container div {
+  text-transform: none !important;
+}
+
+.perfil-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin: 3rem auto;
+  max-width: 1200px;
+  min-height: 80vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.perfil-lado-izquierdo {
+  flex: 1 1 30%;
+  max-width: 30%;
+  min-width: 320px;
+}
+
+.perfil-lado-derecho {
+  flex: 1 1 65%;
+  max-width: 65%;
+  min-width: 300px;
+}
+
+/* ==========================================================================
+   TARJETA PRINCIPAL DEL PERFIL
+   ========================================================================== */
+.card-perfil {
+  border: none;
+  padding: 2rem 1.5rem;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #ffffff 0%, #fafafa 100%);
+  box-shadow: 0 10px 30px rgba(181,0,24,.12), 0 3px 10px rgba(0,0,0,.05);
+  transition: .3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.card-perfil::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #b50018 0%, #d4002a 50%, #b50018 100%);
+}
+.card-perfil:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(181,0,24,.15), 0 5px 15px rgba(0,0,0,.08);
+}
+
+/* ==========================================================================
+   FOTO DEL DOCENTE
+   ========================================================================== */
+.foto-container {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 1.5rem;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(181,0,24,.2);
+  transition: .3s ease;
+  border: 4px solid #fff;
+}
+.foto-container:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 35px rgba(181,0,24,.25);
+}
+.foto-perfil {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  transition: .3s ease;
+}
+.foto-placeholder {
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.foto-icon {
+  color: #fff;
+  font-size: 4rem;
+  opacity: .9;
+}
+.foto-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, rgba(181,0,24,.1) 0%, transparent 50%);
+  border-radius: 50%;
+  transition: .3s ease;
+}
+.foto-container:hover .foto-overlay {
+  background: linear-gradient(45deg, rgba(181,0,24,.2) 0%, transparent 70%);
+}
+
+/* ==========================================================================
+   NOMBRE Y CARGO
+   ========================================================================== */
+.nombre-container {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+.nombre-docente {
+  margin: 0 0 .5rem;
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 1.8rem;
+  line-height: 1.2;
+}
+.cargo-docente {
+  color: #b50018;
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 0;
+  padding: .5rem 1rem;
+  background: rgba(181,0,24,.08);
+  border-radius: 25px;
+  display: inline-block;
+  border: 2px solid rgba(181,0,24,.1);
+}
+
+/* ==========================================================================
+   INFORMACIÓN PERSONAL
+   ========================================================================== */
+.informacion-personal {
+  margin-bottom: 2rem;
+}
+.list-group-perfil {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  padding: .8rem 0;
+  border-bottom: 1px solid rgba(181,0,24,.1);
+  transition: .3s ease;
+  word-wrap: break-word;
+}
+.info-item:hover {
+  background: rgba(181,0,24,.03);
+  padding-left: .5rem;
+  border-radius: 8px;
+}
+.info-item:last-child {
+  border-bottom: none;
+}
+.info-icon {
+  color: #b50018;
+  font-size: 1.1rem;
+  margin-right: .8rem;
+  margin-top: .1rem;
+  min-width: 20px;
+  text-align: center;
+}
+.info-item span {
+  flex: 1;
+  font-size: .9rem;
+  line-height: 1.5;
+  color: #2c3e50;
+}
+.info-item strong {
+  color: #2c3e50;
+  font-weight: 600;
+}
+.observacion-item {
+  background: rgba(181,0,24,.05);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(181,0,24,.15);
+  margin-top: .5rem;
+}
+.email-link,
+.orcid-link {
+  color: #b50018;
+  text-decoration: none;
+  font-weight: 500;
+  transition: .2s ease;
+}
+.email-link:hover,
+.orcid-link:hover {
+  color: #9e0014;
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   INFORMACIÓN DOCENCIA - DISEÑO VERTICAL ESPECÍFICO FIE
+   ========================================================================== */
+.docencia-wrapper-vertical-completa {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  gap: 2rem !important;
+}
+.seccion-docencia-vertical {
+  display: block !important;
+  width: 100% !important;
+  margin-bottom: 1.5rem !important;
+  background: rgba(181,0,24,.02) !important;
+  border-radius: 12px !important;
+  padding: 1.5rem !important;
+  border: 1px solid rgba(181,0,24,.1) !important;
+}
+.contenedor-info-docencia-vertical-fie {
+  display: block !important;
+  width: 100% !important;
+}
+.item-info-docencia-vertical-fie {
+  display: block !important;
+  width: 100% !important;
+  padding: 1rem !important;
+  margin-bottom: .8rem !important;
+  background: rgba(181,0,24,.05) !important;
+  border-radius: 8px !important;
+  border-left: 4px solid #b50018 !important;
+  box-sizing: border-box !important;
+}
+.icono-info-docencia-fie {
+  display: inline-block !important;
+  width: 30px !important;
+  text-align: center !important;
+  margin-right: .8rem !important;
+  vertical-align: top !important;
+}
+.texto-info-docencia-fie {
+  display: inline-block !important;
+  vertical-align: top !important;
+}
+.etiqueta-info-docencia-fie {
+  font-weight: 600 !important;
+  color: #2c3e50 !important;
+  margin-right: .5rem !important;
+}
+.valor-info-docencia-fie {
+  color: #b50018 !important;
+  font-weight: 500 !important;
+}
+
+.seccion-encabezado-docencia-perfil {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  margin-bottom: 1.5rem !important;
+  padding: 1rem !important;
+  background: rgba(181,0,24,.05) !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(181,0,24,.1) !important;
+}
+.icono-seccion-docencia-perfil {
+  width: 50px !important;
+  height: 50px !important;
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%) !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+.icono-seccion-docencia-perfil i {
+  color: #fff !important;
+  font-size: 1.5rem !important;
+}
+.titulo-seccion-docencia-perfil h6 {
+  margin: 0 0 .2rem 0 !important;
+  color: #b50018 !important;
+  font-weight: 700 !important;
+  font-size: 1.1rem !important;
+}
+.titulo-seccion-docencia-perfil p {
+  margin: 0 !important;
+  color: #6c757d !important;
+  font-size: .9rem !important;
+}
+
+/* ==========================================================================
+   ASIGNATURAS ACORDEÓN - DISEÑO COMPACTO
+   ========================================================================== */
+.asignaturas-acordeon-fie {
+  display: block !important;
+  width: 100% !important;
+}
+.accordion-item-fie {
+  background: #fff !important;
+  border: 1px solid rgba(181,0,24,.15) !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  transition: .3s ease !important;
+  animation: fadeInUp .5s ease forwards !important;
+}
+.accordion-item-fie:hover {
+  box-shadow: 0 4px 12px rgba(181,0,24,.1) !important;
+  transform: translateY(-2px) !important;
+}
+.accordion-item-fie:nth-child(1) {
+  animation-delay: .1s !important;
+}
+.accordion-item-fie:nth-child(2) {
+  animation-delay: .2s !important;
+}
+.accordion-item-fie:nth-child(3) {
+  animation-delay: .3s !important;
+}
+.accordion-item-fie:nth-child(4) {
+  animation-delay: .4s !important;
+}
+
+.accordion-header-fie {
+  background: linear-gradient(135deg, rgba(181,0,24,.08) 0%, rgba(181,0,24,.03) 100%) !important;
+  padding: 1rem 1.5rem !important;
+  border-bottom: 1px solid rgba(181,0,24,.1) !important;
+  transition: .3s ease !important;
+}
+.accordion-header-fie:hover {
+  background: linear-gradient(135deg, rgba(181,0,24,.12) 0%, rgba(181,0,24,.05) 100%) !important;
+}
+.accordion-header-content-fie {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+}
+
+.icono-carrera-acordeon-fie {
+  width: 40px !important;
+  height: 40px !important;
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%) !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+.icono-carrera-acordeon-fie i {
+  color: #fff !important;
+  font-size: 1.1rem !important;
+}
+
+.info-carrera-acordeon-fie {
+  flex: 1 !important;
+}
+.nombre-carrera-acordeon-fie {
+  margin: 0 0 .2rem 0 !important;
+  color: #b50018 !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+}
+.cantidad-materias-fie {
+  color: #6c757d !important;
+  font-size: .85rem !important;
+  font-weight: 500 !important;
+}
+
+.accordion-toggle-icon-fie {
+  color: #b50018 !important;
+  font-size: 1rem !important;
+  transition: transform .3s ease !important;
+}
+.accordion-header-fie[aria-expanded="true"] .accordion-toggle-icon-fie i {
+  transform: rotate(180deg) !important;
+}
+
+.accordion-body-fie {
+  border-top: none !important;
+}
+.accordion-content-fie {
+  padding: 1.5rem !important;
+}
+
+/* Tags de materias */
+.materias-compactas-fie {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: .5rem !important;
+}
+.materia-tag-fie {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: rgba(181,0,24,.08) !important;
+  color: #b50018 !important;
+  padding: .4rem .8rem !important;
+  border-radius: 20px !important;
+  font-size: .85rem !important;
+  font-weight: 500 !important;
+  border: 1px solid rgba(181,0,24,.15) !important;
+  transition: .2s ease !important;
+}
+.materia-tag-fie:hover {
+  background: rgba(181,0,24,.12) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 6px rgba(181,0,24,.15) !important;
+}
+.materia-tag-fie i {
+  font-size: .75rem !important;
+  color: #b50018 !important;
+}
+
+/* Resumen compacto */
+.resumen-asignaturas-compacto-fie {
+  margin-top: 1.5rem !important;
+}
+.resumen-card-fie {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  padding: 1rem 1.5rem !important;
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%) !important;
+  border-radius: 12px !important;
+  color: #fff !important;
+  box-shadow: 0 4px 15px rgba(181,0,24,.25) !important;
+}
+.resumen-icon-fie {
+  width: 50px !important;
+  height: 50px !important;
+  background: rgba(255,255,255,.2) !important;
+  border-radius: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+.resumen-icon-fie i {
+  font-size: 1.5rem !important;
+  color: #fff !important;
+}
+.resumen-stats-fie {
+  text-align: center !important;
+}
+.stat-numero-fie {
+  font-size: 1.8rem !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  margin-bottom: .2rem !important;
+}
+.stat-label-fie {
+  font-size: .85rem !important;
+  opacity: .9 !important;
+  font-weight: 500 !important;
+}
+.resumen-divider-fie {
+  width: 2px !important;
+  height: 40px !important;
+  background: rgba(255,255,255,.3) !important;
+  border-radius: 1px !important;
+}
+
+/* Estado vacío */
+.empty-state-asignaturas-fie {
+  text-align: center !important;
+  padding: 2rem !important;
+  color: #6c757d !important;
+}
+.empty-state-asignaturas-fie i {
+  font-size: 3rem !important;
+  color: #b50018 !important;
+  opacity: .3 !important;
+  margin-bottom: 1rem !important;
+}
+.empty-state-asignaturas-fie h6 {
+  color: #b50018 !important;
+  font-weight: 600 !important;
+  margin-bottom: .5rem !important;
+}
+.empty-state-asignaturas-fie p {
+  margin: 0 !important;
+  font-size: .9rem !important;
+}
+
+/* Responsive acordeón */
+@media (max-width:768px) {
+  .materias-compactas-fie {
+    gap: .3rem !important;
+  }
+  .materia-tag-fie {
+    font-size: .8rem !important;
+    padding: .3rem .6rem !important;
+  }
+  .resumen-card-fie {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: .5rem !important;
+  }
+  .resumen-divider-fie {
+    width: 40px !important;
+    height: 2px !important;
+  }
+}
+
+/* ==========================================================================
+   ASIGNATURAS AGRUPADAS / LISTAS
+   ========================================================================== */
+.asignaturas-agrupadas-perfil-fie {
+  display: block !important;
+  width: 100% !important;
+}
+.grupo-carrera-perfil-fie {
+  margin-bottom: 2rem !important;
+  background: rgba(181,0,24,.02) !important;
+  border-radius: 12px !important;
+  padding: 1.5rem !important;
+  border: 1px solid rgba(181,0,24,.1) !important;
+}
+.encabezado-carrera-perfil-fie {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  margin-bottom: 1.2rem !important;
+  padding-bottom: .8rem !important;
+  border-bottom: 2px solid rgba(181,0,24,.2) !important;
+}
+.icono-carrera-perfil-fie {
+  width: 45px !important;
+  height: 45px !important;
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 3px 10px rgba(181,0,24,.3) !important;
+}
+.icono-carrera-perfil-fie i {
+  color: #fff !important;
+  font-size: 1.3rem !important;
+}
+.nombre-carrera-perfil-fie {
+  color: #b50018 !important;
+  font-weight: 800 !important;
+  font-size: 1.2rem !important;
+  margin: 0 !important;
+  text-transform: uppercase !important;
+  letter-spacing: .5px !important;
+}
+
+.lista-materias-perfil-fie:not(.d-none) {
+  display: block !important;
+  padding-left: 1rem !important;
+}
+
+/* Botón de descarga CV adaptado al tema */
+.btn-cv {
+  background-color: var(--bs-primary, #b50018) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: .5rem !important;
+  padding: .6rem 1rem !important;
+  font-weight: 600 !important;
+}
+.btn-cv:hover {
+  filter: brightness(0.95);
+}
+.materia-item-perfil-fie {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: .9rem !important;
+  padding: .6rem 0 !important;
+  border-bottom: 1px solid rgba(181,0,24,.08) !important;
+  transition: .3s ease !important;
+}
+.materia-item-perfil-fie:last-child {
+  border-bottom: none !important;
+}
+.materia-item-perfil-fie:hover {
+  background: rgba(181,0,24,.05) !important;
+  padding-left: .5rem !important;
+  border-radius: 6px !important;
+  margin: 0 -.5rem !important;
+}
+
+/* Bolita idéntica (Asignaturas y Certificados) */
+.bullet-materia-perfil-fie {
+  font-size: 0 !important;
+  width: 6px !important;
+  height: 6px !important;
+  min-width: 6px !important;
+  border-radius: 50% !important;
+  background: #b50018 !important;
+  margin-top: .55rem !important;  /* alineación vertical */
+  margin-right: .7rem !important; /* separación del texto */
+  display: inline-block !important;
+}
+
+.nombre-materia-perfil-fie {
+  color: #2c3e50 !important;
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+  font-weight: 500 !important;
+}
+.nombre-materia-perfil-fie span {
+  display: block !important;
+}
+
+/* Paletas alternas por grupo (opcional) */
+.grupo-carrera-perfil-fie:nth-child(2) .icono-carrera-perfil-fie {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+.grupo-carrera-perfil-fie:nth-child(3) .icono-carrera-perfil-fie {
+  background: linear-gradient(135deg, #007bff 0%, #6610f2 100%) !important;
+}
+.grupo-carrera-perfil-fie:nth-child(4) .icono-carrera-perfil-fie {
+  background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%) !important;
+}
+
+.resumen-asignaturas-fie {
+  padding: 1rem !important;
+  background: rgba(181,0,24,.05) !important;
+  border-radius: 8px !important;
+  text-align: center !important;
+}
+.info-resumen-fie .texto-resumen-fie {
+  color: #2c3e50 !important;
+  font-size: .95rem !important;
+}
+.sin-asignaturas-fie .alert {
+  margin: 0 !important;
+}
+
+/* ==========================================================================
+   ANTI-COLUMNAS CSS - FORZAR DISEÑO VERTICAL
+   ========================================================================== */
+.perfil-container *,
+.content-card *,
+.contenido-tab *,
+.docencia-wrapper *,
+.asignaturas-agrupadas-perfil-fie *,
+.grupo-carrera-perfil-fie *,
+.lista-materias-perfil-fie *,
+.contenido-asignaturas-perfil-fie * {
+  column-count: 1 !important;
+  column-gap: 0 !important;
+  column-width: auto !important;
+  columns: none !important;
+  column-fill: auto !important;
+  column-span: none !important;
+}
+.asignaturas-agrupadas-perfil-fie,
+.lista-materias-perfil-fie,
+.contenido-asignaturas-perfil-fie {
+  display: block !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+}
+.asignaturas-agrupadas-perfil-fie,
+.lista-materias-perfil-fie {
+  display: block !important;
+  grid-template-columns: none !important;
+  grid-auto-columns: none !important;
+}
+
+/* ==========================================================================
+   EXPERIENCIA
+   ========================================================================== */
+.fila-experiencia-perfil-fie {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1.5rem !important;
+  padding: 1.5rem !important;
+  background: rgba(181,0,24,.05) !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(181,0,24,.1) !important;
+}
+.icono-experiencia-perfil-fie {
+  width: 60px !important;
+  height: 60px !important;
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%) !important;
+  border-radius: 15px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+.icono-experiencia-perfil-fie i {
+  color: #fff !important;
+  font-size: 1.8rem !important;
+}
+.datos-experiencia-perfil-fie {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: .3rem !important;
+}
+.numero-experiencia-perfil-fie {
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
+  color: #b50018 !important;
+  line-height: 1 !important;
+}
+.texto-experiencia-perfil-fie {
+  color: #6c757d !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+}
+.descripcion-experiencia-perfil-fie {
+  margin-left: auto !important;
+}
+.descripcion-experiencia-perfil-fie .badge {
+  font-size: .85rem !important;
+  padding: .5rem 1rem !important;
+}
+
+/* ==========================================================================
+   RESUMEN FINAL
+   ========================================================================== */
+.resumen-final-docencia-perfil-fie {
+  padding: 1.5rem !important;
+  background: linear-gradient(135deg, rgba(181,0,24,.05) 0%, rgba(181,0,24,.02) 100%) !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(181,0,24,.1) !important;
+}
+.fila-resumen-perfil-fie {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+}
+.item-resumen-perfil-fie {
+  display: flex !important;
+  align-items: center !important;
+  gap: .5rem !important;
+}
+.etiqueta-resumen-perfil-fie {
+  color: #6c757d !important;
+  font-weight: 500 !important;
+}
+.valor-resumen-perfil-fie {
+  color: #b50018 !important;
+  font-weight: 700 !important;
+}
+.separador-resumen-perfil-fie {
+  color: #b50018 !important;
+  font-weight: 700 !important;
+  opacity: .6 !important;
+}
+
+/* ==========================================================================
+   RESPONSIVE DOCENCIA ESPECÍFICO
+   ========================================================================== */
+@media (max-width:768px) {
+  .fila-experiencia-perfil-fie {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 1rem !important;
+  }
+  .descripcion-experiencia-perfil-fie {
+    margin-left: 0 !important;
+  }
+  .fila-resumen-perfil-fie {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+  .separador-resumen-perfil-fie {
+    display: none !important;
+  }
+  .seccion-encabezado-docencia-perfil {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: .8rem !important;
+  }
+  .asignatura-item-vertical-fie {
+    display: block !important;
+    text-align: left !important;
+  }
+  .asignaturas-agrupadas-perfil-fie,
+  .contenido-asignaturas-perfil-fie {
+    column-count: 1 !important;
+    columns: none !important;
+  }
+  .grupo-carrera-perfil-fie {
+    padding: 1rem !important;
+  }
+  .encabezado-carrera-perfil-fie {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: .8rem !important;
+  }
+  .nombre-carrera-perfil-fie {
+    font-size: 1rem !important;
+  }
+  .lista-materias-perfil-fie {
+    padding-left: 0 !important;
+  }
+  .materia-item-perfil-fie {
+    padding: .8rem !important;
+    margin-bottom: .5rem !important;
+    background: rgba(181,0,24,.03) !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(181,0,24,.1) !important;
+  }
+  .materia-item-perfil-fie:hover {
+    margin: 0 0 .5rem 0 !important;
+  }
+}
+
+/* ==========================================================================
+   OVERRIDES BOOTSTRAP / FRAMEWORKS
+   ========================================================================== */
+.lista-asignaturas-vertical-fie.row,
+.contenido-asignaturas-perfil-fie.row {
+  display: block !important;
+  margin: 0 !important;
+  column-count: 1 !important;
+}
+.asignatura-item-vertical-fie.col,
+.asignatura-item-vertical-fie.col-12,
+.asignatura-item-vertical-fie.col-6,
+.asignatura-item-vertical-fie.col-4,
+.asignatura-item-vertical-fie.col-3 {
+  width: 100% !important;
+  max-width: 100% !important;
+  flex: none !important;
+  display: block !important;
+  column-count: 1 !important;
+}
+.lista-asignaturas-vertical-fie {
+  position: static !important;
+  height: auto !important;
+  column-count: 1 !important;
+}
+.asignatura-item-vertical-fie {
+  position: static !important;
+  transform: none !important;
+  left: auto !important;
+  top: auto !important;
+  width: 100% !important;
+  column-count: 1 !important;
+}
+
+/* ==========================================================================
+   MÉTRICAS ACADÉMICAS
+   ========================================================================== */
+.metricas-academicas {
+  margin-top: 2rem;
+}
+.metricas-titulo {
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%);
+  color: #fff;
+  padding: .8rem 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 700;
+  font-size: .95rem;
+  box-shadow: 0 4px 15px rgba(181,0,24,.2);
+  position: relative;
+  overflow: hidden;
+}
+.metricas-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  justify-items: center;
+}
+.metrica-card {
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%);
+  color: #fff;
+  width: 88%;
+  padding: .6rem;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(181,0,24,.25);
+  transition: .3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.metrica-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(181,0,24,.35);
+}
+.metrica-icon {
+  font-size: 1.5rem;
+  margin-bottom: .5rem;
+  opacity: .9;
+}
+.metrica-numero {
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: .3rem;
+}
+.metrica-label {
+  font-size: .8rem;
+  margin-top: .3rem;
+  opacity: .95;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   TABS INSTITUCIONALES (mejorados, sin azul)
+   ========================================================================== */
+.tabs-container {
+  margin-bottom: 0;
+  position: relative;
+}
+.tabs-container::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #b50018 50%, transparent 100%);
+  z-index: 1;
+}
+.custom-tabs {
+  border-bottom: none;
+  background: linear-gradient(145deg, #fff 0%, #f8f9fa 100%);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -5px 20px rgba(181,0,24,.08);
+  padding: .8rem 1rem 0;
+  position: relative;
+  z-index: 2;
+}
+.custom-tabs .nav-link {
+  color: #495057;
+  border: none;
+  border-radius: 15px 15px 0 0;
+  margin-right: 5px;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  font-size: .9rem;
+  transition: all .4s cubic-bezier(.4,0,.2,1);
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  border: 2px solid transparent;
+}
+.custom-tabs .nav-link::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(181,0,24,.1) 0%, rgba(181,0,24,.05) 100%);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform .3s ease;
+  z-index: -1;
+}
+.custom-tabs .nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #b50018 0%, #d4002a 100%);
+  transform: translateX(-50%);
+  transition: width .3s ease;
+}
+.custom-tabs .nav-link:hover {
+  background: linear-gradient(135deg, rgba(181,0,24,.08) 0%, rgba(181,0,24,.03) 100%);
+  color: #b50018;
+  transform: translateY(-3px);
+  border-color: rgba(181,0,24,.2);
+  box-shadow: 0 8px 25px rgba(181,0,24,.15);
+}
+.custom-tabs .nav-link:hover::before {
+  transform: scaleY(1);
+}
+.custom-tabs .nav-link:hover::after {
+  width: 80%;
+}
+.custom-tabs .nav-link.active {
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 30px rgba(181,0,24,.4);
+  transform: translateY(-5px);
+  border-color: #b50018;
+}
+.custom-tabs .nav-link.active::before {
+  transform: scaleY(1);
+  background: rgba(255,255,255,.1);
+}
+.custom-tabs .nav-link.active::after {
+  width: 100%;
+  background: rgba(255,255,255,.3);
+}
+
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link {
+  background-color: #b50018 !important;
+  border-color: #b50018 !important;
+  color: #fff !important;
+}
+.nav-link:focus,
+.nav-link:hover {
+  border-color: rgba(181,0,24,.2) !important;
+  color: #b50018 !important;
+}
+
+/* Contenido de tabs */
+.tab-content-container {
+  background: linear-gradient(145deg, #fff 0%, #f8f9fa 100%);
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.12);
+  overflow: hidden;
+  position: relative;
+}
+.tab-content-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #b50018 50%, transparent 100%);
+}
+.tab-header {
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%);
+  color: #fff;
+  padding: 1.5rem 2rem;
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+}
+.tab-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.1), transparent);
+  animation: shimmer 3s infinite;
+}
+.tab-header h5 {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  text-shadow: 0 2px 4px rgba(0,0,0,.2);
+}
+.tab-header i {
+  font-size: 1.3rem;
+  margin-right: .8rem;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.2));
+}
+.contenido-tab {
+  padding: 2rem;
+  min-height: 300px;
+  position: relative;
+}
+
+.content-card {
+  background: linear-gradient(145deg, #fff 0%, #f8f9fa 100%);
+  padding: 2rem;
+  border-radius: 15px;
+  border: 1px solid rgba(181,0,24,.1);
+  box-shadow: 0 4px 20px rgba(0,0,0,.08), inset 0 1px 0 rgba(255,255,255,.8);
+  transition: .3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.content-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #b50018 0%, #d4002a 100%);
+}
+.content-card::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle, rgba(181,0,24,.1) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.content-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.no-info-card {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 15px;
+  border: 2px dashed rgba(181,0,24,.3);
+  position: relative;
+  overflow: hidden;
+}
+.no-info-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 20%, rgba(181,0,24,.05) 0%, transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(181,0,24,.05) 0%, transparent 50%);
+}
+.no-info-card i {
+  font-size: 4rem;
+  color: rgba(181,0,24,.4);
+  margin-bottom: 1.5rem;
+  filter: drop-shadow(0 4px 8px rgba(181,0,24,.1));
+  position: relative;
+  z-index: 2;
+}
+.no-info {
+  color: #6c757d;
+  font-style: italic;
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  position: relative;
+  z-index: 2;
+}
+
+/* ==========================================================================
+   PRESENTACIÓN
+   ========================================================================== */
+.presentacion-caja {
+  background: rgba(181,0,24,.02);
+  border-radius: 12px;
+  padding: 2rem;
+  position: relative;
+  border: 1px solid rgba(181,0,24,.1);
+}
+.presentacion-texto {
+  color: #2c3e50;
+  font-size: 1rem;
+  line-height: 1.8;
+  text-align: justify;
+  margin-bottom: 2rem;
+}
+.presentacion-firma {
+  color: #b50018;
+  font-weight: 600;
+  text-align: right;
+  font-size: .95rem;
+  border-top: 1px solid rgba(181,0,24,.1);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+.presentacion-firma i {
+  color: #b50018;
+  margin-right: .5rem;
+}
+
+/* ==========================================================================
+   PROYECTOS
+   ========================================================================== */
+.proyectos-wrapper {
+  padding: .5rem;
+}
+.projects-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%);
+  border-radius: 15px;
+  color: #fff;
+}
+.project-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(255,255,255,.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.project-icon i {
+  font-size: 2rem;
+  color: #fff;
+}
+.project-info {
+  display: flex;
+  flex-direction: column;
+}
+.project-title {
+  font-size: .9rem;
+  opacity: .9;
+}
+.project-count {
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.proyectos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin-top: 2rem;
+}
+.proyecto-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid rgba(181,0,24,.1);
+  overflow: hidden;
+  transition: .3s ease;
+}
+.proyecto-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(181,0,24,.1);
+}
+.proyecto-header {
+  padding: 1rem 1.5rem;
+  background: rgba(181,0,24,.03);
+  border-bottom: 1px solid rgba(181,0,24,.1);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.proyecto-header i {
+  color: #b50018;
+  font-size: 1.2rem;
+}
+.proyecto-tipo {
+  color: #b50018;
+  font-weight: 600;
+  font-size: .9rem;
+}
+.proyecto-periodo {
+  margin-left: auto;
+  font-size: .85rem;
+  color: #6c757d;
+}
+.proyecto-body {
+  padding: 1.5rem;
+}
+.proyecto-titulo {
+  font-weight: 700;
+  color: #2c3e50;
+  font-size: 1.1rem;
+  margin-bottom: .5rem;
+}
+.proyecto-detalles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+.detalle-item {
+  background: rgba(181,0,24,.08);
+  padding: .3rem .8rem;
+  border-radius: 15px;
+  font-size: .9rem;
+  color: #b50018;
+  border: 1px solid rgba(181,0,24,.1);
+}
+
+.empty-state-certificaciones-fie {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+}
+.empty-state-certificaciones-fie i {
+  font-size: 3rem;
+  color: #b50018;
+  opacity: .3;
+  margin-bottom: 1rem;
+}
+.empty-state-certificaciones-fie h6 {
+  color: #b50018;
+  font-weight: 600;
+  margin-bottom: .5rem;
+}
+.empty-state-certificaciones-fie p {
+  margin: 0;
+  font-size: .9rem;
+}
+
+/* ==========================================================================
+   CONTENIDO FORMATEADO
+   ========================================================================== */
+.text-justify {
+  text-align: justify;
+  line-height: 1.8;
+  color: #2c3e50;
+  font-size: 1rem;
+  position: relative;
+  max-width: none;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  text-transform: none !important;
+}
+.text-justify::first-letter {
+  font-size: 3em;
+  float: left;
+  line-height: .8;
+  margin: .1em .1em .1em 0;
+  color: #b50018;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(181,0,24,.2);
+}
+.info-formateada {
+  line-height: 1.8;
+  color: #2c3e50;
+  font-size: .95rem;
+  position: relative;
+  max-width: none;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-line;
+}
+.info-formateada p {
+  margin-bottom: 1.2rem;
+  text-align: justify;
+  line-height: 1.7;
+}
+.info-formateada br + br {
+  display: none;
+}
+
+.info-formateada ul,
+.idioma-info ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin: 1.5rem 0;
+  position: relative;
+}
+.info-formateada li,
+.idioma-info li {
+  margin-bottom: 1rem;
+  padding: .8rem 1rem .8rem 3rem;
+  position: relative;
+  background: linear-gradient(135deg, rgba(181,0,24,.02) 0%, transparent 100%);
+  border-radius: 8px;
+  border-left: 3px solid rgba(181,0,24,.2);
+  transition: .3s ease;
+}
+.info-formateada li:hover,
+.idioma-info li:hover {
+  background: linear-gradient(135deg, rgba(181,0,24,.05) 0%, rgba(181,0,24,.01) 100%);
+  border-left-color: #b50018;
+  transform: translateX(5px);
+  box-shadow: 0 3px 10px rgba(181,0,24,.1);
+}
+.info-formateada li::before,
+.idioma-info li::before {
+  content: '';
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(135deg, #b50018 0%, #d4002a 100%);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(181,0,24,.3);
+}
+.info-formateada li::after,
+.idioma-info li::after {
+  content: '';
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  border-radius: 50%;
+}
+.info-formateada strong,
+.idioma-info strong {
+  color: #b50018;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(181,0,24,.1);
+}
+.info-formateada h6,
+.idioma-info h6 {
+  color: #b50018;
+  font-weight: 800;
+  margin: 2rem 0 1rem;
+  padding: .8rem 1.5rem;
+  background: linear-gradient(135deg, rgba(181,0,24,.1) 0%, rgba(181,0,24,.05) 100%);
+  border-radius: 10px;
+  border-left: 4px solid #b50018;
+  font-size: 1.1rem;
+  letter-spacing: .5px;
+  position: relative;
+  overflow: hidden;
+}
+.info-formateada h6::before,
+.idioma-info h6::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, #b50018 0%, #d4002a 100%);
+}
+.info-formateada h6::after,
+.idioma-info h6::after {
+  content: '📚';
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  opacity: .7;
+}
+
+.estado-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .4rem 1rem;
+  background: rgba(40,167,69,.1);
+  color: #28a745;
+  border-radius: 20px;
+  font-size: .85rem;
+  font-weight: 600;
+}
+.estado-badge i {
+  font-size: .9rem;
+}
+
+/* ==========================================================================
+   RESPONSIVE GENERAL
+   ========================================================================== */
+@media (max-width:768px) {
+  .perfil-lado-izquierdo,
+  .perfil-lado-derecho {
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+  .perfil-container {
+    flex-direction: column;
+    gap: 1.5rem;
+    margin: 2rem auto;
+  }
+  .foto-container {
+    width: 150px;
+    height: 150px;
+  }
+  .custom-tabs {
+    padding: .3rem;
+  }
+  .custom-tabs .nav-link {
+    font-size: .8rem;
+    padding: .6rem .8rem;
+    margin-right: 2px;
+    margin-bottom: 2px;
+  }
+  .metricas-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: .8rem;
+  }
+  .metrica-card {
+    padding: 1rem;
+  }
+  .metrica-numero {
+    font-size: 1.8rem;
+  }
+  .docencia-wrapper {
+    flex-direction: column;
+    text-align: center;
+  }
+  .projects-header,
+  .publications-header,
+  .languages-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  .teaching-stats {
+    grid-template-columns: 1fr;
+  }
+  .modalidades-niveles {
+    grid-template-columns: 1fr;
+    gap: .5rem;
+  }
+  .certificaciones-grid {
+    grid-template-columns: 1fr;
+    gap: .6rem;
+  }
+  .docencia-section-header {
+    padding: .6rem 1rem;
+    font-size: .8rem;
+  }
+  .docencia-section-content {
+    padding: 1rem;
+  }
+  .logros-timeline {
+    border-left: 1px solid rgba(181,0,24,.2);
+    padding-left: 1rem;
+    margin-left: .5rem;
+  }
+  .asignatura-item-vertical-fie {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: .8rem !important;
+  }
+}
+@media (max-width:480px) {
+  .perfil-container {
+    margin: 1rem auto;
+    gap: 1rem;
+  }
+  .card-perfil {
+    padding: 1.5rem 1rem;
+  }
+  .metricas-grid {
+    grid-template-columns: 1fr;
+    gap: .8rem;
+  }
+  .custom-tabs .nav-link {
+    font-size: .75rem;
+    padding: .5rem .6rem;
+  }
+  .nombre-docente {
+    font-size: 1.5rem;
+  }
+  .cargo-docente {
+    font-size: 1rem;
+  }
+}
+
+/* ==========================================================================
+   ANIMACIONES
+   ========================================================================== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+.card-perfil,
+.tab-content-container {
+  animation: fadeInUp .6s ease-out;
+}
+.metrica-card:nth-child(1) {
+  animation-delay: .1s;
+}
+.metrica-card:nth-child(2) {
+  animation-delay: .2s;
+}
+.metrica-card:nth-child(3) {
+  animation-delay: .3s;
+}
+.metrica-card:nth-child(4) {
+  animation-delay: .4s;
+}
+
+
+.info-item .info-icon {
+  margin-right: 1rem !important;
+}
+.seccion-encabezado-docencia-perfil {
+  gap: 1.25rem !important;
+}
+.encabezado-carrera-perfil-fie {
+  gap: 1.25rem !important;
+}
+.icono-info-docencia-fie {
+  margin-right: 1rem !important;
+}
+.materia-item-perfil-fie {
+  gap: 1rem !important;
+}
+.proyecto-header {
+  gap: 1.25rem !important;
+}
+
+.info-item i,
+.proyecto-header i,
+.metrica-card i {
+  margin-right: .55rem !important;
+}
+
+.asignaturas-agrupadas-perfil-fie .lista-materias-perfil-fie .bullet-materia-perfil-fie,
+.lista-materias-perfil-fie .bullet-materia-perfil-fie {
+  width: 6px !important;
+  height: 6px !important;
+  min-width: 6px !important;
+  margin-right: .7rem !important;
+  margin-top: .55rem !important;
+}
+
+/* ==========================================================================
+   PUBLICACIONES
+   ========================================================================== */
+.publicaciones-wrapper {
+  padding: 1.5rem;
+  background: rgba(181, 0, 24, 0.02);
+  border-radius: 12px;
+  border: 1px solid rgba(181, 0, 24, 0.1);
+}
+
+.publications-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #b50018 0%, #9e0014 100%);
+  border-radius: 15px;
+  color: #fff;
+}
+
+.publication-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.publication-icon i {
+  font-size: 2rem;
+  color: #fff;
+}
+
+.publication-count {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.count-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.count-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.orcid-badge {
+  margin-left: auto;
+}
+
+.orcid-link-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-radius: 20px;
+  text-decoration: none;
+  transition: 0.3s ease;
+}
+
+.orcid-link-badge:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  color: #fff;
+}
