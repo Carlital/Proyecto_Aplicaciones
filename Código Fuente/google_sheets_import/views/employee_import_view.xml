@@ -5,13 +5,44 @@
         <field name="model">employee.import</field>
         <field name="arch" type="xml">
             <form string="Import Employees">
+                <header>
+                    <!-- El botón de cleanup se agregará aquí por herencia -->
+                </header>
                 <sheet>
                     <group>
+                        <field name="employee_id" readonly="1"/>
                         <field name="sheet_url" placeholder="URL CSV Datos Empleados (db_docentes)"/>
                         <field name="imagenes_url" placeholder="URL CSV Imágenes (nombres_docentes)"/>
                     </group>
+                    <group string="🔍 Filtro de Importación">
+                        <field name="facultad_filter" 
+                               widget="radio"
+                               options="{'horizontal': false}"/>
+                        
+                        <separator string="O escriba una facultad personalizada" colspan="2"/>
+                        
+                        <field name="facultad_custom" 
+                               placeholder="Ej: FACULTAD DE ZOOTECNIA"
+                               class="oe_inline"/>
+                        
+                        <div class="alert alert-warning" role="alert" colspan="2">
+                            <i class="fa fa-exclamation-triangle"/> 
+                            <strong>Importante:</strong> Si escribe una facultad personalizada, 
+                            debe coincidir EXACTAMENTE con el texto del CSV (mayúsculas, tildes, espacios, etc.)
+                        </div>
+                        
+                        <div class="alert alert-info" role="alert" colspan="2">
+                            <i class="fa fa-info-circle"/> 
+                            <strong>Consejo:</strong> Deje ambos filtros vacíos para importar todas las facultades. 
+                            El sistema mostrará qué facultades encontró en el CSV al finalizar.
+                        </div>
+                    </group>
                     <group>
-                        <button string="Import Employees" type="object" name="import_employees" class="btn-primary"/>
+                        <button string="Import Employees" 
+                                type="object" 
+                                name="import_employees" 
+                                class="btn-primary" 
+                                groups="google_sheets_import.group_admin_institucional"/>
                     </group>
                 </sheet>
             </form>
@@ -23,6 +54,7 @@
         <field name="res_model">employee.import</field>
         <field name="view_mode">form</field>
         <field name="target">current</field>
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
     </record>
 
     <record id="action_fix_identification_digits" model="ir.actions.server">
@@ -30,21 +62,38 @@
         <field name="model_id" ref="hr.model_hr_employee"/>
         <field name="state">code</field>
         <field name="code">
-# Ejecutar el método de actualización de cédulas
 result = env['hr.employee'].action_fix_identification_digits()
 action = result
+        </field>
+    </record>
+
+    <record id="view_employee_import_form_cleanup" model="ir.ui.view">
+        <field name="name">employee.import.form.cleanup</field>
+        <field name="model">employee.import</field>
+        <field name="inherit_id" ref="view_employee_import_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="cleanup_duplicate_users" 
+                        type="object" 
+                        string="Limpiar Duplicados"
+                        class="btn-warning"
+                        confirm="¿Está seguro de limpiar usuarios duplicados? Esta acción no se puede deshacer."
+                        groups="base.group_system"/>
+            </xpath>
         </field>
     </record>
 
     <menuitem id="menu_employee_import"
           name="Import Employees"
           parent="hr.menu_hr_employee_payroll"
-          action="action_employee_import"/>
-          
+          action="action_employee_import"
+          groups="base.group_system"/>
+
     <menuitem id="menu_fix_identification_digits"
           name=" Actualizar Cédulas"
           parent="hr.menu_hr_employee_payroll"
-          action="action_fix_identification_digits"/>
+          action="action_fix_identification_digits"
+          groups="base.group_system"/>
     
     <menuitem id="menu_gs_import_root"
             name="Google Sheets Import"

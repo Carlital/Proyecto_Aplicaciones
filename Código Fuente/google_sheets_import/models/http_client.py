@@ -1,11 +1,13 @@
 import requests
 import logging
 import re
+import time
 from datetime import datetime, timedelta
 from odoo import models, fields, api
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
+
 
 class HttpClient(models.AbstractModel):
     _name = 'http.client'
@@ -22,13 +24,7 @@ class HttpClient(models.AbstractModel):
             # Validar cédula
             self._validate_cedula(cedula)
 
-            # Verificar cache
-            cache_key = f'cv_data_{cedula}'
-            cached = self.env['ir.cache'].get(cache_key)
-            if cached:
-                return cached
-
-            # Configurar session con timeout y reintentos
+            # session con timeout y reintentos
             session = requests.Session()
             session.mount('https://', requests.adapters.HTTPAdapter(
                 max_retries=3,
@@ -39,28 +35,17 @@ class HttpClient(models.AbstractModel):
             # Log de seguridad
             _logger.info(f'Solicitando CV para cédula: {cedula}')
             
-            # Intentar primero con SSL verificado
-            try:
-                response = session.get(
-                    f'https://hojavida.espoch.edu.ec/cv/{cedula}',
-                    timeout=10,
-                    verify=True
-                )
-            except requests.exceptions.SSLError:
-                _logger.warning(f'Error SSL al obtener CV para {cedula}')
-                # Solo si falla SSL, intentar sin verificación
-                response = session.get(
-                    f'https://hojavida.espoch.edu.ec/cv/{cedula}',
-                    timeout=10,
-                    verify=False
-                )
+            response = session.get(
+                f'https://hojavida.espoch.edu.ec/cv/{cedula}',
+                timeout=10,
+                verify=True
+            )
 
             if response.status_code != 200:
                 raise UserError(f'Error del servidor: {response.status_code}')
 
             # Guardar en cache por 1 hora
             data = response.json()
-            self.env['ir.cache'].set(cache_key, data, ttl=3600)
             
             return data
 

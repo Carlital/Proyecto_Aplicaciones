@@ -7,7 +7,6 @@ class GoogleSheetsCacheController(http.Controller):
 
     @http.route('/google_sheets_import/profile_image/<int:employee_id>', type='http', auth='public', methods=['GET'])
     def profile_image(self, employee_id, **kwargs):
-        # Requiere módulo hr instalado; adaptar según tu caso.
         employee = request.env['hr.employee'].sudo().browse(employee_id)
         if not employee.exists() or not employee.image_1920:
             return Response(status=404)

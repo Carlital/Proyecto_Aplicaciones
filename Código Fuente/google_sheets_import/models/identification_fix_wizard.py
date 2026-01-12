@@ -36,15 +36,15 @@ class IdentificationFixWizard(models.TransientModel):
                 if len(cedula) == 9 and cedula.isdigit():
                     new_cedula = cedula.zfill(10)
                     to_update.append(employee)
-                    preview_lines.append(f"✅ {employee.name}: {cedula} → {new_cedula}")
+                    preview_lines.append(f" {employee.name}: {cedula} → {new_cedula}")
                     
                 elif len(cedula) == 10 and cedula.isdigit():
                     already_correct.append(employee)
                     if len(preview_lines) < 10:  # Mostrar algunos ejemplos
-                        preview_lines.append(f"ℹ️ {employee.name}: {cedula} (ya correcto)")
+                        preview_lines.append(f" {employee.name}: {cedula} (ya correcto)")
                         
             except Exception as e:
-                preview_lines.append(f"❌ Error con {employee.name}: {str(e)}")
+                preview_lines.append(f" Error con {employee.name}: {str(e)}")
         
         if len(employees) > 20:
             preview_lines.append(f"... y {len(employees) - 20} empleados más")

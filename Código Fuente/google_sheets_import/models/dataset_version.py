@@ -41,9 +41,13 @@ class GoogleSheetsDatasetVersion(models.Model):
     @api.model
     def create_version_from_import(self, sheet_url, sheet_gid=None, raw_rows=None, meta=None):
         raw_rows = raw_rows or []
+        if not sheet_url:
+            raise ValidationError(_("sheet_url es requerido para crear una versión de dataset."))
         h, blob = self._compute_rows_hash(raw_rows)
         existing = self.search([('hash_sha256', '=', h)], limit=1)
         if existing:
+            # actualizar import_datetime si ya existe
+            existing.sudo().write({'import_datetime': fields.Datetime.now(), 'row_count': len(raw_rows)})
             return existing
         headers = []
         if raw_rows:

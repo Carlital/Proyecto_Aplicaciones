@@ -17,8 +17,8 @@
                             <div>
                                 <strong><field name="name"/></strong><br/>
                                 <field name="job_title"/><br/>
-                                <field name="x_facultad"/><br/>
-                                <field name="x_carrera"/>
+                                <field name="facultad"/><br/>
+                                <field name="carrera"/>
                             </div>
                         </div>
                     </t>
@@ -32,57 +32,12 @@
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
-
-            <xpath expr="//field[@name='job_title']" position="replace">
-                <field name="job_title" readonly="1"/>
+            <xpath expr="//field[@name='job_id']" position="after">
+            <group string="Unidad Académica">
+                <field name="facultad" required="1"/>
+                <field name="carrera"/>
+            </group>
             </xpath>
-
-            <xpath expr="//field[@name='job_id']" position="replace">
-                <field name="x_carrera" invisible="1"/>
-            </xpath>
-
-            <xpath expr="//field[@name='parent_id']" position="replace">
-                <field name="x_carrera" readonly="1"/>
-                <field name="parent_id" invisible="1"/>
-            </xpath>
-
-            <xpath expr="//field[@name='department_id']" position="before">
-                <field name="x_facultad" readonly="1"/>
-            </xpath>
-
-            <xpath expr="//field[@name='coach_id']" position="after">
-                <field name="x_modalidad" readonly="1"/>
-                <field name="x_tiempo_dedicacion" readonly="1"/>
-                <field name="x_observacion" readonly="1"/>
-            </xpath>
-
-            <!-- NUEVA SECCIÓN -->
-            <xpath expr="//sheet" position="inside">
-                <group string="Datos del CV" col="2">
-                    <field name="x_titulos_academicos"/>
-                    <field name="x_experiencia_laboral"/>
-                    <field name="x_formacion_continua"/>
-                    <field name="x_participacion_proyectos"/>
-                    <field name="x_publicaciones_detalle"/>
-                    <field name="x_capacitaciones"/>
-                    <field name="x_distinciones"/>
-                    <field name="x_idiomas"/>
-                    <field name="x_cv_pdf" filename="x_cv_url" widget="binary"/>
-                </group>
-                
-                <group string="Información Adicional del CV" col="4">
-                    <field name="x_email_personal"/>
-                    <field name="x_titulo_principal"/>
-                    <field name="x_anos_experiencia"/>
-                    <field name="x_oficina"/>
-                    <field name="x_orcid"/>
-                    <field name="x_total_publicaciones"/>
-                    <!-- <field name="x_indice_h"/> Comentado: campo no existe en el modelo -->
-                    <field name="x_total_proyectos"/>
-                    <field name="x_seminarios"/>
-                </group>
-            </xpath>
-
         </field>
     </record>
 
@@ -93,14 +48,8 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='name']" position="after">
                 <field name="job_title"/>
-                <field name="x_facultad"/>
-                <field name="x_carrera"/>
-                <field name="x_modalidad"/>
-                <field name="x_tiempo_dedicacion"/>
-                <field name="x_titulos_academicos"/>
-                <field name="x_experiencia_laboral"/>
-                <field name="x_idiomas"/>
-                <field name="x_cv_pdf" filename="x_cv_url" widget="binary" />
+                <field name="facultad"/>
+                <field name="carrera"/>
             </xpath>
         </field>
     </record>
@@ -117,7 +66,7 @@
     </record>
 
     <menuitem id="menu_facultad_carrera"
-              name="Facultades / Carreras"
+              name="Facultades / Carrera"
               parent="hr.menu_hr_root"
               sequence="96"
               groups="hr.group_hr_user"/>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_employee_import_wizard_form" model="ir.ui.view">
+        <field name="name">employee.import.wizard.form</field>
+        <field name="model">employee.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Error en Importación">
+                <group>
+                    <group>
+                        <field name="error_row" readonly="1"/>
+                        <field name="total_processed" readonly="1"/>
+                        <field name="total_created" readonly="1"/>
+                        <field name="total_updated" readonly="1"/>
+                        <field name="total_skipped" readonly="1"/>
+                    </group>
+                </group>
+                
+                <group>
+                    <field name="error_message" readonly="1" widget="text"/>
+                </group>
+                
+                <div class="alert alert-warning" role="alert">
+                    <p><strong>Instrucciones para continuar:</strong></p>
+                    <ol>
+                        <li>Abra el archivo CSV en Excel o editor de texto</li>
+                        <li>Localice y corrija la <strong>Fila <field name="error_row" readonly="1" nolabel="1" class="oe_inline"/></strong></li>
+                        <li>Guarde el archivo CSV</li>
+                        <li>Haga clic en el botón <strong>"Continuar Importación"</strong> abajo</li>
+                    </ol>
+                    <p><strong>La importación continuará desde la fila con error sin duplicar los datos ya procesados.</strong></p>
+                </div>
+
+                <footer>
+                    <button name="action_retry_import" string="Continuar Importación" type="object" class="btn-primary"/>
+                    <button name="action_cancel_import" string="Cancelar" type="object" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

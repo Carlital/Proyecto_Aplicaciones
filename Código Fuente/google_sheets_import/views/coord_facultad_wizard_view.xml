@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_groups_form_inherit_facultad" model="ir.ui.view">
+    <field name="name">res.groups.form.facultad</field>
+    <field name="model">res.groups</field>
+    <field name="inherit_id" ref="base.view_groups_form"/>
+    <field name="arch" type="xml">
+      <!-- Reemplazar el field users de la pestaña Users para usar nuestro tree -->
+      <xpath expr="//page[@name='users']/field[@name='users']" position="replace">
+        <field name="users"
+               context="{'search_default_filter_no_share': 1,
+                         'tree_view_ref': 'google_sheets_import.view_res_users_tree_facultad'}"
+               can_create="True"
+               can_write="True"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

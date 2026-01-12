@@ -1,12 +1,148 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Record Rules -->
-    <record id="employee_import_personal_rule" model="ir.rule">
-        <field name="name">Personal Employee Import</field>
-        <field name="model_id" ref="model_employee_import"/>
-        <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
-        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    <!-- ========================================== -->
+    <!-- GRUPOS FUNCIONALES                         -->
+    <!-- ========================================== -->
+
+    <!-- ADMIN TIC: solo lectura de empleados -->
+    <record id="rule_employee_admin_tic_ro" model="ir.rule">
+        <field name="name">Admin TIC: Lectura empleados</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>    
+    <!-- Grupo: Docente -->
+    <record id="group_docente" model="res.groups">
+        <field name="name">Docente</field>
+        <field name="category_id" ref="base.module_category_human_resources"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
     </record>
 
-    <!-- Admin tiene acceso total por defecto -->
+    <!-- Grupo: Coordinador Académico -->
+    <record id="group_coord_academico" model="res.groups">
+        <field name="name">Coordinador Académico FIE</field>
+        <field name="category_id" ref="base.module_category_human_resources"/>
+        <field name="comment">Valida y aprueba perfiles de su unidad académica</field>
+    </record>
+
+    <!-- Grupo: Administrador Institucional -->
+    <record id="group_admin_institucional" model="res.groups">
+        <field name="name">Administrador Institucional FIE</field>
+        <field name="category_id" ref="base.module_category_human_resources"/>
+        <field name="comment">Gestiona todos los docentes, importaciones y publicaciones</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- ========================================== -->
+    <!-- REGLAS DE REGISTRO (ir.rule)              -->
+    <!-- ========================================== -->
+
+    <!-- DOCENTE: Solo ve su propio empleado -->
+    <record id="rule_employee_docente_own" model="ir.rule">
+        <field name="name">Docente: Solo su propio perfil</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_docente'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- COORDINADOR: Ve docentes de su unidad -->
+    <record id="rule_employee_coord_unit" model="ir.rule">
+        <field name="name">Coordinador: Solo su unidad académica</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="domain_force">[('facultad', '=', user.employee_id.facultad.id)]</field>
+        <field name="groups" eval="[(4, ref('group_coord_academico'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- ADMIN INSTITUCIONAL: Ve todos los empleados -->
+    <record id="rule_employee_admin_all" model="ir.rule">
+        <field name="name">Admin Institucional: Todos los docentes FIE</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_admin_institucional'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- ========================================== -->
+    <!-- REGLAS PARA employee_import               -->
+    <!-- ========================================== -->
+
+    <!-- DOCENTE: No puede ver importaciones masivas -->
+    <record id="rule_import_docente_none" model="ir.rule">
+        <field name="name">Docente: Sin acceso a importaciones</field>
+        <field name="model_id" ref="model_employee_import"/>
+        <field name="domain_force">[(0, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_docente'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- COORDINADOR: Solo lectura de importaciones de su unidad -->
+    <record id="rule_import_coord_read" model="ir.rule">
+        <field name="name">Coordinador: Solo lectura importaciones de su unidad</field>
+        <field name="model_id" ref="model_employee_import"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_coord_academico'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- ADMIN INSTITUCIONAL: Puede crear y gestionar importaciones -->
+    <record id="rule_import_admin_all" model="ir.rule">
+        <field name="name">Admin Institucional: Gestiona importaciones</field>
+        <field name="model_id" ref="model_employee_import"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_admin_institucional'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- ========================================== -->
+    <!-- REGLAS PARA dataset_version               -->
+    <!-- ========================================== -->
+
+    <record id="rule_dataset_docente_none" model="ir.rule">
+        <field name="name">Docente: Sin acceso a versiones de dataset</field>
+        <field name="model_id" ref="model_google_sheets_dataset_version"/>
+        <field name="domain_force">[(0, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_docente'))]"/>
+    </record>
+
+    <record id="rule_dataset_coord_read" model="ir.rule">
+        <field name="name">Coordinador: Solo lectura de versiones</field>
+        <field name="model_id" ref="model_google_sheets_dataset_version"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_coord_academico'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+    </record>
+
+    <record id="rule_dataset_admin_all" model="ir.rule">
+        <field name="name">Admin Institucional: Gestiona versiones</field>
+        <field name="model_id" ref="model_google_sheets_dataset_version"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_admin_institucional'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+    </record>
 </odoo>

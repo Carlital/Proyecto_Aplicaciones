@@ -44,16 +44,24 @@
         </field>
     </record>
 
+    <menuitem id="menu_hr_gs_import"
+              name="Google Sheets Import"
+              parent="hr.menu_hr_root"
+              sequence="10"
+              groups="hr.group_hr_user"/>
+
+    <!-- Tu acción -->
     <record id="action_google_sheets_dataset_versions" model="ir.actions.act_window">
         <field name="name">Dataset Versions</field>
         <field name="res_model">google.sheets.dataset.version</field>
         <field name="view_mode">tree,form</field>
     </record>
 
+    <!-- Menú hijo, ahora sí con padre existente -->
     <menuitem id="menu_google_sheets_dataset_versions"
-            name="Dataset Versions"
-            parent="google_sheets_import.menu_hr_gs_import"
-            action="google_sheets_import.action_google_sheets_dataset_versions"
-            sequence="20"
-            groups="hr.group_hr_user"/>
+              name="Dataset Versions"
+              parent="menu_hr_gs_import"
+              action="google_sheets_import.action_google_sheets_dataset_versions"
+              sequence="20"
+              groups="google_sheets_import.group_admin_institucional,base.group_system"/>
 </odoo>

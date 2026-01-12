@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_res_users_form_coord_facultad" model="ir.ui.view">
+    <field name="name">res.users.form.coord.facultad</field>
+    <field name="model">res.users</field>
+    <field name="inherit_id" ref="base.view_users_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//page[@name='access_rights']/group[last()]" position="after">
+        <group string="Unidad Académica" groups="google_sheets_import.group_coord_academico">
+          <field name="employee_id" required="1"/>
+          <field name="facultad" string="Facultad" required="1"/>
+        </group>
+      </xpath>
+    </field>
+  </record>
+</odoo>
