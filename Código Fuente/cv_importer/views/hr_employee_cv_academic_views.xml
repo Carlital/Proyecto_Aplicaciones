@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Extender formulario de hr.employee para agregar botón y tab -->
+    <record id="view_employee_form_cv_academic_inherit" model="ir.ui.view">
+        <field name="name">hr.employee.form.cv.academic.inherit</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- Agregar botón estadístico en button_box -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_academic_degrees"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-graduation-cap">
+                    <field name="cv_academic_degree_count" widget="statinfo" string="Degrees"/>
+                </button>
+            </xpath>
+
+            <!-- Agregar página/tab para títulos académicos normalizados -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Academic Degrees (Normalized)" 
+                      name="page_academic_degrees">
+                    <field name="cv_academic_degree_ids" 
+                           context="{'default_employee_id': active_id}">
+                        <tree editable="bottom">
+                            <field name="degree_type"/>
+                            <field name="degree_title"/>
+                            <field name="institution"/>
+                            <field name="source" optional="hide"/>
+                        </tree>
+                    </field>
+                    <group>
+                        <div class="alert alert-info" role="alert" style="margin-top: 10px;">
+                            <i class="fa fa-info-circle"/> 
+                            <strong>Note:</strong> This is the normalized model for academic degrees. 
+                            The legacy field "Títulos Académicos" (x_titulos_academicos) will be phased out in future versions.
+                        </div>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

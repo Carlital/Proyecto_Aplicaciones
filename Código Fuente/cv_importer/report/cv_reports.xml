@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Reporte: Listado de CV aprobados/publicados -->
+    <report
+        id="action_report_cv_validated_list"
+        string="Listado de CV validados/publicados"
+        model="cv.document"
+        report_type="qweb-pdf"
+        name="cv_importer.report_cv_validated_list"
+        file="cv_importer.report_cv_validated_list"
+        print_report_name="'CV_Validados_%s' % (object.employee_id.name or '')"
+    />
+
+    <template id="report_cv_validated_list">
+        <t t-call="web.external_layout">
+            <div class="page">
+                <h2>Listado de CV validados / publicados</h2>
+                <p>
+                    <strong>Fecha de generación:</strong>
+                    <span t-esc="datetime.datetime.now()"/>
+                </p>
+
+                <table class="table table-sm o_main_table">
+                    <thead>
+                        <tr>
+                            <th>Docente</th>
+                            <th>Cédula</th>
+                            <th>Estado</th>
+                            <th>Publicado en web</th>
+                            <th>Coordinador</th>
+                            <th>Fecha aprobación admin</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="docs" t-as="doc">
+                            <tr>
+                                <td t-esc="doc.employee_id.name"/>
+                                <td t-esc="doc.cedula"/>
+                                <td t-esc="doc.state"/>
+                                <td>
+                                    <t t-if="doc.x_website_published">Sí</t>
+                                    <t t-else="">No</t>
+                                </td>
+                                <td t-esc="doc.x_coord_validated_by.name or ''"/>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+        </t>
+    </template>
+</odoo>

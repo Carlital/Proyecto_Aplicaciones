@@ -1,66 +1,332 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <record id="cv_document_docente_rule" model="ir.rule">
+        <field name="name">CV Document Docente: solo sus documentos</field>
+        <field name="model_id" ref="cv_importer.model_cv_document"/>
+        <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('google_sheets_import.group_docente'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="cv_document_personal_rule" model="ir.rule">
+        <field name="name">CV Document Coord/Admin acceso completo</field>
+        <field name="model_id" ref="cv_importer.model_cv_document"/>
+        <field name="domain_force">[(1,'=',1)]</field>
+        <field name="groups" eval="[
+            (4, ref('google_sheets_import.group_coord_academico')),
+            (4, ref('google_sheets_import.group_admin_institucional'))
+        ]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="cv_document_admin_tic_rule" model="ir.rule">
+        <field name="name">CV Document Admin TIC Readonly</field>
+        <field name="model_id" ref="cv_importer.model_cv_document"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('cv_importer.group_admin_tic'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Acceso al historial de CV -->
+    <record id="access_cv_document_history_coord" model="ir.model.access">
+        <field name="name">cv.document.history coord</field>
+        <field name="model_id" ref="cv_importer.model_cv_document_history"/>
+        <field name="group_id" ref="google_sheets_import.group_coord_academico"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+    <record id="access_cv_document_history_admin" model="ir.model.access">
+        <field name="name">cv.document.history admin</field>
+        <field name="model_id" ref="cv_importer.model_cv_document_history"/>
+        <field name="group_id" ref="google_sheets_import.group_admin_institucional"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+
+    <!-- ===================== -->
+    <!-- FORM VIEW cv.document -->
+    <!-- ===================== -->
     <record id="view_cv_document_form" model="ir.ui.view">
         <field name="name">cv.document.form</field>
         <field name="model">cv.document</field>
+        <field name="groups_id" eval="[(6,0,[ref('google_sheets_import.group_coord_academico'), ref('google_sheets_import.group_admin_institucional'), ref('google_sheets_import.group_docente'), ref('cv_importer.group_admin_tic')])]"/>
         <field name="arch" type="xml">
             <form string="Documento CV">
                 <header>
-                    <button string="Descargar desde URL" type="object" name="action_download_cv_from_url" 
-                            class="btn-primary" invisible="state not in ['draft', 'error']"/>
-                    <button string="Descargar y Procesar" type="object" name="action_download_and_process" 
-                            class="btn-success" invisible="state not in ['draft', 'error']"/>
-                    <button string="Probar Conexión N8N" type="object" name="action_test_n8n_connection" 
-                            class="btn-warning" invisible="state == 'processing'"/>
-                    <button string="Subir a N8N" type="object" name="action_upload_to_n8n" 
-                            class="btn-primary" invisible="state not in ['uploaded', 'error']"/>
-                    <button string="Aplicar Datos" type="object" name="action_apply_extracted_data" 
-                            class="btn-success" invisible="state != 'processed'"/>
-                    <button string="Resetear" type="object" name="action_reset_to_draft" 
-                            class="btn-secondary" invisible="state == 'draft'"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,uploaded,processing,processed"/>
+                    <!-- Botón: probar conexión con N8N -->
+                    <button string="Probar Conexión N8N"
+                            type="object"
+                            name="action_test_n8n_connection"
+                            class="btn-warning"
+                            invisible="state == 'processing'"/>
+
+                    <!-- Botón: subir a N8N -->
+                    <button string="Subir a N8N"
+                            type="object"
+                            name="action_upload_to_n8n"
+                            class="btn-primary"
+                            invisible="state not in ['draft', 'error']"/>
+
+
+                    <!-- Docente: solicitar revisión al coordinador -->
+                    <button string="Solicitar revisión"
+                            type="object"
+                            name="action_submit_for_coord_review"
+                            class="btn-secondary"
+                            groups="google_sheets_import.group_docente"
+                            invisible="state == 'coord_review'"/>
+
+                    <!-- Coordinador: aprobar revisión académica -->
+                    <button string="Aprobar (Coordinador)"
+                            type="object"
+                            name="action_coord_approve"
+                            class="btn-success"
+                            groups="google_sheets_import.group_coord_academico"
+                            invisible="state != 'coord_review'"/>
+
+                    <!-- Coordinador: rechazar -->
+                    <button string="Rechazar (Coordinador)"
+                            type="object"
+                            name="action_coord_reject"
+                            class="btn-danger"
+                            groups="google_sheets_import.group_coord_academico"
+                            invisible="state != 'coord_review'"/>
+
+                    <!-- Coordinador: despublicar perfil -->
+                    <button string="Despublicar"
+                            type="object"
+                            name="action_unpublish"
+                            class="btn-secondary"
+                            groups="google_sheets_import.group_coord_academico"
+                            invisible="state != 'published'"/>
+
+                    <!-- Ver página pública -->
+                    <button string="Ver perfil público"
+                            type="object"
+                            name="action_open_webpage"
+                            class="btn-link"
+                            invisible="state != 'published'"/>
+
+                    <!-- Historial de versiones -->
+                    <button string="Historial"
+                            type="object"
+                            name="action_view_history"
+                            class="btn-secondary"
+                            groups="google_sheets_import.group_coord_academico,google_sheets_import.group_admin_institucional,cv_importer.group_admin_tic"/>
+
+                    <!-- Barra de estado -->
+                    <field name="state"
+                        widget="statusbar"
+                        statusbar_visible="draft,coord_review,published,rejected"/>
                 </header>
+
                 <sheet>
                     <div class="oe_title">
                         <h1>
                             <field name="name" placeholder="Nombre del documento"/>
                         </h1>
                     </div>
+
+                    <!-- Datos generales del documento -->
                     <group>
                         <group>
                             <field name="employee_id" required="1"/>
                             <field name="cedula" readonly="1"/>
-                            <field name="cv_filename" readonly="1"/>
                             <field name="cv_download_url" readonly="1"/>
-                            <field name="auto_downloaded" readonly="1"/>
                         </group>
                         <group>
-                            <field name="n8n_webhook_url"/>
+                            <field name="n8n_webhook_url" readonly="1"/>
+                            <field name="n8n_job_id" readonly="1"/>
+                            <field name="n8n_status" readonly="1"/>
+                            <field name="n8n_last_callback" readonly="1"/>
+                            <field name="x_coord_validation_notes" placeholder="Observaciones del coordinador"/>
                         </group>
                     </group>
-                    
-                    <group string="Archivo CV">
-                        <field name="cv_file" filename="cv_filename" 
-                               readonly="auto_downloaded == True"/>
-                        <div invisible="auto_downloaded == False" class="alert alert-info">
-                            <i class="fa fa-info-circle"/> Este CV fue descargado automáticamente desde la URL institucional.
-                        </div>
-                    </group>
-                    
+
                     <notebook>
-                        <page string="Datos Extraídos" invisible="state not in ['processed']">
+
+                        <!-- ================================== -->
+                        <!-- Pestaña: Formación Académica       -->
+                        <!-- ================================== -->
+                        <!-- Oculta si no hay registros en cv_academic_degree_ids -->
+                        <page string="Formación Académica">
+                            <field name="cv_academic_degree_ids" editable="bottom" modifiers="{'readonly':[('state','=','coord_review')]}">
+                                <tree editable="bottom">
+                                    <field name="degree_type"/>
+                                    <field name="degree_title"/>
+                                    <field name="institution"/>
+                                    <field name="source"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- ================================== -->
+                        <!-- Pestaña: Experiencia Laboral       -->
+                        <!-- ================================== -->
+                        <page string="Experiencia Laboral">
+                            <field name="cv_work_experience_ids" editable="bottom" modifiers="{'readonly':[('state','=','coord_review')]}">
+                                <tree editable="bottom">
+                                    <field name="position"/>
+                                    <field name="company"/>
+                                    <field name="department"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                    <field name="display_period"/>
+                                    <field name="source"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- ================================== -->
+                        <!-- Pestaña: Materias                  -->
+                        <!-- ================================== -->
+                        <page string="Materias">
+                            <field name="cv_materias_ids" editable="bottom" modifiers="{'readonly':[('state','=','coord_review')]}">
+                                <tree editable="bottom">
+                                    <field name="asignatura"/>
+                                    <field name="course_code"/>
+                                    <field name="carrera_id"/>
+                                    <field name="facultad_id"/>
+                                    <field name="source"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- ================================== -->
+                        <!-- Pestaña: Certificaciones           -->
+                        <!-- ================================== -->
+                        <page string="Certificaciones">
+                            <field name="cv_certification_ids" editable="bottom" modifiers="{'readonly':[('state','=','coord_review')]}">
+                                <tree editable="bottom">
+                                    <field name="certification_name"/>
+                                    <field name="certification_type"/>
+                                    <field name="institution"/>
+                                    <field name="duration_hours"/>
+                                    <field name="duration_days"/>
+                                    <field name="source"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- ================================== -->
+                        <!-- Pestaña: Logros y Reconocimientos  -->
+                        <!-- ================================== -->
+                        <page string="Logros y Reconocimientos">
+                            <field name="cv_logros_ids" editable="bottom" modifiers="{'readonly':[('state','=','coord_review')]}">
+                                <tree editable="bottom">
+                                    <field name="tipo"/>
+                                    <field name="name"/>
+                                    <field name="awarding_institution"/>
+                                    <field name="award_year"/>
+                                    <field name="source"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- ================================== -->
+                        <!-- Pestaña: Idiomas                   -->
+                        <!-- ================================== -->
+                        <page string="Idiomas">
+                            <field name="cv_language_ids" editable="bottom" modifiers="{'readonly':[('state','=','coord_review')]}">
+                                <tree editable="bottom">
+                                    <field name="language_name"/>
+                                    <field name="writing_level"/>
+                                    <field name="speaking_level"/>
+                                    <field name="proficiency_level"/>
+                                    <field name="source"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- ================================== -->
+                        <!-- Pestaña: Proyectos                 -->
+                        <!-- ================================== -->
+                        <page string="Proyectos">
+                            <field name="cv_project_ids" editable="bottom" modifiers="{'readonly':[('state','=','coord_review')]}">
+                                <tree editable="bottom">
+                                    <field name="project_title"/>
+                                    <field name="project_code"/>
+                                    <field name="project_type"/>
+                                    <field name="institution"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                    <field name="source"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- ================================== -->
+                        <!-- Pestaña: Publicaciones             -->
+                        <!-- ================================== -->
+                        <page string="Publicaciones">
+                            <field name="cv_publication_ids" editable="bottom" modifiers="{'readonly':[('state','=','coord_review')]}">
+                                <tree editable="bottom">
+                                    <field name="title"/>
+                                    <field name="publication_type"/>
+                                    <field name="publication_year"/>
+                                    <field name="publication_date"/>
+                                    <field name="is_indexed"/>
+                                    <field name="indexing_database"/>
+                                    <field name="language"/>
+                                    <field name="source"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- ================================== -->
+                        <!-- Pestaña: Métricas Anuales          -->
+                        <!-- (la dejo siempre visible)           -->
+                        <!-- ================================== -->
+                        <page string="Métricas Anuales">
+                            <field name="cv_yearly_metrics_ids" readonly="1">
+                                <tree>
+                                    <field name="year"/>
+                                    <field name="publications_count"/>
+                                    <field name="logros_count"/>
+                                    <field name="computation_method"/>
+                                </tree>
+                            </field>
+
+                            <group string="Estado de parsing / normalización">
+                                <group>
+                                    <field name="parsing_status" readonly="1"/>
+                                    <field name="parsing_date" readonly="1"/>
+                                    <field name="applied_date" readonly="1"/>
+                                </group>
+                                <group>
+                            <field name="normalized_processing_date" readonly="1"/>
+                        </group>
+                    </group>
+                        </page>
+
+                        <!-- ========================= -->
+                        <!-- Pestaña: Errores          -->
+                        <!-- ========================= -->
+                        <page string="Errores" invisible="(not status_message) and (not parsing_error)">
                             <group>
-                                <field name="extracted_presentacion" widget="text"/>
-                                <field name="extracted_docencia" widget="text"/>
-                                <field name="extracted_proyectos" widget="text"/>
-                                <field name="extracted_publicaciones" widget="text"/>
+                                <group string="Errores de integración / N8N"
+                                       invisible="not status_message">
+                                    <field name="status_message" widget="text" readonly="1"/>
+                                </group>
+                                <group string="Errores de parsing / normalización"
+                                       invisible="not parsing_error">
+                                    <field name="parsing_error" widget="text" readonly="1"/>
+                                </group>
                             </group>
-                        </page>
-                        <page string="Texto Procesado" invisible="processed_text == False">
-                            <field name="processed_text" widget="text" readonly="1"/>
-                        </page>
-                        <page string="Errores" invisible="error_message == False">
-                            <field name="error_message" widget="text" readonly="1"/>
                         </page>
                     </notebook>
                 </sheet>
@@ -68,31 +334,42 @@
         </field>
     </record>
 
-    <!-- Tree View para listar CVs -->
+    <!-- ===================== -->
+    <!-- TREE VIEW cv.document -->
+    <!-- ===================== -->
     <record id="view_cv_document_tree" model="ir.ui.view">
         <field name="name">cv.document.tree</field>
         <field name="model">cv.document</field>
         <field name="arch" type="xml">
-            <tree string="Documentos CV" decoration-success="state=='processed'" 
-                  decoration-danger="state=='error'" decoration-info="state=='processing'">
+            <tree string="Documentos CV"
+                  decoration-success="state=='processed'"
+                  decoration-danger="state=='error'"
+                  decoration-info="state=='processing'">
                 <field name="name"/>
                 <field name="employee_id"/>
                 <field name="cedula"/>
-                <field name="cv_filename"/>
-                <field name="auto_downloaded"/>
                 <field name="state"/>
                 <field name="create_date"/>
-                <button string="Descargar" type="object" name="action_download_and_process" 
-                        icon="fa-download" invisible="state not in ['draft', 'error']"/>
-                <button string="Procesar" type="object" name="action_upload_to_n8n" 
-                        icon="fa-play" invisible="state not in ['uploaded', 'error']"/>
-                <button string="Aplicar" type="object" name="action_apply_extracted_data" 
-                        icon="fa-check" invisible="state != 'processed'"/>
+                <field name="last_state_change"/>
+
+                <button string="Subir"
+                        type="object"
+                        name="action_upload_to_n8n"
+                        icon="fa-upload"
+                        invisible="state not in ['draft','error']"/>
+
+                <button string="Aplicar"
+                        type="object"
+                        name="action_apply_parsed_data"
+                        icon="fa-check"
+                        invisible="state != 'processed'"/>
             </tree>
         </field>
     </record>
 
-    <!-- Vista de búsqueda para cv.document -->
+    <!-- ======================= -->
+    <!-- SEARCH VIEW cv.document -->
+    <!-- ======================= -->
     <record id="view_cv_document_search" model="ir.ui.view">
         <field name="name">cv.document.search</field>
         <field name="model">cv.document</field>
@@ -114,7 +391,9 @@
         </field>
     </record>
 
-    <!-- Acción para cv.document -->
+    <!-- ======================= -->
+    <!-- ACCIÓN principal        -->
+    <!-- ======================= -->
     <record id="action_cv_document" model="ir.actions.act_window">
         <field name="name">Documentos CV</field>
         <field name="res_model">cv.document</field>
@@ -125,52 +404,179 @@
                 Crear un nuevo documento CV
             </p>
             <p>
-                Sube archivos PDF de CVs de empleados para procesarlos automáticamente con N8N.
+                Sube CVs de empleados (o dispara la descarga automática)
+                para procesarlos con N8N y normalizarlos en las tablas <code>cv.*</code>.
             </p>
         </field>
     </record>
 
-    <!-- Menú principal -->
-    <menuitem id="menu_cv_importer_root" name="CV Importer" parent="hr.menu_hr_root" sequence="50"/>
-    
-    <!-- Submenús -->
-    <menuitem id="menu_cv_document" name="Documentos CV" parent="menu_cv_importer_root" 
-              action="action_cv_document" sequence="10"/>
+    <!-- Acción y menú específicos para docentes (filtrados a sus propios CVs) -->
+    <record id="action_cv_document_docente" model="ir.actions.act_window">
+        <field name="name">Mis Documentos CV</field>
+        <field name="res_model">cv.document</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_cv_document_search"/>
+        <field name="domain">['|', ('employee_id.user_id', '=', uid), ('create_uid', '=', uid)]</field>
+    </record>
 
-    <!-- Wizard para subir CV -->
-    <record id="view_cv_upload_wizard" model="ir.ui.view">
-        <field name="name">cv.upload.wizard</field>
-        <field name="model">cv.document</field>
+    <!-- ============================= -->
+    <!-- HISTORIAL DE VERSIONES        -->
+    <!-- ============================= -->
+    <record id="view_cv_document_history_tree" model="ir.ui.view">
+        <field name="name">cv.document.history.tree</field>
+        <field name="model">cv.document.history</field>
         <field name="arch" type="xml">
-            <form string="Subir CV">
+            <tree create="false" delete="false">
+                <field name="create_date"/>
+                <field name="version"/>
+                <field name="state"/>
+                <field name="is_published"/>
+                <field name="is_current"/>
+                <field name="coord_comment"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_cv_document_history_form" model="ir.ui.view">
+        <field name="name">cv.document.history.form</field>
+        <field name="model">cv.document.history</field>
+        <field name="arch" type="xml">
+            <form string="Snapshot de CV" create="false" delete="false" edit="false">
                 <group>
-                    <field name="employee_id" required="1"/>
-                    <field name="cv_file" filename="cv_filename" required="1"/>
-                    <field name="cv_filename" invisible="1"/>
-                    <field name="n8n_webhook_url"/>
+                    <group>
+                        <field name="document_id" readonly="1"/>
+                        <field name="version" readonly="1"/>
+                        <field name="state" readonly="1"/>
+                        <field name="is_published" readonly="1"/>
+                        <field name="is_current" readonly="1"/>
+                        <field name="create_date" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="coord_comment" readonly="1"/>
+                        <field name="data_json" widget="text" readonly="1"/>
+                    </group>
                 </group>
-                <footer>
-                    <button string="Subir y Procesar" type="object" name="action_upload_to_n8n" class="btn-primary"/>
-                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
-                </footer>
             </form>
         </field>
     </record>
 
-    <!-- Acción para wizard -->
-    <record id="action_cv_upload_wizard" model="ir.actions.act_window">
-        <field name="name">Subir CV</field>
-        <field name="res_model">cv.document</field>
-        <field name="view_mode">form</field>
-        <field name="view_id" ref="view_cv_upload_wizard"/>
-        <field name="target">new</field>
+    <record id="action_cv_document_history" model="ir.actions.act_window">
+        <field name="name">Historial de versiones</field>
+        <field name="res_model">cv.document.history</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_cv_document_history_tree"/>
     </record>
 
-    <!-- Menú para wizard -->
-    <menuitem id="menu_cv_upload_wizard" name="Subir CV" parent="menu_cv_importer_root" 
-              action="action_cv_upload_wizard" sequence="5"/>
 
-    <!-- Vista para descarga masiva -->
+
+
+
+    <!-- ============================= -->
+    <!-- HISTORIAL DE PROCESAMIENTO   -->
+    <!-- ============================= -->
+
+    <record id="view_cv_document_trace_tree" model="ir.ui.view">
+        <field name="name">cv.document.trace.tree</field>
+        <field name="model">cv.document</field>
+        <field name="arch" type="xml">
+            <tree string="Historial de Procesamiento"
+                  create="false" delete="false">
+                <field name="create_date"/>
+                <field name="employee_id"/>
+                <field name="cedula"/>
+                <field name="state"/>
+                <field name="n8n_status"/>
+                <field name="status_message"/>
+
+                <!-- Fechas funcionales para el Admin Institucional -->
+                <field name="x_coord_validated_date"/>
+                <field name="last_state_change"/>
+
+
+                <!-- Campos más técnicos al final -->
+                <field name="n8n_job_id"/>
+                <field name="n8n_last_callback"/>
+            </tree>
+        </field>
+    </record>
+
+
+    <record id="view_cv_document_trace_search" model="ir.ui.view">
+        <field name="name">cv.document.trace.search</field>
+        <field name="model">cv.document</field>
+        <field name="arch" type="xml">
+            <search string="Historial de procesamiento">
+                <field name="employee_id"/>
+                <field name="cedula"/>
+                <field name="state"/>
+                <field name="n8n_status"/>
+
+                <filter name="only_errors"
+                        string="Solo errores"
+                        domain="['|', ('state', '=', 'error'), ('n8n_status', '=', 'error')]"/>
+
+                <filter name="only_processing"
+                        string="En proceso"
+                        domain="[('state', '=', 'processing')]"/>
+
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_employee"
+                            string="Docente"
+                            context="{'group_by': 'employee_id'}"/>
+                    <filter name="group_state"
+                            string="Estado"
+                            context="{'group_by': 'state'}"/>
+                    <filter name="group_create_date"
+                            string="Fecha creación"
+                            context="{'group_by': 'create_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_cv_document_trace" model="ir.actions.act_window">
+        <field name="name">Historial de Procesamiento</field>
+        <field name="res_model">cv.document</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_cv_document_trace_tree"/>
+        <field name="search_view_id" ref="view_cv_document_trace_search"/>
+        <field name="context">{}</field>
+    </record>
+
+
+
+
+
+    <!-- MENÚS Y BULK DOWNLOADER -->
+    <menuitem id="menu_cv_importer_root"
+              name="CV Importer"
+              parent="hr.menu_hr_root"
+              sequence="50"
+              groups="google_sheets_import.group_docente,google_sheets_import.group_coord_academico,google_sheets_import.group_admin_institucional,cv_importer.group_admin_tic"/>
+
+
+
+    <menuitem id="menu_cv_auditoria_root"
+              name="Auditoría de Importaciones"
+              parent="menu_cv_importer_root"
+              sequence="30"
+              groups="google_sheets_import.group_admin_institucional,cv_importer.group_admin_tic"/>
+
+
+    <menuitem id="menu_cv_document"
+              name="Documentos CV"
+              parent="menu_cv_importer_root"
+              action="action_cv_document_trace"
+              sequence="10"
+              groups="google_sheets_import.group_coord_academico,google_sheets_import.group_admin_institucional,cv_importer.group_admin_tic"/>
+
+    <menuitem id="menu_cv_document_docente"
+              name="Mis Documentos CV"
+              parent="menu_cv_importer_root"
+              action="action_cv_document_docente"
+              sequence="9"
+              groups="google_sheets_import.group_docente"/>
+
     <record id="view_cv_bulk_downloader_form" model="ir.ui.view">
         <field name="name">cv.bulk.downloader.form</field>
         <field name="model">cv.bulk.downloader</field>
@@ -182,34 +588,58 @@
                         <field name="overwrite_existing"/>
                     </group>
                 </group>
-                
+
                 <group string="Empleados a Procesar" invisible="download_all == True">
-                    <field name="employee_ids" nolabel="1" 
+                    <field name="employee_ids"
+                           nolabel="1"
                            domain="[('identification_id', '!=', False)]"/>
                 </group>
-                
+
                 <div invisible="download_all == False" class="alert alert-info">
-                    <i class="fa fa-info-circle"/> Se procesarán todos los empleados que tengan cédula.
+                    <i class="fa fa-info-circle"/>
+                    Se procesarán todos los empleados que tengan cédula.
                 </div>
-                
+
                 <footer>
-                    <button string="Descargar CVs" type="object" name="action_download_cvs" class="btn-primary"/>
-                    <button string="Ver CVs Existentes" type="object" name="action_view_cv_documents" class="btn-secondary"/>
-                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                    <button string="Descargar CVs"
+                            type="object"
+                            name="action_download_cvs"
+                            class="btn-primary"/>
+                    <button string="Ver CVs Existentes"
+                            type="object"
+                            name="action_view_cv_documents"
+                            class="btn-secondary"/>
+                    <button string="Cancelar"
+                            class="btn-secondary"
+                            special="cancel"/>
                 </footer>
             </form>
         </field>
     </record>
 
-    <!-- Acción para descarga masiva -->
     <record id="action_cv_bulk_downloader" model="ir.actions.act_window">
         <field name="name">Descarga Masiva de CVs</field>
         <field name="res_model">cv.bulk.downloader</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
+        <field name="groups_id" eval="[(6,0,[ref('google_sheets_import.group_admin_institucional'), ref('cv_importer.group_admin_tic')])]"/>
     </record>
 
-    <!-- Menú para descarga masiva -->
-    <menuitem id="menu_cv_bulk_downloader" name="Descarga Masiva" parent="menu_cv_importer_root" 
-              action="action_cv_bulk_downloader" sequence="15"/>
+    <menuitem id="menu_cv_bulk_downloader"
+              name="Descarga Masiva"
+              parent="menu_cv_importer_root"
+              action="action_cv_bulk_downloader"
+              sequence="15"
+              groups="google_sheets_import.group_admin_institucional,cv_importer.group_admin_tic"/>
+
+
+    <!-- Acceso de Auditoría a Versiones de Dataset -->
+    <menuitem id="menu_cv_audit_dataset_versions"
+              name="Versiones de Dataset"
+              parent="menu_cv_auditoria_root"
+              action="google_sheets_import.action_google_sheets_dataset_versions"
+              sequence="20"
+              groups="google_sheets_import.group_admin_institucional"/>
+
+
 </odoo>

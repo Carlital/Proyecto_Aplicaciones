@@ -1,9 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="cv_personal_rule" model="ir.rule">
-        <field name="name">Personal CV Access</field>
-        <field name="model_id" ref="model_cv_import"/>
-        <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
-        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    <!-- ========================================== -->
+    <!-- REGLAS PARA cv.document                   -->
+    <!-- ========================================== -->
+
+    <!-- DOCENTE: Solo ve sus propios CVs -->
+    <record id="rule_cv_document_docente_own" model="ir.rule">
+        <field name="name">Docente: Solo sus propios CVs</field>
+        <field name="model_id" ref="model_cv_document"/>
+        <field name="domain_force">['|', ('employee_id.user_id', '=', user.id), ('create_uid', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('google_sheets_import.group_docente'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
     </record>
+
+    <!-- COORDINADOR: Ve CVs de su unidad -->
+    <record id="rule_cv_document_coord_unit" model="ir.rule">
+        <field name="name">Coordinador: CVs de su unidad</field>
+        <field name="model_id" ref="model_cv_document"/>
+        <field name="domain_force">[('employee_id.department_id', 'in', user.employee_id.department_id.ids)]</field>
+        <field name="groups" eval="[(4, ref('google_sheets_import.group_coord_academico'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- ADMIN INSTITUCIONAL: Ve todos los CVs -->
+    <record id="rule_cv_document_admin_all" model="ir.rule">
+        <field name="name">Admin Institucional: Todos los CVs</field>
+        <field name="model_id" ref="model_cv_document"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('google_sheets_import.group_admin_institucional'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- ADMIN TIC: Todos los CVs con gestión técnica -->
+    <record id="rule_cv_document_admin_tic" model="ir.rule">
+        <field name="name">Admin TIC: Gestión técnica de CVs</field>
+        <field name="model_id" ref="model_cv_document"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- ========================================== -->
+    <!-- REGLAS PARA MODELOS ACADÉMICOS            -->
+    <!-- ========================================== -->
+
+    <!-- cv.academic.degree -->
+    <record id="rule_academic_degree_docente" model="ir.rule">
+        <field name="name">Docente: Solo sus títulos</field>
+        <field name="model_id" ref="model_cv_academic_degree"/>
+        <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('google_sheets_import.group_docente'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+    </record>
+
+    <record id="rule_academic_degree_coord" model="ir.rule">
+        <field name="name">Coordinador: Títulos de su unidad</field>
+        <field name="model_id" ref="model_cv_academic_degree"/>
+        <field name="domain_force">[('employee_id.facultad', 'in', user.employee_id.facultad.ids)]</field>
+        <field name="groups" eval="[(4, ref('google_sheets_import.group_coord_academico'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+    </record>
+
+    <record id="rule_academic_degree_admin" model="ir.rule">
+        <field name="name">Admin Institucional: Todos los títulos</field>
+        <field name="model_id" ref="model_cv_academic_degree"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('google_sheets_import.group_admin_institucional'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+    </record>
+
+    <record id="rule_metrics_tic" model="ir.rule">
+        <field name="name">Admin TIC: Métricas</field>
+        <field name="model_id" ref="model_cv_metrics"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_cv_document_admin_tic" model="ir.rule">
+    <field name="name">Admin TIC: Lectura CVs</field>
+    <field name="model_id" ref="model_cv_document"/>
+    <field name="domain_force">[(1, '=', 1)]</field>
+    <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+    <field name="perm_read" eval="True"/>
+    <field name="perm_write" eval="False"/>
+    <field name="perm_create" eval="False"/>
+    <field name="perm_unlink" eval="False"/>
+    </record>
+
 </odoo>

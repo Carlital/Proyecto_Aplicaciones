@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Extender formulario de hr.employee para agregar Publications -->
+    <record id="view_employee_form_cv_publication_inherit" model="ir.ui.view">
+        <field name="name">hr.employee.form.cv.publication.inherit</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- Agregar botones estadísticos para Publications -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_publications"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-book">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="cv_publication_count"/>
+                        </span>
+                        <span class="o_stat_text">Publications</span>
+                    </div>
+                </button>
+            </xpath>
+
+            <!-- Agregar tab para Publications -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Publications (Normalized)" 
+                      name="page_publications">
+                    <field name="cv_publication_ids" 
+                           context="{'default_employee_id': active_id}">
+                        <tree editable="bottom">
+                            <field name="publication_year"/>
+                            <field name="title"/>
+                            <field name="publication_type"/>
+                            <field name="is_indexed"/>
+                            <field name="source" optional="hide"/>
+                        </tree>
+                    </field>
+                    <group>
+                        <div class="alert alert-info" role="alert" style="margin-top: 10px;">
+                            <i class="fa fa-info-circle"/> 
+                            <strong>Note:</strong> This is the normalized model for scientific publications. 
+                            The legacy field "Detalle de Publicaciones" (x_publicaciones_detalle) will be phased out in future versions.
+                        </div>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

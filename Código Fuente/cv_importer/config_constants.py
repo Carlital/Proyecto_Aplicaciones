@@ -10,6 +10,3 @@ CV_IMPORT_HEADERS = {
     "User-Agent": "cv-importer/1.0",
     "Accept": "application/json",
 }
-
-# Puedes importar estas constantes donde las necesites:
-# from .config_constants import CV_IMPORT_TIMEOUT, CV_IMPORT_RETRIES, CV_IMPORT_HEADERS

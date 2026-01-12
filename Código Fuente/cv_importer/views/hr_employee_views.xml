@@ -29,8 +29,16 @@
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <button string="Descargar CV Automático" type="object" name="action_download_cv_auto" class="btn-primary"/>
-                <button string="Crear CV Manual" type="object" name="action_create_cv_document" class="btn-secondary"/>
+                <button string="Descargar CV Automático" 
+                        type="object" 
+                        name="action_download_cv_auto" 
+                        class="btn-primary"
+                        groups="google_sheets_import.group_docente"/>
+                <button string="Crear CV Manual" 
+                        type="object" 
+                        name="action_create_cv_document" 
+                        class="btn-secondary"
+                        groups="google_sheets_import.group_admin_institucional"/>
             </xpath>
         </field>
     </record>
@@ -46,4 +54,117 @@
             </xpath>
         </field>
     </record>
+
+    <!-- Vista simplificada para docentes: imagen, datos básicos y acceso a CVs -->
+    <record id="view_hr_employee_docente_simplified" model="ir.ui.view">
+        <field name="name">hr.employee.form.docente.simplified</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="priority" eval="200"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="replace">
+                <sheet string="Perfil Docente" class="o_cv_docente_sheet" groups="google_sheets_import.group_docente,google_sheets_import.group_admin_institucional">
+                    <div class="card-perfil">
+                        <div class="text-center animate__animated animate__fadeInDown">
+                            <div class="foto-container">
+                                <field name="image_1920"
+                                       widget="image"
+                                       class="oe_avatar foto-perfil"
+                                       options="{'zoom': true, 'preview_image': 'avatar_128'}"/>
+                            </div>
+                            <div class="nombre-container">
+                                <h1 class="nombre-docente">
+                                    <field name="name" required="1" readonly="1"/>
+                                </h1>
+                                <p class="cargo-docente">
+                                    <field name="job_title" 
+                                           placeholder="Cargo" 
+                                           readonly="1"/>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="informacion-personal content-card animate__animated animate__fadeInUp">
+                            <ul class="list-group-perfil">
+                                <li class="info-item">
+                                    <i class="fa fa-id-card info-icon"></i>
+                                    <span><strong> Cédula:</strong></span>
+                                    <field name="identification_id" required="1" readonly="1"/>
+                                </li>
+                                <li class="info-item">
+                                    <i class="fa fa-envelope info-icon"></i>
+                                    <span><strong> Email:</strong></span>
+                                    <field name="work_email" widget="email" readonly="1"/>
+                                </li>
+                                <li class="info-item">
+                                    <i class="fa fa-phone info-icon"></i>
+                                    <span><strong> Móvil:</strong></span>
+                                    <field name="mobile_phone" widget="phone" readonly="1"/>
+                                </li>
+                                <li class="info-item">
+                                    <i class="fa fa-university info-icon"></i>
+                                    <span><strong> Facultad:</strong></span>
+                                    <field name="facultad" readonly="1"/>
+                                </li>
+                                <li class="info-item">
+                                    <i class="fa fa-book info-icon"></i>
+                                    <span><strong> Carrera:</strong></span>
+                                    <field name="carrera" readonly="1"/>
+                                </li>
+                                <li class="info-item">
+                                    <i class="fa fa-sitemap info-icon"></i>
+                                    <span><strong> Departamento:</strong></span>
+                                    <field name="department_id" readonly="1"/>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="metricas-academicas content-card animate__animated animate__fadeInUp" style="animation-delay:0.1s;">
+                            <div class="metricas-titulo">Mis CVs</div>
+                            <div class="d-flex gap-2 mb-3">
+                                <button type="object"
+                                        name="action_view_cv_documents"
+                                        class="btn-cv"
+                                        icon="fa-file-pdf-o"> Ver mis CVs
+                                </button>
+                                <button type="object"
+                                        name="action_download_cv_auto"
+                                        class="btn-cv"
+                                        icon="fa-download"> Descargar CV
+                                </button>
+                            </div>
+                            <field name="cv_document_ids" readonly="1">
+                                <tree string="Mis CVs" create="false" delete="false">
+                                    <field name="name"/>
+                                    <field name="state"/>
+                                    <field name="n8n_status"/>
+                                    <field name="n8n_last_callback"/>
+                                </tree>
+                            </field>
+                        </div>
+                    </div>
+                </sheet>
+            </xpath>
+            <!-- Quitar chatter completo para docentes (evita campos restringidos) -->
+            <xpath expr="//div[contains(@class, 'oe_chatter')]" position="replace"/>
+        </field>
+    </record>
+
+    <!-- Acción dedicada para docentes: solo su empleado -->
+    <record id="action_hr_employee_docente_self" model="ir.actions.act_window">
+        <field name="name">Mi Perfil</field>
+        <field name="res_model">hr.employee</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="domain">[('user_id', '=', uid)]</field>
+        <field name="context">{'search_default_my_employee': 1}</field>
+        <field name="groups_id" eval="[(6, 0, [ref('google_sheets_import.group_docente')])]" />
+    </record>
+
+    <!-- Menú para docentes apuntando a la acción filtrada -->
+    <menuitem id="menu_hr_employee_docente_self"
+              name="Mi Perfil Docente"
+              parent="hr.menu_hr_root"
+              action="action_hr_employee_docente_self"
+              groups="google_sheets_import.group_docente"
+              sequence="2"/>
 </odoo>

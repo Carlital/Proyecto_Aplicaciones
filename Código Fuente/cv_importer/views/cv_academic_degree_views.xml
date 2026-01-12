@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+    <!-- Tree View -->
+    <record id="view_cv_academic_degree_tree" model="ir.ui.view">
+        <field name="name">cv.academic.degree.tree</field>
+        <field name="model">cv.academic.degree</field>
+        <field name="arch" type="xml">
+            <tree string="Academic Degrees">
+                <field name="employee_id"/>
+                <field name="degree_type"/>
+                <field name="degree_title"/>
+                <field name="institution"/>
+                <field name="source"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_cv_academic_degree_form" model="ir.ui.view">
+        <field name="name">cv.academic.degree.form</field>
+        <field name="model">cv.academic.degree</field>
+        <field name="arch" type="xml">
+            <form string="Academic Degree">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="degree_title" placeholder="e.g., PhD en Ingeniería Mecánica"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group name="degree_info" string="Degree Information">
+                            <field name="employee_id" options="{'no_create': True}"/>
+                            <field name="degree_type"/>
+                            <field name="institution"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group name="details" string="Additional Details">
+                            <field name="source"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_cv_academic_degree_search" model="ir.ui.view">
+        <field name="name">cv.academic.degree.search</field>
+        <field name="model">cv.academic.degree</field>
+        <field name="arch" type="xml">
+            <search string="Search Academic Degrees">
+                <field name="employee_id"/>
+                <field name="degree_title"/>
+                <field name="institution"/>
+                <field name="degree_type"/>
+                <separator/>
+                <filter string="primaria" 
+                        name="filter_primaria" 
+                        domain="[('degree_type','=','primaria')]"/>
+                <filter string="secundaria" 
+                        name="filter_secundaria" 
+                        domain="[('degree_type','=','secundaria')]"/>
+                <filter string="tecnico superior" 
+                        name="filter_tecnico_superior" 
+                        domain="[('degree_type','=','tecnico superior')]"/>
+                <separator/>
+                <filter string="Manual Entry" 
+                        name="filter_manual" 
+                        domain="[('source','=','manual')]"/>
+                <filter string="Imported" 
+                        name="filter_import" 
+                        domain="[('source','=','import')]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Employee" 
+                            name="group_employee" 
+                            context="{'group_by':'employee_id'}"/>
+                    <filter string="Degree Type" 
+                            name="group_type" 
+                            context="{'group_by':'degree_type'}"/>
+                    <filter string="Institution" 
+                            name="group_institution" 
+                            context="{'group_by':'institution'}"/>
+                    <filter string="Source" 
+                            name="group_source" 
+                            context="{'group_by':'source'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_cv_academic_degree" model="ir.actions.act_window">
+        <field name="name">Academic Degrees</field>
+        <field name="res_model">cv.academic.degree</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new academic degree record
+            </p>
+            <p>
+                Track academic degrees obtained by employees.
+                <br/>
+                This normalized model replaces the legacy text field x_titulos_academicos.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_cv_academic_degree"
+              name="Academic Degrees"
+              parent="menu_cv_importer_root"
+              action="action_cv_academic_degree"
+              sequence="15"/>
+
+</odoo>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="view_cv_work_experience_tree" model="ir.ui.view">
+        <field name="name">cv.work.experience.tree</field>
+        <field name="model">cv.work.experience</field>
+        <field name="arch" type="xml">
+            <tree string="Work Experience">
+                <field name="employee_id"/>
+                <field name="position"/>
+                <field name="company"/>
+                <field name="display_period"/>
+                <field name="duration_months" sum="Total Months"/>
+                <field name="source"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_cv_work_experience_form" model="ir.ui.view">
+        <field name="name">cv.work.experience.form</field>
+        <field name="model">cv.work.experience</field>
+        <field name="arch" type="xml">
+            <form string="Work Experience">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="position" placeholder="e.g., Profesor Titular de Cátedra"/>
+                        </h1>
+                        <h2>
+                            <field name="company" placeholder="e.g., ESPOCH - Escuela Superior Politécnica de Chimborazo"/>
+                        </h2>
+                    </div>
+                    
+                    <group>
+                        <group name="employee_info" string="Employee">
+                            <field name="employee_id" options="{'no_create': True}"/>
+                            <field name="department"/>
+                        </group>
+                        <group name="employment_details" string="Employment Details">
+                            <field name="source"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group name="dates" string="Period">
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <field name="display_period" readonly="1"/>
+                            <field name="duration_months" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group name="responsibilities" string="Responsibilities and Achievements">
+                        <field name="responsibilities" nolabel="1" 
+                               placeholder="Describe main responsibilities, projects, achievements, or notable contributions in this role..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_cv_work_experience_search" model="ir.ui.view">
+        <field name="name">cv.work.experience.search</field>
+        <field name="model">cv.work.experience</field>
+        <field name="arch" type="xml">
+            <search string="Search Work Experience">
+                <field name="employee_id"/>
+                <field name="position"/>
+                <field name="company"/>
+                <field name="department"/>
+                <separator/>
+                <filter string="Manual Entry" 
+                        name="filter_manual" 
+                        domain="[('source','=','manual')]"/>
+                <filter string="Imported" 
+                        name="filter_import" 
+                        domain="[('source','=','import')]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Employee" 
+                            name="group_employee" 
+                            context="{'group_by':'employee_id'}"/>
+                    <filter string="Company" 
+                            name="group_company" 
+                            context="{'group_by':'company'}"/>
+                    <filter string="Source" 
+                            name="group_source" 
+                            context="{'group_by':'source'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_cv_work_experience" model="ir.actions.act_window">
+        <field name="name">Work Experience</field>
+        <field name="res_model">cv.work.experience</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new work experience record
+            </p>
+            <p>
+                Track work experience and positions held by employees.
+                <br/>
+                This normalized model replaces the legacy text field x_experiencia_laboral.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_cv_work_experience"
+              name="Work Experience"
+              parent="menu_cv_importer_root"
+              action="action_cv_work_experience"
+              sequence="16"/>
+
+</odoo>

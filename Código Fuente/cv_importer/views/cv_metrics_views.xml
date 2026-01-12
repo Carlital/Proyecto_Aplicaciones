@@ -7,14 +7,12 @@
       <tree create="false" delete="false">
         <field name="operation_type"/>
         <field name="execution_time"/>
-        <field name="file_size"/>
-        <field name="success"/>
-        <field name="error_message"/>
-        <field name="cv_candidate_id"/>
-        <field name="cache_hits"/>
-        <field name="cache_misses"/>
+        <field name="employee_id"/>
         <field name="imported_at"/>
         <field name="user_id"/>
+        <field name="pdf_pages"/>
+        <field name="pdf_text_length"/>
+        <field name="completeness_ratio"/>
       </tree>
     </field>
   </record>
@@ -27,20 +25,54 @@
         <sheet>
           <group>
             <field name="operation_type"/>
-            <field name="success"/>
             <field name="execution_time"/>
-            <field name="file_size"/>
-            <field name="cv_candidate_id"/>
-            <field name="error_message"/>
-            <field name="cache_hits"/>
-            <field name="cache_misses"/>
+            <field name="employee_id"/>
             <field name="imported_at"/>
             <field name="user_id"/>
+            <field name="pdf_pages"/>
+            <field name="pdf_text_length"/>
+            <field name="completeness_ratio"/>
+
+            <field name="profiling_pre_json" widget="text"/>
+            <field name="profiling_post_json" widget="text"/>
           </group>
         </sheet>
       </form>
     </field>
   </record>
+
+
+
+  <!-- ============================= -->
+  <!-- VISTAS KPIs PARA ADMIN INST  -->
+  <!-- ============================= -->
+
+  <record id="view_cv_metrics_graph_admin" model="ir.ui.view">
+    <field name="name">cv.metrics.graph.admin</field>
+    <field name="model">cv.metrics</field>
+    <field name="arch" type="xml">
+      <graph string="KPIs CV Importer" type="bar">
+        <field name="imported_at" type="row"/>
+        <field name="operation_type" type="col"/>
+        <field name="execution_time" type="measure"/>
+      </graph>
+    </field>
+  </record>
+
+  <record id="view_cv_metrics_pivot_admin" model="ir.ui.view">
+    <field name="name">cv.metrics.pivot.admin</field>
+    <field name="model">cv.metrics</field>
+    <field name="arch" type="xml">
+      <pivot string="KPIs CV Importer">
+        <field name="operation_type" type="row"/>
+        <field name="success" type="col"/>
+        <field name="execution_time" type="measure"/>
+      </pivot>
+    </field>
+  </record>
+
+
+
 
   <record id="action_cv_metrics" model="ir.actions.act_window">
     <field name="name">CV Metrics</field>
@@ -48,6 +80,101 @@
     <field name="view_mode">tree,form</field>
   </record>
 
-  <menuitem id="menu_cv_metrics" name="Métricas" parent="menu_cv_importer_root"
-            action="action_cv_metrics" sequence="20"/>
+
+  <record id="action_cv_metrics_admin" model="ir.actions.act_window">
+    <field name="name">KPIs (Administrativo)</field>
+    <field name="res_model">cv.metrics</field>
+    <field name="view_mode">graph,pivot,tree</field>
+    <field name="view_id" ref="view_cv_metrics_graph_admin"/>
+    <field name="search_view_id" ref="view_cv_metrics_tree"/>
+    <field name="context">{'group_by': 'operation_type'}</field>
+  </record>
+
+
+
+
+  <menuitem id="menu_cv_metrics" 
+            name="Métricas Técnicas" 
+            parent="menu_cv_auditoria_root"
+            action="action_cv_metrics" 
+            sequence="20"
+            groups="cv_importer.group_admin_tic,google_sheets_import.group_admin_institucional"/>
+
+
+
+  <!-- =============================== -->
+  <!-- Vistas para cv.yearly.metrics   -->
+  <!-- =============================== -->
+
+  <record id="view_cv_yearly_metrics_tree" model="ir.ui.view">
+    <field name="name">cv.yearly.metrics.tree</field>
+    <field name="model">cv.yearly.metrics</field>
+    <field name="arch" type="xml">
+      <tree string="Indicadores Académicos por Año" create="false" delete="false">
+        <field name="year"/>
+        <field name="employee_id"/>
+        <field name="publications_count"/>
+        <field name="indexed_publications_count"/>
+
+        <!-- LOGROS -->
+        <field name="logros_count"/>
+
+        <!-- EXPERIENCIA -->
+        <field name="years_of_experience"/>
+        <field name="years_in_academia"/>
+
+        <!-- METADATOS -->
+        <field name="computation_method"/>
+        <field name="last_computed_date"/>
+      </tree>
+    </field>
+  </record>
+
+  <record id="view_cv_yearly_metrics_graph" model="ir.ui.view">
+    <field name="name">cv.yearly.metrics.graph</field>
+    <field name="model">cv.yearly.metrics</field>
+    <field name="arch" type="xml">
+      <graph string="Indicadores Académicos"
+             type="bar">
+        <field name="publications_count" type="measure"/>
+        <field name="logros_count" type="measure"/>
+        <field name="year" type="row"/>
+        <field name="employee_id" type="col"/>
+      </graph>
+    </field>
+  </record>
+
+  <record id="view_cv_yearly_metrics_search" model="ir.ui.view">
+    <field name="name">cv.yearly.metrics.search</field>
+    <field name="model">cv.yearly.metrics</field>
+    <field name="arch" type="xml">
+      <search string="Buscar Indicadores Académicos">
+        <field name="employee_id"/>
+        <field name="year"/>
+        <group expand="0" string="Agrupar por">
+          <filter name="group_year" string="Año" context="{'group_by': 'year'}"/>
+          <filter name="group_employee" string="Docente" context="{'group_by': 'employee_id'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_cv_yearly_metrics_academic" model="ir.actions.act_window">
+    <field name="name">Indicadores Académicos</field>
+    <field name="res_model">cv.yearly.metrics</field>
+    <field name="view_mode">tree,graph</field>
+    <field name="view_id" ref="view_cv_yearly_metrics_tree"/>
+    <field name="search_view_id" ref="view_cv_yearly_metrics_search"/>
+    <field name="context">{}</field>
+  </record>
+
+  <menuitem id="menu_cv_yearly_metrics_academic"
+            name="Indicadores Académicos"
+            parent="menu_cv_auditoria_root"
+            action="action_cv_yearly_metrics_academic"
+            sequence="30"
+            groups="google_sheets_import.group_admin_institucional"/>
+
+
+
 </odoo>

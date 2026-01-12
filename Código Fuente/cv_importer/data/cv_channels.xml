@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Canal general para notificaciones de CV -->
+    <record id="cv_channel_general" model="mail.channel">
+        <field name="name">CV Revisiones - General</field>
+        <field name="channel_type">channel</field>
+        <field name="public">private</field>
+        <field name="email_send">False</field>
+    </record>
+</odoo>

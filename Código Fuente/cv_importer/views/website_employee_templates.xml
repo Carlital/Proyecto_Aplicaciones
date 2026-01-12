@@ -1,0 +1,1089 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- =========================================================
+       HEREDAR TEMPLATE BASE Y AGREGAR CONTENIDO EUR-ACE
+       Solo consume datos normalizados desde cv_importer
+     ========================================================= -->
+  <template id="perfil_docente_template" 
+            name="Perfil Docente (EUR-ACE + Datos Normalizados)"
+            inherit_id="cv_importer.employee_profile_base"
+            primary="True">
+
+    <!-- LADO IZQUIERDO: Información personal (normalizada) -->
+    <xpath expr="//div[@class='informacion-personal']//ul" position="replace">
+      <ul class="list-group-perfil text-start">
+        <li class="info-item">
+          <i class="fa fa-id-card info-icon"></i>
+          <span>
+            <strong>Cédula:</strong>
+            <t t-esc="empleado.identification_id or 'No registrado'"/>
+          </span>
+        </li>
+        <li class="info-item">
+          <i class="fa fa-venus-mars info-icon"></i>
+          <span>
+            <strong>Género:</strong>
+            <t t-if="empleado.gender == 'male'">Masculino</t>
+            <t t-elif="empleado.gender == 'female'">Femenino</t>
+            <t t-elif="empleado.gender == 'other'">Otro</t>
+            <t t-else="">No especificado</t>
+          </span>
+        </li>
+        <li class="info-item">
+          <i class="fa fa-clock-o info-icon"></i>
+          <span>
+            <strong>Dedicación:</strong>
+            <t t-if="experience_years is not None">
+              <t t-esc="experience_years"/> años
+            </t>
+            <t t-else="">
+              No se ha ingresado este valor
+            </t>
+          </span>
+        </li>
+        <li class="info-item">
+          <i class="fa fa-university info-icon"></i>
+          <span>
+            <strong>Facultad:</strong>
+            <t t-if="empleado.facultad and empleado.facultad.id">
+              <t t-esc="empleado.facultad.name or 'Sin nombre'"/>
+            </t>
+            <t t-else="">
+              No asignada
+            </t>
+          </span>
+        </li>
+        <li class="info-item">
+          <i class="fa fa-book info-icon"></i>
+          <span>
+            <strong>Carrera:</strong>
+            <t t-if="empleado.carrera and empleado.carrera.id">
+              <t t-esc="empleado.carrera.name or 'Sin nombre'"/>
+            </t>
+            <t t-else="">
+              No asignada
+            </t>
+          </span>
+        </li>
+        <li class="info-item">
+          <i class="fa fa-envelope info-icon"></i>
+          <span>
+            <strong>Email institucional:</strong>
+            <t t-if="empleado.work_email">
+              <a t-att-href="'mailto:' + empleado.work_email" class="email-link">
+                <t t-esc="empleado.work_email"/>
+              </a>
+            </t>
+            <t t-else="">
+              No registrado
+            </t>
+          </span>
+        </li>
+      </ul>
+    </xpath>
+
+    <!-- Métricas de la tarjeta lateral -->
+    <xpath expr="//div[@class='metricas-grid']" position="replace">
+      <div class="metricas-grid">
+        <div class="metrica-card">
+          <i class="fa fa-calendar metrica-icon"></i>
+          <div class="metrica-numero">
+            <t t-if="experience_years is not None">
+              <t t-esc="experience_years"/>
+            </t>
+            <t t-else="">–</t>
+          </div>
+          <div class="metrica-label">Años Experiencia</div>
+        </div>
+        <div class="metrica-card">
+          <i class="fa fa-file-text metrica-icon"></i>
+          <div class="metrica-numero"><t t-esc="total_publicaciones or 0"/></div>
+          <div class="metrica-label">Publicaciones</div>
+        </div>
+        <div class="metrica-card">
+          <i class="fa fa-lightbulb-o metrica-icon"></i>
+          <div class="metrica-numero"><t t-esc="total_proyectos or 0"/></div>
+          <div class="metrica-label">Proyectos</div>
+        </div>
+        <div class="metrica-card">
+          <i class="fa fa-star metrica-icon"></i>
+          <div class="metrica-numero"><t t-esc="total_logros or 0"/></div>
+          <div class="metrica-label">Logros</div>
+        </div>
+      </div>
+    </xpath>
+
+    <!-- CONTENIDO PRINCIPAL: Tabs EUR-ACE -->
+    <xpath expr="//div[@id='profile_main_content']" position="replace">
+      <div id="profile_main_content">
+
+        <!-- ==== FLAGS PARA MOSTRAR / OCULTAR TABS ==== -->
+        <!-- Diseño: solo si hay proyectos -->
+        <t t-set="has_diseno" 
+           t-value="True if (proyectos and len(proyectos) &gt; 0) else False"/>
+        <!-- Investigación: solo si hay publicaciones o logros -->
+        <t t-set="has_investigacion" 
+           t-value="True if ((publicaciones and len(publicaciones) &gt; 0) or (logros and len(logros) &gt; 0)) else False"/>
+        <!-- Práctica: solo si hay certificaciones o experiencia laboral -->
+        <t t-set="has_practica" 
+           t-value="True if ((certificaciones_por_institucion and len(certificaciones_por_institucion) &gt; 0) or (experiencia_laboral and len(experiencia_laboral) &gt; 0)) else False"/>
+
+        <!-- TABS EUR-ACE -->
+        <div class="tabs-container">
+          <ul class="nav nav-tabs custom-tabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" data-bs-toggle="tab" href="#eur_conocimientos">
+                <i class="fa fa-graduation-cap me-2"></i>Conocimientos
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="tab" href="#eur_analisis">
+                <i class="fa fa-line-chart me-2"></i>Análisis
+              </a>
+            </li>
+            <!-- Diseño solo si hay proyectos -->
+            <li class="nav-item" t-if="has_diseno">
+              <a class="nav-link" data-bs-toggle="tab" href="#eur_diseno">
+                <i class="fa fa-cubes me-2"></i>Diseño
+              </a>
+            </li>
+            <!-- Investigación solo si hay publicaciones o logros -->
+            <li class="nav-item" t-if="has_investigacion">
+              <a class="nav-link" data-bs-toggle="tab" href="#eur_investigacion">
+                <i class="fa fa-university me-2"></i>Investigación
+              </a>
+            </li>
+            <!-- Práctica solo si hay certificaciones o experiencia laboral -->
+            <li class="nav-item" t-if="has_practica">
+              <a class="nav-link" data-bs-toggle="tab" href="#eur_practica">
+                <i class="fa fa-flask me-2"></i>Práctica
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="tab" href="#eur_transferibles">
+                <i class="fa fa-users me-2"></i>Transferibles
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- CONTENIDO TABS -->
+        <div class="tab-content-container">
+          <div class="tab-content border-0 p-0">
+            
+            <!-- ================================================== -->
+            <!-- TAB: CONOCIMIENTOS Y COMPRENSIÓN -->
+            <!-- ================================================== -->
+            <div class="tab-pane fade show active" id="eur_conocimientos">
+              <div class="tab-header">
+                <h5><i class="fa fa-graduation-cap me-2"></i>Conocimientos y Comprensión</h5>
+              </div>
+              <div class="contenido-tab">
+                <!-- Presentación automática -->
+                <t t-call="cv_importer.s_docente_presentacion_cv"/>
+                
+                <!-- Títulos académicos -->
+                <t t-call="cv_importer.s_titulos_academicos_cv"/>
+                
+                <!-- Información general -->
+                <t t-call="cv_importer.s_info_general_cv"/>
+                
+                <!-- Materias/Asignaturas -->
+                <t t-call="cv_importer.s_materias_cv"/>
+              </div>
+            </div>
+
+            <!-- ================================================== -->
+            <!-- TAB: ANÁLISIS DE INGENIERÍA -->
+            <!-- ================================================== -->
+            <div class="tab-pane fade" id="eur_analisis">
+              <div class="tab-header">
+                <h5><i class="fa fa-line-chart me-2"></i>Análisis de Ingeniería</h5>
+              </div>
+              <div class="contenido-tab">
+                <t t-call="cv_importer.s_analisis_metricas_cv"/>
+              </div>
+            </div>
+
+            <!-- ================================================== -->
+            <!-- TAB: DISEÑO DE INGENIERÍA -->
+            <!-- ================================================== -->
+            <div class="tab-pane fade" id="eur_diseno" t-if="has_diseno">
+              <div class="tab-header">
+                <h5><i class="fa fa-cubes me-2"></i>Diseño de Ingeniería</h5>
+              </div>
+              <div class="contenido-tab">
+                <t t-call="cv_importer.s_proyectos_cv"/>
+              </div>
+            </div>
+
+            <!-- ================================================== -->
+            <!-- TAB: INVESTIGACIÓN -->
+            <!-- ================================================== -->
+            <div class="tab-pane fade" id="eur_investigacion" t-if="has_investigacion">
+              <div class="tab-header">
+                <h5><i class="fa fa-university me-2"></i>Investigación</h5>
+              </div>
+              <div class="contenido-tab">
+                <t t-call="cv_importer.s_publicaciones_cv"/>
+                <t t-call="cv_importer.s_logros_cv"/>
+              </div>
+            </div>
+
+            <!-- ================================================== -->
+            <!-- TAB: PRÁCTICA DE INGENIERÍA -->
+            <!-- ================================================== -->
+            <div class="tab-pane fade" id="eur_practica" t-if="has_practica">
+              <div class="tab-header">
+                <h5><i class="fa fa-flask me-2"></i>Práctica de Ingeniería</h5>
+              </div>
+              <div class="contenido-tab">
+                <t t-call="cv_importer.s_certificaciones_cv"/>
+                <t t-call="cv_importer.s_experiencia_laboral_cv"/>
+              </div>
+            </div>
+
+            <!-- ================================================== -->
+            <!-- TAB: HABILIDADES TRANSFERIBLES -->
+            <!-- ================================================== -->
+            <div class="tab-pane fade" id="eur_transferibles">
+              <div class="tab-header">
+                <h5><i class="fa fa-users me-2"></i>Habilidades Transferibles</h5>
+              </div>
+              <div class="contenido-tab">
+                <t t-call="cv_importer.s_idiomas_cv"/>
+                <t t-call="cv_importer.s_contacto_cv"/>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </xpath>
+
+  </template>
+
+
+  <!-- =========================================================
+       SNIPPETS REUTILIZABLES (Datos CV normalizados)
+     ========================================================= -->
+
+  <!-- ============================================================
+       1. PRESENTACIÓN AUTOMÁTICA
+     ============================================================ -->
+  <template id="s_docente_presentacion_cv" name="Presentación (CV Normalizado)">
+    <section class="content-card mb-2">
+      <div class="proyectos-wrapper-mejorado">
+        <div class="proyectos-header-mejorado eur-section-header">
+          <div class="proyecto-header-left">
+            <div class="proyecto-icon-mejorado">
+              <i class="fa fa-user-circle-o"></i>
+            </div>
+            <div class="proyecto-info-principal">
+              <h6 class="proyecto-titulo-seccion">Presentación</h6>
+              <p class="proyecto-subtitulo">Resumen profesional</p>
+            </div>
+          </div>
+        </div>
+        <div class="eur-section-body">
+          <div class="mt-3 presentacion-caja">
+            <div class="presentacion-texto" style="white-space: pre-line;">
+              <t t-if="presentacion_generada">
+                <t t-esc="presentacion_generada"/>
+              </t>
+              <t t-else="">
+                No se ha generado aún una presentación automática a partir del CV normalizado.
+              </t>
+            </div>
+            <div class="presentacion-firma mt-3">
+              <i class="fa fa-user-graduate me-1"></i>
+              <span t-esc="empleado.name"/>
+              <t t-if="empleado.job_title">
+                <span class="text-muted"> · <t t-esc="empleado.job_title"/></span>
+              </t>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+
+  <!-- ============================================================
+       2. TÍTULOS ACADÉMICOS
+     ============================================================ -->
+  <template id="s_titulos_academicos_cv" name="Títulos Académicos (CV Normalizado)">
+    <section class="content-card mb-4" t-if="titulos_academicos">
+      <div class="proyectos-wrapper-mejorado">
+        <!-- Header con estética mejorada -->
+        <div class="proyectos-header-mejorado eur-section-header">
+          <div class="proyecto-header-left">
+            <div class="proyecto-icon-mejorado">
+              <i class="fa fa-mortar-board"></i>
+            </div>
+            <div class="proyecto-info-principal">
+              <h6 class="proyecto-titulo-seccion">Títulos Académicos</h6>
+              <p class="proyecto-subtitulo">Formación y grados obtenidos</p>
+            </div>
+          </div>
+          <div class="proyecto-count-badge">
+            <span class="count-num"><t t-esc="len(titulos_academicos)"/></span>
+            <span class="count-lbl">Títulos</span>
+          </div>
+        </div>
+
+        <!-- Cuerpo con estilo unificado -->
+        <div class="eur-section-body">
+          <div class="publicaciones-lista-mejorada mt-3">
+            <t t-foreach="titulos_academicos" t-as="titulo">
+              <div class="pub-item-mejorado mb-3">
+                <div class="pub-icon-tipo">
+                  <i class="fa fa-graduation-cap"></i>
+                </div>
+                <div class="pub-content-mejorado">
+                  <div class="pub-titulo-principal">
+                    <span class="pub-titulo-text">
+                      <t t-esc="titulo.degree_title"/>
+                    </span>
+                  </div>
+
+                  <div class="pub-metadata mt-2">
+                    <t t-if="titulo.institution">
+                      <span class="pub-type-badge">
+                        <i class="fa fa-university"></i>
+                        <t t-esc="titulo.institution"/>
+                      </span>
+                    </t>
+                    <t t-if="titulo.degree_type">
+                      <span class="pub-year-badge">
+                        <i class="fa fa-tag"></i>
+                        <t t-esc="titulo.degree_type.replace('_', ' ').title()"/>
+                      </span>
+                    </t>
+                  </div>
+                </div>
+              </div>
+            </t>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+
+
+  <!-- ============================================================
+       3. INFORMACIÓN GENERAL
+     ============================================================ -->
+  <template id="s_info_general_cv" name="Información General (CV)">
+    <section class="content-card mb-4">
+      <div class="proyectos-wrapper-mejorado">
+        <div class="proyectos-header-mejorado eur-section-header">
+          <div class="proyecto-header-left">
+            <div class="proyecto-icon-mejorado">
+              <i class="fa fa-info-circle"></i>
+            </div>
+            <div class="proyecto-info-principal">
+              <h6 class="proyecto-titulo-seccion">Información General</h6>
+              <p class="proyecto-subtitulo">Datos básicos de la actividad docente</p>
+            </div>
+          </div>
+        </div>
+        <div class="eur-section-body">
+          <div class="contenedor-info-docencia-vertical-fie mt-3">
+            <div class="item-info-docencia-vertical-fie">
+              <div class="icono-info-docencia-fie">
+                <i class="fa fa-university text-info"></i>
+              </div>
+              <div class="texto-info-docencia-fie">
+                <span class="etiqueta-info-docencia-fie">Facultad:</span>
+                <span class="valor-info-docencia-fie">
+                  <t t-esc="(empleado.facultad and empleado.facultad.name) or 'No asignada'"/>
+                </span>
+              </div>
+            </div>
+            
+            <div class="item-info-docencia-vertical-fie">
+              <div class="icono-info-docencia-fie">
+                <i class="fa fa-book text-warning"></i>
+              </div>
+              <div class="texto-info-docencia-fie">
+                <span class="etiqueta-info-docencia-fie">Carrera:</span>
+                <span class="valor-info-docencia-fie">
+                  <t t-esc="(empleado.carrera and empleado.carrera.name) or 'No asignada'"/>
+                </span>
+              </div>
+            </div>
+            
+            <div class="item-info-docencia-vertical-fie">
+              <div class="icono-info-docencia-fie">
+                <i class="fa fa-calendar-check-o text-primary"></i>
+              </div>
+              <div class="texto-info-docencia-fie">
+                <span class="etiqueta-info-docencia-fie">Experiencia:</span>
+                <span class="valor-info-docencia-fie">
+                  <t t-if="experience_years is not None">
+                    <t t-set="anios" t-value="int(experience_years or 0)"/>
+                    <t t-esc="anios"/> años
+                    <t t-if="anios &gt; 10">
+                      <span class="badge bg-success ms-2">Experimentado</span>
+                    </t>
+                    <t t-elif="anios &gt; 5">
+                      <span class="badge bg-primary ms-2">Consolidada</span>
+                    </t>
+                    <t t-elif="anios &gt; 0">
+                      <span class="badge bg-info ms-2">En Desarrollo</span>
+                    </t>
+                    <t t-elif="anios == 0">
+                      <span class="badge bg-secondary ms-2">Nuevo</span>
+                    </t>
+                  </t>
+                  <t t-else="">
+                    No se ha ingresado este valor
+                  </t>
+                </span>
+              </div>
+            </div>
+            
+            <div class="item-info-docencia-vertical-fie">
+              <div class="icono-info-docencia-fie">
+                <i class="fa fa-chalkboard-teacher text-success"></i>
+              </div>
+              <div class="texto-info-docencia-fie">
+                <span class="etiqueta-info-docencia-fie">Estado:</span>
+                <span class="valor-info-docencia-fie">
+                  <span class="badge bg-success">Activo</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+
+  <!-- ============================================================
+       4. MATERIAS/ASIGNATURAS
+     ============================================================ -->
+  <template id="s_materias_cv" name="Materias (CV Normalizado)">
+    <section class="content-card mb-2" t-if="materias_por_carrera">
+      <div class="proyectos-wrapper-mejorado">
+        <div class="proyectos-header-mejorado eur-section-header">
+          <div class="proyecto-header-left">
+            <div class="proyecto-icon-mejorado">
+              <i class="fa fa-list-alt"></i>
+            </div>
+            <div class="proyecto-info-principal">
+              <h6 class="proyecto-titulo-seccion">Asignaturas Impartidas</h6>
+              <p class="proyecto-subtitulo">Agrupadas por carrera</p>
+            </div>
+          </div>
+        </div>
+        <div class="eur-section-body">
+          <div class="asignaturas-agrupadas-perfil-fie mt-3">
+            <t t-foreach="sorted(materias_por_carrera.keys())" t-as="carrera">
+              <div class="grupo-carrera-perfil-fie mb-1">
+                <div class="encabezado-carrera-perfil-fie">
+                  <div class="icono-carrera-perfil-fie">
+                    <i class="fa fa-layer-group"></i>
+                  </div>
+                  <h6 class="nombre-carrera-perfil-fie"><t t-esc="carrera"/></h6>
+                  <span class="badge bg-light text-dark ms-auto">
+                    <t t-esc="len(materias_por_carrera[carrera])"/> asignaturas
+                  </span>
+                  
+                  <button type="button" 
+                          class="btn btn-sm btn-outline-secondary rounded-pill ms-2 eur-carrera-toggle" 
+                          aria-expanded="false">
+                    <span class="when-collapsed">Ver materias</span>
+                    <span class="when-not-collapsed" style="display: none;">Ocultar materias</span>
+                  </button>
+                </div>
+                
+                <ul class="lista-materias-perfil-fie eur-carrera-content d-none" style="display: none;">
+                  <t t-foreach="sorted(materias_por_carrera[carrera], key=lambda m: m.asignatura)" t-as="materia">
+                    <li class="materia-item-perfil-fie">
+                      <div class="bullet-materia-perfil-fie"></div>
+                      <div class="nombre-materia-perfil-fie">
+                        <span><t t-esc="materia.asignatura"/></span>
+                      </div>
+                    </li>
+                  </t>
+                </ul>
+              </div>
+            </t>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+
+  <!-- ============================================================
+       5. MÉTRICAS DE ANÁLISIS
+     ============================================================ -->
+  <template id="s_analisis_metricas_cv" name="Métricas Análisis (CV)">
+    <section class="content-card mb-4">
+      <div class="proyectos-wrapper-mejorado">
+        <div class="proyectos-header-mejorado eur-section-header">
+          <div class="proyecto-header-left">
+            <div class="proyecto-icon-mejorado">
+              <i class="fa fa-chart-bar"></i>
+            </div>
+            <div class="proyecto-info-principal">
+              <h6 class="proyecto-titulo-seccion">Indicadores de Productividad</h6>
+              <p class="proyecto-subtitulo">Métricas académicas y científicas</p>
+            </div>
+          </div>
+        </div>
+        <div class="eur-section-body">
+          <div class="metricas-grid mt-3">
+            <div class="metrica-card">
+              <i class="fa fa-file-text metrica-icon"></i>
+              <div class="metrica-numero"><t t-esc="total_publicaciones or 0"/></div>
+              <div class="metrica-label">Publicaciones</div>
+            </div>
+            <div class="metrica-card">
+              <i class="fa fa-lightbulb-o metrica-icon"></i>
+              <div class="metrica-numero"><t t-esc="total_proyectos or 0"/></div>
+              <div class="metrica-label">Proyectos</div>
+            </div>
+            <div class="metrica-card">
+              <i class="fa fa-certificate metrica-icon"></i>
+              <div class="metrica-numero"><t t-esc="total_certificaciones or 0"/></div>
+              <div class="metrica-label">Certificaciones</div>
+            </div>
+            <div class="metrica-card">
+              <i class="fa fa-star metrica-icon"></i>
+              <div class="metrica-numero"><t t-esc="total_logros or 0"/></div>
+              <div class="metrica-label">Logros</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+
+  <!-- ============================================================
+       6. PROYECTOS
+     ============================================================ -->
+  <template id="s_proyectos_cv" name="Proyectos (CV Normalizado)">
+    <section class="content-card mb-4" t-if="proyectos">
+      <div class="proyectos-wrapper-mejorado">
+        <div class="proyectos-header-mejorado eur-section-header">
+          <div class="proyecto-header-left">
+            <div class="proyecto-icon-mejorado">
+              <i class="fa fa-lightbulb-o"></i>
+            </div>
+            <div class="proyecto-info-principal">
+              <h6 class="proyecto-titulo-seccion">Proyectos de Investigación</h6>
+              <p class="proyecto-subtitulo">Diseño, desarrollo e innovación</p>
+            </div>
+          </div>
+          <div class="proyecto-count-badge">
+            <span class="count-num"><t t-esc="len(proyectos)"/></span>
+            <span class="count-lbl">Proyectos</span>
+          </div>
+        </div>
+        <div class="eur-section-body">
+          <div class="proyectos-lista-mejorada mt-3">
+            <t t-foreach="proyectos" t-as="proyecto">
+              <div class="proyecto-card-mejorado mb-3">
+                <div class="proyecto-header-card">
+                  <div class="proyecto-tipo-icon">
+                    <i t-att-class="'fa ' + ('fa-flask' if proyecto.project_type == 'investigacion_e_innovacion' else 'fa-handshake-o' if proyecto.project_type == 'vinculacion' else 'fa-users')"></i>
+                  </div>
+                  <div class="proyecto-titulo-wrapper">
+                    <h6 class="proyecto-titulo-text"><t t-esc="proyecto.project_title"/></h6>
+                  </div>
+                </div>
+                
+                <div class="proyecto-body-mejorado">
+                  <div class="proyecto-metadata mb-2">
+                    <t t-if="proyecto.start_date">
+                      <span class="badge bg-light text-dark">
+                        <i class="fa fa-calendar"></i>
+                        <t t-esc="proyecto.start_date.year"/>
+                        <t t-if="proyecto.end_date"> - <t t-esc="proyecto.end_date.year"/></t>
+                      </span>
+                    </t>
+                    <span class="badge bg-primary ms-2">
+                      <t t-if="proyecto.project_type == 'investigacion_e_innovacion'">Investigación</t>
+                      <t t-elif="proyecto.project_type == 'vinculacion'">Vinculación</t>
+                      <t t-elif="proyecto.project_type == 'docencia'">Docencia</t>
+                      <t t-else="">Otro</t>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </t>
+          </div>
+          
+          <div class="proyectos-resumen-footer">
+            <div class="resumen-item">
+              <i class="fa fa-tasks"></i>
+              <span>Total: <strong><t t-esc="len(proyectos)"/></strong> proyectos registrados</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+
+  <!-- ============================================================
+       7. PUBLICACIONES
+     ============================================================ -->
+  <template id="s_publicaciones_cv" name="Publicaciones (CV Normalizado)">
+    <section class="content-card mb-4" t-if="publicaciones">
+      <div class="publicaciones-wrapper-mejorado">
+        <div class="publications-header-mejorado eur-section-header">
+          <div class="pub-header-left">
+            <div class="publication-icon-mejorado">
+              <i class="fa fa-file-text"></i>
+            </div>
+            <div class="pub-info-principal">
+              <h6 class="pub-titulo-seccion">Publicaciones Científicas</h6>
+              <p class="pub-subtitulo">Producción académica e investigación</p>
+            </div>
+          </div>
+        </div>
+        <div class="eur-section-body">
+          <!-- Tabs por tipo -->
+          <div class="pub-tabs-container mt-3">
+            <ul class="nav nav-tabs pub-tabs-nav" role="tablist">
+              <t t-if="publicaciones_por_tipo['article']">
+                <li class="nav-item">
+                  <a class="nav-link active" href="#tab-articulos" role="tab">
+                    <i class="fa fa-file-text-o"></i> Artículos (<t t-esc="len(publicaciones_por_tipo['article'])"/>)
+                  </a>
+                </li>
+              </t>
+              <t t-if="publicaciones_por_tipo['conference']">
+                <li class="nav-item">
+                  <a t-att-class="'nav-link' + ('' if publicaciones_por_tipo['article'] else ' active')" 
+                     href="#tab-congresos" role="tab">
+                    <i class="fa fa-users"></i> Congresos (<t t-esc="len(publicaciones_por_tipo['conference'])"/>)
+                  </a>
+                </li>
+              </t>
+              <t t-if="publicaciones_por_tipo['book']">
+                <li class="nav-item">
+                  <a t-att-class="'nav-link' + ('' if (publicaciones_por_tipo['article'] or publicaciones_por_tipo['conference']) else ' active')" 
+                     href="#tab-libros" role="tab">
+                    <i class="fa fa-book"></i> Libros (<t t-esc="len(publicaciones_por_tipo['book'])"/>)
+                  </a>
+                </li>
+              </t>
+            </ul>
+            
+            <div class="tab-content pub-tabs-content">
+              <!-- Artículos -->
+              <t t-if="publicaciones_por_tipo['article']">
+                <div class="tab-pane fade show active" id="tab-articulos" role="tabpanel">
+                  <t t-call="cv_importer.pub_items_list_normalized">
+                    <t t-set="items" t-value="publicaciones_por_tipo['article']"/>
+                  </t>
+                </div>
+              </t>
+              
+              <!-- Congresos -->
+              <t t-if="publicaciones_por_tipo['conference']">
+                <div t-att-class="'tab-pane fade' + ('' if publicaciones_por_tipo['article'] else ' show active')" 
+                     id="tab-congresos" role="tabpanel">
+                  <t t-call="cv_importer.pub_items_list_normalized">
+                    <t t-set="items" t-value="publicaciones_por_tipo['conference']"/>
+                  </t>
+                </div>
+              </t>
+              
+              <!-- Libros -->
+              <t t-if="publicaciones_por_tipo['book']">
+                <div t-att-class="'tab-pane fade' + ('' if (publicaciones_por_tipo['article'] or publicaciones_por_tipo['conference']) else ' show active')" 
+                     id="tab-libros" role="tabpanel">
+                  <t t-call="cv_importer.pub_items_list_normalized">
+                    <t t-set="items" t-value="publicaciones_por_tipo['book']"/>
+                  </t>
+                </div>
+              </t>
+            </div>
+          </div>
+          
+          <div class="pub-stats-footer">
+            <div class="stat-item">
+              <i class="fa fa-chart-line"></i>
+              <span>Total publicaciones: <strong><t t-esc="len(publicaciones)"/></strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+
+  <!-- Template auxiliar para lista de publicaciones -->
+  <template id="pub_items_list_normalized" name="Lista Items Publicación">
+    <div class="lista-publicaciones-tab mt-3">
+      <t t-foreach="items" t-as="pub">
+        <div class="pub-item-mejorado mb-3">
+          <div class="pub-content-mejorado">
+            <div class="pub-titulo-principal">
+              <span class="pub-titulo-text"><t t-esc="pub.title"/></span>
+            </div>
+            
+            <div class="pub-metadata mt-2">
+              <t t-if="pub.publication_year">
+                <span class="pub-year-badge">
+                  <i class="fa fa-calendar"></i>
+                  <t t-esc="pub.publication_year"/>
+                </span>
+              </t>
+              <t t-if="pub.indexing_database">
+                <span class="badge bg-info ms-2">
+                  <t t-esc="pub.indexing_database"/>
+                </span>
+              </t>
+            </div>
+          </div>
+        </div>
+      </t>
+    </div>
+  </template>
+
+
+  <!-- ============================================================
+       8. LOGROS
+     ============================================================ -->
+  <template id="s_logros_cv" name="Logros (CV Normalizado)">
+    <section class="content-card mb-4" t-if="logros">
+      <div class="logros-wrapper-mejorado">
+        <div class="logros-header-mejorado eur-section-header">
+          <div class="logros-header-left">
+            <div class="logros-icon-mejorado">
+              <i class="fa fa-trophy"></i>
+            </div>
+            <div class="logros-info-principal">
+              <h6 class="logros-titulo-seccion">Logros y Distinciones</h6>
+              <p class="logros-subtitulo">Premios, reconocimientos y acreditaciones</p>
+            </div>
+          </div>
+          <div class="logros-count-badge">
+            <span class="count-num"><t t-esc="len(logros)"/></span>
+            <span class="count-lbl">Logros</span>
+          </div>
+        </div>
+        <div class="eur-section-body">
+          <div class="logros-lista-mejorada mt-3">
+            <t t-foreach="logros" t-as="logro">
+              <div class="logro-item-mejorado mb-3">
+                <div class="logro-icon-tipo">
+                  <i class="fa fa-star"></i>
+                </div>
+                
+                <div class="logro-content-mejorado">
+                  <div class="logro-titulo-principal">
+                    <span class="logro-titulo-text"><t t-esc="logro.name"/></span>
+                  </div>
+                  
+                  <div class="logro-metadata mt-2">
+                    <t t-set="award_year_str" t-value="str(logro.award_year or '').strip()"/>
+                    <t t-if="award_year_str and award_year_str not in ('-1', '0', 'N/A')">
+                      <span class="logro-year-badge">
+                        <i class="fa fa-calendar"></i>
+                        <t t-esc="award_year_str"/>
+                      </span>
+                    </t>
+                    <t t-if="logro.tipo">
+                      <span class="badge bg-primary ms-2">
+                        <t t-esc="logro.tipo.replace('_', ' ').title()"/>
+                      </span>
+                    </t>
+                  </div>
+                </div>
+              </div>
+            </t>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+
+  <!-- ============================================================
+       9. CERTIFICACIONES
+     ============================================================ -->
+  <template id="s_certificaciones_cv" name="Certificaciones (CV Normalizado)">
+    <section class="content-card mb-4" t-if="certificaciones_por_institucion">
+      <div class="publicaciones-wrapper-mejorado">
+        <div class="publications-header-mejorado eur-section-header">
+          <div class="pub-header-left">
+            <div class="publication-icon-mejorado">
+              <i class="fa fa-certificate"></i>
+            </div>
+            <div class="pub-info-principal">
+              <h6 class="pub-titulo-seccion">Certificaciones y Capacitaciones</h6>
+              <p class="pub-subtitulo">Agrupadas por institución</p>
+            </div>
+          </div>
+        </div>
+        <div class="eur-section-body">
+          <div class="certificaciones-agrupadas-perfil-fie mt-3">
+            <t t-foreach="sorted(certificaciones_por_institucion.keys())" t-as="inst">
+              <div class="grupo-institucion-perfil-fie mb-1">
+                <div class="encabezado-institucion-perfil-fie">
+                  <div class="icono-institucion-perfil-fie">
+                    <i class="fa fa-university"></i>
+                  </div>
+                  <h6 class="nombre-institucion-perfil-fie"><t t-esc="inst"/></h6>
+                  <span class="badge bg-light text-dark ms-auto">
+                    <t t-esc="len(certificaciones_por_institucion[inst])"/> certificaciones
+                  </span>
+                  
+                  <button type="button" 
+                          class="btn btn-sm btn-outline-secondary rounded-pill ms-2 eur-cert-toggle" 
+                          aria-expanded="false">
+                    <span class="when-collapsed">Ver certificaciones</span>
+                    <span class="when-not-collapsed" style="display: none;">Ocultar certificaciones</span>
+                  </button>
+                </div>
+                
+                <ul class="lista-certificaciones-perfil-fie eur-cert-content d-none" style="display: none;">
+                  <t t-foreach="certificaciones_por_institucion[inst]" t-as="cert">
+                    <li class="certificacion-item-perfil-fie">
+                      <div class="bullet-certificacion-perfil-fie">
+                        <i class="fa fa-check-circle"></i>
+                      </div>
+                      <div class="nombre-certificacion-perfil-fie">
+                        <span><t t-esc="cert.certification_name"/></span>
+                        <t t-if="cert.duration_hours">
+                          <small class="text-muted ms-2">
+                            (<t t-esc="cert.duration_hours"/>h)
+                          </small>
+                        </t>
+                      </div>
+                    </li>
+                  </t>
+                </ul>
+              </div>
+            </t>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+
+  <!-- ============================================================
+       10. EXPERIENCIA LABORAL
+     ============================================================ -->
+  <template id="s_experiencia_laboral_cv" name="Experiencia Laboral (CV)">
+    <section class="content-card mb-4" t-if="experiencia_laboral">
+      <div class="publicaciones-wrapper-mejorado">
+        <!-- Header con estética mejorada -->
+        <div class="publications-header-mejorado eur-section-header">
+          <div class="pub-header-left">
+            <div class="publication-icon-mejorado">
+              <i class="fa fa-briefcase"></i>
+            </div>
+            <div class="pub-info-principal">
+              <h6 class="pub-titulo-seccion">Experiencia Profesional</h6>
+              <p class="pub-subtitulo">Trayectoria laboral</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cuerpo con el mismo estilo de cards que publicaciones -->
+        <div class="eur-section-body">
+          <div class="publicaciones-lista-mejorada mt-3">
+            <t t-foreach="experiencia_laboral" t-as="exp">
+              <div class="pub-item-mejorado mb-3">
+                <div class="pub-icon-tipo">
+                  <i class="fa fa-building"></i>
+                </div>
+                <div class="pub-content-mejorado">
+                  <!-- Cargo -->
+                  <div class="pub-titulo-principal">
+                    <span class="pub-titulo-text">
+                      <t t-esc="exp.position or 'Cargo no especificado'"/>
+                    </span>
+                  </div>
+
+                  <!-- Empresa, departamento, fechas y duración -->
+                  <div class="pub-metadata mt-2">
+                    <t t-if="exp.company">
+                      <span class="pub-type-badge">
+                        <i class="fa fa-building-o"></i>
+                        <t t-esc="exp.company"/>
+                      </span>
+                    </t>
+
+                    <t t-if="exp.department">
+                      <span class="pub-type-badge">
+                        <i class="fa fa-sitemap"></i>
+                        <t t-esc="exp.department"/>
+                      </span>
+                    </t>
+
+                    <t t-if="exp.start_date">
+                      <span class="pub-year-badge">
+                        <i class="fa fa-calendar"></i>
+                        <t t-esc="exp.start_date.year"/>
+                        <t t-if="exp.end_date">
+                          - <t t-esc="exp.end_date.year"/>
+                        </t>
+                        <t t-else="">
+                          - Actualidad
+                        </t>
+                      </span>
+                    </t>
+
+                    <t t-if="exp.duration_months">
+                      <span class="pub-type-badge">
+                        <i class="fa fa-clock-o"></i>
+                        <t t-set="anios_exp" t-value="int(exp.duration_months/12)"/>
+                        <t t-if="anios_exp &gt; 0">
+                          <t t-esc="anios_exp"/> años
+                        </t>
+                        <t t-else="">
+                          &lt; 1 año
+                        </t>
+                      </span>
+                    </t>
+                  </div>
+
+                  <!-- Responsabilidades como detalle expandido -->
+                  <t t-set="resp_str" t-value="(exp.responsibilities or '').strip()"/>
+                  <t t-if="resp_str and resp_str not in ('N/A', '-1', '0')">
+                    <div class="pub-detalles-content mt-2">
+                      <i class="fa fa-tasks me-1"></i>
+                      <t t-esc="resp_str"/>
+                    </div>
+                  </t>
+                </div>
+              </div>
+            </t>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+
+
+  <!-- ============================================================
+       11. IDIOMAS
+     ============================================================ -->
+  <template id="s_idiomas_cv" name="Idiomas (CV Normalizado)">
+    <section class="content-card mb-4" t-if="idiomas">
+      <div class="logros-wrapper-mejorado">
+        <!-- Header con estética mejorada -->
+        <div class="logros-header-mejorado eur-section-header">
+          <div class="logros-header-left">
+            <div class="logros-icon-mejorado">
+              <i class="fa fa-comments"></i>
+            </div>
+            <div class="logros-info-principal">
+              <h6 class="logros-titulo-seccion">Idiomas Dominados</h6>
+              <p class="logros-subtitulo">Nivel de competencia lingüística</p>
+            </div>
+          </div>
+          <div class="logros-count-badge">
+            <span class="count-num"><t t-esc="len(idiomas)"/></span>
+            <span class="count-lbl">Idiomas</span>
+          </div>
+        </div>
+
+        <!-- Cuerpo con el mismo patrón visual que 'Logros' -->
+        <div class="eur-section-body">
+          <div class="logros-lista-mejorada mt-3">
+            <t t-foreach="idiomas" t-as="idioma">
+              <div class="logro-item-mejorado mb-3">
+                <div class="logro-icon-tipo">
+                  <i class="fa fa-globe"></i>
+                </div>
+
+                <div class="logro-content-mejorado">
+                  <!-- Nombre del idioma -->
+                  <div class="logro-titulo-principal">
+                    <span class="logro-titulo-text">
+                      <t t-esc="idioma.language_name"/>
+                    </span>
+                  </div>
+
+                  <!-- Niveles -->
+                  <div class="logro-metadata mt-2">
+                    <t t-if="idioma.proficiency_level">
+                      <span class="badge bg-primary">
+                        <t t-esc="idioma.proficiency_level"/>
+                      </span>
+                    </t>
+
+                    <t t-if="idioma.writing_level and idioma.writing_level &gt; 0">
+                      <span class="badge bg-light text-dark ms-2">
+                        <i class="fa fa-pencil"></i>
+                        Escritura: <t t-esc="idioma.writing_level"/>%
+                      </span>
+                    </t>
+
+                    <t t-if="idioma.speaking_level and idioma.speaking_level &gt; 0">
+                      <span class="badge bg-light text-dark ms-2">
+                        <i class="fa fa-comment-o"></i>
+                        Oral: <t t-esc="idioma.speaking_level"/>%
+                      </span>
+                    </t>
+                  </div>
+                </div>
+              </div>
+            </t>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+
+
+  <!-- ============================================================
+       12. CONTACTO
+     ============================================================ -->
+  <template id="s_contacto_cv" name="Contacto (CV)">
+    <section class="content-card mb-4">
+      <div class="proyectos-wrapper-mejorado">
+        <div class="proyectos-header-mejorado eur-section-header">
+          <div class="proyecto-header-left">
+            <div class="proyecto-icon-mejorado">
+              <i class="fa fa-envelope"></i>
+            </div>
+            <div class="proyecto-info-principal">
+              <h6 class="proyecto-titulo-seccion">Información de Contacto</h6>
+              <p class="proyecto-subtitulo">Vías de comunicación</p>
+            </div>
+          </div>
+        </div>
+        <div class="eur-section-body">
+          <div class="mt-3">
+            <ul class="list-group-perfil text-start">
+              <t t-if="empleado.work_email">
+                <li class="info-item contact-line">
+                  <i class="fa fa-envelope info-icon"></i>
+                  <a t-att-href="'mailto:' + empleado.work_email" class="email-link">
+                    <t t-esc="empleado.work_email"/>
+                  </a>
+                </li>
+              </t>
+              <t t-else="">
+                <li class="info-item">
+                  <i class="fa fa-info-circle info-icon"></i>
+                  <span>No se ha ingresado información de contacto.</span>
+                </li>
+              </t>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+</odoo>

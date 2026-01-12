@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- =========================================================
+       TEMPLATE BASE: Estructura mínima del perfil
+       Este template SOLO usa datos normalizados de cv_importer
+     ========================================================= -->
+  <template id="employee_profile_base" name="Employee Profile (Base)">
+    <t t-call="website.layout">
+      <t t-set="title">Perfil de <t t-esc="empleado.name"/></t>
+
+      <div class="perfil-container container">
+        <!-- LADO IZQUIERDO -->
+        <div class="perfil-lado-izquierdo">
+          <div class="card-perfil text-center shadow-lg">
+            <!-- Foto -->
+            <t t-if="empleado.image_1920">
+              <div class="foto-container">
+                <img t-att-src="'/web/image/hr.employee/%s/image_1920' % empleado.id"
+                     alt="Foto del docente" class="foto-perfil"/>
+              </div>
+            </t>
+
+            <!-- Nombre y cargo -->
+            <div class="nombre-container">
+              <h3 class="nombre-docente"><t t-esc="empleado.name"/></h3>
+              <h5 class="cargo-docente"><t t-esc="empleado.job_title or 'Docente'"/></h5>
+            </div>
+
+            <!-- Información básica -->
+            <div class="informacion-personal">
+              <ul class="list-group-perfil text-start">
+                <li class="info-item">
+                  <i class="fa fa-id-card info-icon"></i>
+                  <span><strong>Cédula:</strong> <t t-esc="empleado.identification_id or 'No registrado'"/></span>
+                </li>
+                <li class="info-item">
+                  <i class="fa fa-envelope info-icon"></i>
+                  <span><strong>Email:</strong> 
+                    <t t-if="empleado.work_email">
+                      <a t-att-href="'mailto:' + empleado.work_email"><t t-esc="empleado.work_email"/></a>
+                    </t>
+                    <t t-else="">No registrado</t>
+                  </span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Métricas -->
+            <div class="metricas-academicas mt-4">
+              <h6 class="metricas-titulo">Métricas Académicas</h6>
+              <div class="metricas-grid">
+                <div class="metrica-card">
+                  <i class="fa fa-calendar metrica-icon"></i>
+                  <div class="metrica-numero"><t t-esc="experience_years or 0"/></div>
+                  <div class="metrica-label">Años</div>
+                </div>
+                <div class="metrica-card">
+                  <i class="fa fa-file-text metrica-icon"></i>
+                  <div class="metrica-numero"><t t-esc="total_publicaciones or 0"/></div>
+                  <div class="metrica-label">Publicaciones</div>
+                </div>
+                <div class="metrica-card">
+                  <i class="fa fa-lightbulb-o metrica-icon"></i>
+                  <div class="metrica-numero"><t t-esc="total_proyectos or 0"/></div>
+                  <div class="metrica-label">Proyectos</div>
+                </div>
+                <div class="metrica-card">
+                  <i class="fa fa-star metrica-icon"></i>
+                  <div class="metrica-numero"><t t-esc="total_logros or 0"/></div>
+                  <div class="metrica-label">Logros</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LADO DERECHO: Contenido principal -->
+        <div class="perfil-lado-derecho">
+          <!-- Hook para que google_sheets_import agregue contenido -->
+          <div id="profile_main_content" class="oe_structure">
+            <!-- Aquí google_sheets_import inyectará sus snippets -->
+            <t t-call="cv_importer.profile_content_placeholder"/>
+          </div>
+
+          <!-- Botón de descarga CV -->
+          <div class="acciones-perfil mt-4">
+            <t t-if="cv_download_href">
+              <a t-att-href="cv_download_href" target="_blank" class="btn btn-primary w-100">
+                <i class="fa fa-download me-2"></i>Descargar CV
+              </a>
+            </t>
+          </div>
+        </div>
+      </div>
+    </t>
+  </template>
+
+  <!-- Placeholder para contenido (será reemplazado por google_sheets_import) -->
+  <template id="profile_content_placeholder" name="Profile Content Placeholder">
+    <div class="content-placeholder">
+      <h4>Perfil del docente</h4>
+      <p>Datos normalizados del sistema CV</p>
+      
+      <!-- Contenido básico si no hay google_sheets_import instalado -->
+      <t t-if="titulos_academicos">
+        <h5>Títulos Académicos</h5>
+        <ul>
+          <t t-foreach="titulos_academicos" t-as="titulo">
+            <li><t t-esc="titulo.degree_title"/> - <t t-esc="titulo.institution"/></li>
+          </t>
+        </ul>
+      </t>
+
+      <t t-if="publicaciones">
+        <h5>Publicaciones</h5>
+        <ul>
+          <t t-foreach="publicaciones[:5]" t-as="pub">
+            <li><t t-esc="pub.title"/> (<t t-esc="pub.publication_year"/>)</li>
+          </t>
+        </ul>
+      </t>
+    </div>
+  </template>
+
+</odoo>

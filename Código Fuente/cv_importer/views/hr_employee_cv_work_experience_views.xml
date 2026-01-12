@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Extender formulario de hr.employee para agregar Work Experience -->
+    <record id="view_employee_form_cv_work_experience_inherit" model="ir.ui.view">
+        <field name="name">hr.employee.form.cv.work.experience.inherit</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- Agregar botón estadístico para Work Experience -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_work_experience"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-briefcase">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="cv_work_experience_count"/>
+                        </span>
+                        <span class="o_stat_text">Positions</span>
+                    </div>
+                </button>
+                <button name="action_view_work_experience"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-calendar"
+                        invisible="cv_total_experience_months == 0">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="cv_total_experience_months"/>
+                        </span>
+                        <span class="o_stat_text">Months Experience</span>
+                    </div>
+                </button>
+            </xpath>
+
+            <!-- Agregar tab para Work Experience -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Work Experience (Normalized)" 
+                      name="page_work_experience">
+                    <field name="cv_work_experience_ids" 
+                           context="{'default_employee_id': active_id}">
+                        <tree editable="bottom">
+                            <field name="position"/>
+                            <field name="company"/>
+                            <field name="start_date"/>
+                            <field name="end_date" optional="show"/>
+                            <field name="duration_months" sum="Total"/>
+                            <field name="source" optional="hide"/>
+                        </tree>
+                    </field>
+                    <group>
+                        <div class="alert alert-info" role="alert" style="margin-top: 10px;">
+                            <i class="fa fa-info-circle"/> 
+                            <strong>Note:</strong> This is the normalized model for work experience. 
+                            The legacy field "Experiencia Laboral" (x_experiencia_laboral) will be phased out in future versions.
+                        </div>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
