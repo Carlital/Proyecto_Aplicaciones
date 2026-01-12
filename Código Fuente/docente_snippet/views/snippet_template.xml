@@ -1,0 +1,74 @@
+<odoo>
+  <template id="snippet_lista_docentes_register" name="Lista Docentes" inherit_id="website.snippets">
+    <xpath expr="//div[@id='snippet_structure']/div[@class='o_panel_body']" position="inside">
+      <t t-snippet="docente_snippet.snippet_lista_docentes_template"
+         t-thumbnail="/docente_snippet/static/src/img/lista_docentes.png"
+         string="Lista Docentes">
+        <keywords>docentes profesores lista filtro</keywords>
+      </t>
+    </xpath>
+  </template>
+
+  <template id="snippet_lista_docentes_template" name="Bloque Lista Docentes">
+    <section class="s_banner oe_structure py-5" data-name="Lista Docentes">
+      <div class="container">
+        <div class="docente-header-section text-center mb-4">
+          <h1 class="docente-main-title">Personal Docente</h1>
+          <p class="docente-subtitle">Facultad de Informática y Electrónica</p>
+        </div>
+
+        <div class="docente-filter-wrapper">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-5">
+              <label class="docente-label" for="busqueda_docente">Buscar por nombre o apellido</label>
+              <div class="docente-input-group">
+                <i class="fa fa-search docente-input-icon"></i>
+                <input type="text" 
+                       class="form-control docente-input" 
+                       id="busqueda_docente" 
+                       placeholder="Buscar"/>
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <label class="docente-label" for="filtro_carrera">Filtrar por departamento</label>
+              <select class="form-select docente-select" id="filtro_carrera">
+                <option value="">Todas las carreras</option>
+                <t t-foreach="request.env['carrera'].sudo().search([('facultad_id.name_normalized', '=', 'informatica y electronica')])" t-as="carrera">
+                  <t t-set="grupo_docente" t-value="request.env.ref('google_sheets_import.group_docente')"/>
+                  <t t-set="tiene_docentes" t-value="request.env['hr.employee'].sudo().search_count([
+                      ('carrera', '=', carrera.id),
+                      ('user_id', '!=', False),
+                      ('user_id.groups_id', 'in', [grupo_docente.id])
+                    ])"/>
+                  
+                  <t t-if="tiene_docentes > 0">
+                    <option t-att-value="carrera.id">
+                      <t t-esc="carrera.name"/> (<t t-esc="tiene_docentes"/>)
+                    </option>
+                  </t>
+                </t>
+              </select>
+            </div>
+
+            <div class="col-md-2">
+              <button class="btn docente-btn-filter w-100" id="btn-filtrar">
+                <i class="fa fa-filter me-2"></i>Filtrar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="docente-results-section mt-4">
+          <div class="row g-3" id="lista-docentes"></div>
+        </div>
+
+        <div class="text-center mt-4">
+          <nav>
+            <ul class="pagination justify-content-center" id="pagination-docentes"></ul>
+          </nav>
+        </div>
+      </div>
+    </section>
+  </template>
+</odoo>
